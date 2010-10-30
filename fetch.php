@@ -229,12 +229,15 @@ $res = mysql_query($query);
 if (! $res) die('Impossible de lancer une requete');
 
 while ($row = mysql_fetch_assoc($res)) {
+	if (is_null($row['crypted_password']) || $row['crypted_password'] == 'NULL') {
+		continue;
+	}
 	$url = "http://sp.braldahim.com/scripts/profil/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['crypted_password']}&version=1";
 	//$url = "http://www.guim.info/braldahim/toto.php?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['crypted_password']}&version=1";
-	//fetch_position($url);
+	fetch_position($url);
 	
-	//$url = "http://sp.braldahim.com/scripts/vue/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['crypted_password']}&version=1";
-	$url = "http://www.guim.info/braldahim/toto.php?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['crypted_password']}&version=1";
+	$url = "http://sp.braldahim.com/scripts/vue/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['crypted_password']}&version=1";
+	//$url = "http://www.guim.info/braldahim/toto.php?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['crypted_password']}&version=1";
 	fetch_vue($url);
 }
 mysql_free_result($res);

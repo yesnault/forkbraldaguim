@@ -52,7 +52,7 @@ class Carte {
 	private $colors;
 	private $font_size;
 	
-	private $debug = false;
+	private $debug = true;
 	
 	/*
 	Construit une carte de la taille indiqué avec size (en pixel)
@@ -77,9 +77,10 @@ class Carte {
 	private function createColors() {
 		$this->colors = array();
 		$this->colors['black'] = imagecolorallocate($this->img, 0, 0, 0);
-		$this->colors['name_bg'] = imagecolorallocatealpha($this->img, 255, 255, 255, 64);
 		$this->colors['red'] = imagecolorallocate($this->img, 255, 0, 0);
 		$this->colors['blue'] = imagecolorallocate($this->img, 0, 0, 255);
+		$this->colors['name_bg'] = imagecolorallocatealpha($this->img, 255, 255, 255, 64);
+		$this->colors['line'] = imagecolorallocate($this->img, 255, 255, 255);
 		$this->colors['background'] = imagecolorallocate($this->img, 0, 59, 0);
 	}
 	
@@ -132,14 +133,23 @@ class Carte {
 		// le bord de l'image.
 		
 		$text = imagefontwidth($this->font_size) * $nom_max;
-		$this->zoom = ($this->size - 2*$text) / ($position_max * 2);
+		$this->zoom = floor(($this->size - 2*$text) / ($position_max * 2));
+		// On prend une valeur entière de zoom pour tombre juste et pas se prendre la tete
+		// sur le tiling du fond de carte.
 	}
 	
 	public function info() {
+		/*
 		foreach ($this->players as $p) {
 			echo "$p<br>";
 		}
-		echo "centre: {$this->origine}<br>zoom: {$this->zoom}";
+		*/
+		if ($this->debug) {
+			imagestring($this->img, $this->font_size,
+				10, 10,
+				"centre: {$this->origine} - zoom: {$this->zoom}",
+				$this->colors['red']);
+		}
 	}
 	
 	private function drawPlayer($p) {
@@ -172,17 +182,89 @@ class Carte {
 			$name, $this->colors['red']);
 	}
 	
-	public function generateImage() {
-		if ($this->debug) {
-			$this->info();
-			return;
+	
+	/*
+	Dessine la grille
+	*/
+	private function drawGrid() {
+		// On part du centre ($this->size/2), on enleve/ajoute 0.5 car le point est au milieu
+		// de la case et on veut le tour de la case.
+		// On ajout/retire $i pour boucler, et on met à l'echelle avec le zoom.
+		// => $i est le numéro de la case en partant du centre
+		// On boucle tant qu'on a pas atteind une bordure de l'image
+		$x = 0;
+		for ($i=0; ($this->size/2) - $x > 0; $i++) {
+			$x =  (-0.5+$i) * $this->zoom;
+			// verticale
+			imageline($this->img, ($this->size/2) - $x, 0, ($this->size/2) - $x, $this->size, $this->colors['line']);
+			imageline($this->img, ($this->size/2) + $x, 0, ($this->size/2) + $x, $this->size, $this->colors['line']);
+			// horizontale
+			imageline($this->img, 0, ($this->size/2) - $x, $this->size, ($this->size/2) - $x, $this->colors['line']);
+			imageline($this->img, 0, ($this->size/2) + $x, $this->size, ($this->size/2) + $x, $this->colors['line']);
 		}
+		$this->drawTile($i);
+	}
+	
+	/*
+	Affiche les image pour chaque case.
+	On lui passe en paramètre le nombre max de cases à afficher en partant du centre.
+	*/
+	private function drawTile($max) {
+		// on boucle sur deltaX
+		for ($dx=-$max; $dx<$max; $dx++) {
+			// -0.5 permet d'être dans le coin haut gauche de l'image
+			$x =  (-0.5+$dx) * $this->zoom;
+			// on boucle sur deltaY
+			for ($dy=-$max; $dy<$max; $dy++) {
+				$y =  (-0.5+$dy) * $this->zoom;
+				$tile = $this->getTile(floor($dx), floor($dy));
+				
+				
+				imagestring($this->img, $this->font_size,
+					($this->size/2) - $x,
+					($this->size/2) - $y,
+					$tile['type'][0],
+					$this->colors['red']);
+			}
+		}
+	}
+	
+	private function getTile($x, $y) {
+		$tile = null;
+		$query = "SELECT type, id FROM carte WHERE x='{$x}' AND y='{$y}';";
+		//echo "$query<br>";
+		$res = mysql_query($query);
+		if (mysql_num_rows($res) == 0) {
+			$tile = array();
+			$tile['type'] = 'NA';
+			$tile['id'] = 'NA';
+		}
+		else {
+			$tile = mysql_fetch_assoc($res);
+		}
+		mysql_free_result($res);
+		return $tile;
+	}
+	
+	public function generateImage() {
 		// mise en place du fond
 		imagefilledrectangle($this->img, 0, 0, $this->size, $this->size, $this->colors['background']);
 		
+		// dessin de la grille
+		//$this->drawGrid();
+		
+		// dessin des joueurs
 		foreach ($this->players as $p) {
 			$this->drawPlayer($p);
 		}
+		imagefilledellipse($this->img,
+			($this->size/2),
+			($this->size/2),
+			$this->players_size, $this->players_size,
+			$this->colors['blue']);
+		
+		// ajout des infos de debug
+		$this->info();
 		
 		header ("Content-type: image/png");
 		imagepng($this->img);
