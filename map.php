@@ -85,9 +85,32 @@ class Carte {
 	}
 	
 	/*
+	On passe une position en coordonnées logique (par rapport au jeu) et
+	la fonction retourne les coordonnées du centre de la case en coordonées
+	physique de l'image
+	*/
+	private function positionToPixel(Point $p) {
+		$x = ($this->size/2) + ($p->x - $this->origine->x) * $this->zoom;
+		$y = ($this->size/2) - ($p->y - $this->origine->y) * $this->zoom;
+		return new Point($x, $y);
+	}
+	
+	/*
+	On passe une position en coordonnées physique (par rapport à l'image) et
+	la fonction retourne les coordonnées logique de la case
+	*/
+	private function pixelToPosition(Point $p) {
+		$x = $this->origine->x + (($p->x - ($this->size/2)) / $this->zoom);
+		$y = $this->origine->y + (($p->y - ($this->size/2)) / ($this->zoom * -1));
+		return new Point(floor($x), floor($y)); 
+	}
+	
+	
+	/*
 	Recupere les joueurs de la communauté
 	*/
 	private function getPlayers() {
+		//$query = "SELECT braldahim_id, prenom, nom, x, y FROM user WHERE x IS NOT NULL AND y IS NOT NULL ORDER BY braldahim_id ASC LIMIT 1;";
 		$query = "SELECT braldahim_id, prenom, nom, x, y FROM user WHERE x IS NOT NULL AND y IS NOT NULL ORDER BY braldahim_id ASC;";
 		$res = mysql_query($query);
 		while ($row = mysql_fetch_assoc($res)) {
@@ -116,7 +139,7 @@ class Carte {
 		
 		// On cherche la position la plus éloignée du barycentre (sur x ou y) en valeur absolue
 		// On cherche également le nom le plus long à afficher (pour prévoir de la marge)
-		$position_max = 0;
+		$position_max = 1;
 		$nom_max = 0;
 		foreach ($this->players as $p) {
 			$position_max = max($position_max, $p->position->distanceMax($this->origine));
@@ -154,8 +177,7 @@ class Carte {
 	
 	private function drawPlayer($p) {
 		// coordonnées du centre
-		$nx = ($this->size/2) + ($p->position->x - $this->origine->x) * $this->zoom;
-		$ny = ($this->size/2) - ($p->position->y - $this->origine->y) * $this->zoom;
+		$pos = $this->positionToPixel($p->position);
 		
 		$name = "{$p->prenom} {$p->nom} {$p->position}";
 		$name_width = imagefontwidth($this->font_size) * strlen($name);
@@ -163,22 +185,23 @@ class Carte {
 		
 		// dessin du point
 		imagefilledellipse($this->img,
-			$nx, $ny,
+			$pos->x, $pos->y,
 			$this->players_size, $this->players_size,
 			$this->colors['blue']);
 		
 		// dessin du fond du nom
 		imagefilledrectangle($this->img,
-			$nx - $name_width / 2,
-			$ny,
-			$nx + $name_width / 2,
-			$ny + $name_height,
+			$pos->x - $name_width / 2,
+			$pos->y,
+			$pos->x + $name_width / 2,
+			$pos->y + $name_height,
 			$this->colors['name_bg']);
 		
 		// dessin du nom
 		imagestring($this->img, $this->font_size,
-			$nx - $name_width / 2,
-			$ny,
+
+			$pos->x - $name_width / 2,
+			$pos->y,
 			$name, $this->colors['red']);
 	}
 	
@@ -219,11 +242,17 @@ class Carte {
 				$y =  (-0.5+$dy) * $this->zoom;
 				$tile = $this->getTile(floor($dx), floor($dy));
 				
-				
+				/*
 				imagestring($this->img, $this->font_size,
 					($this->size/2) - $x,
 					($this->size/2) - $y,
 					$tile['type'][0],
+					$this->colors['red']);
+					*/
+				imagestring($this->img, 1,
+					($this->size/2) - $x,
+					($this->size/2) - $y,
+					"$dx,$dy",
 					$this->colors['red']);
 			}
 		}
@@ -232,7 +261,6 @@ class Carte {
 	private function getTile($x, $y) {
 		$tile = null;
 		$query = "SELECT type, id FROM carte WHERE x='{$x}' AND y='{$y}';";
-		//echo "$query<br>";
 		$res = mysql_query($query);
 		if (mysql_num_rows($res) == 0) {
 			$tile = array();
@@ -257,14 +285,15 @@ class Carte {
 		foreach ($this->players as $p) {
 			$this->drawPlayer($p);
 		}
-		imagefilledellipse($this->img,
+		
+		/*imagefilledellipse($this->img,
 			($this->size/2),
 			($this->size/2),
 			$this->players_size, $this->players_size,
 			$this->colors['blue']);
-		
+		*/
 		// ajout des infos de debug
-		$this->info();
+		//$this->info();
 		
 		header ("Content-type: image/png");
 		imagepng($this->img);
