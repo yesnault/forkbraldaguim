@@ -79,9 +79,13 @@ class Carte {
 		$this->colors['black'] = imagecolorallocate($this->img, 0, 0, 0);
 		$this->colors['red'] = imagecolorallocate($this->img, 255, 0, 0);
 		$this->colors['blue'] = imagecolorallocate($this->img, 0, 0, 255);
+		
 		$this->colors['name_bg'] = imagecolorallocatealpha($this->img, 255, 255, 255, 64);
 		$this->colors['line'] = imagecolorallocate($this->img, 255, 255, 255);
 		$this->colors['background'] = imagecolorallocate($this->img, 0, 59, 0);
+		$this->colors['route'] = imagecolorallocate($this->img, 128, 128, 128);
+		$this->colors['plaine'] = imagecolorallocate($this->img, 128, 255, 128);
+		$this->colors['palissade'] = imagecolorallocate($this->img, 200, 200, 128);
 	}
 	
 	/*
@@ -102,7 +106,7 @@ class Carte {
 	private function pixelToPosition(Point $p) {
 		$x = $this->origine->x + (($p->x - ($this->size/2)) / $this->zoom);
 		$y = $this->origine->y + (($p->y - ($this->size/2)) / ($this->zoom * -1));
-		return new Point(floor($x), floor($y)); 
+		return new Point(floor($x), floor($y));
 	}
 	
 	
@@ -199,7 +203,6 @@ class Carte {
 		
 		// dessin du nom
 		imagestring($this->img, $this->font_size,
-
 			$pos->x - $name_width / 2,
 			$pos->y,
 			$name, $this->colors['red']);
@@ -225,53 +228,66 @@ class Carte {
 			imageline($this->img, 0, ($this->size/2) - $x, $this->size, ($this->size/2) - $x, $this->colors['line']);
 			imageline($this->img, 0, ($this->size/2) + $x, $this->size, ($this->size/2) + $x, $this->colors['line']);
 		}
-		$this->drawTile($i);
 	}
 	
 	/*
 	Affiche les image pour chaque case.
-	On lui passe en paramètre le nombre max de cases à afficher en partant du centre.
 	*/
-	private function drawTile($max) {
-		// on boucle sur deltaX
-		for ($dx=-$max; $dx<$max; $dx++) {
-			// -0.5 permet d'être dans le coin haut gauche de l'image
-			$x =  (-0.5+$dx) * $this->zoom;
-			// on boucle sur deltaY
-			for ($dy=-$max; $dy<$max; $dy++) {
-				$y =  (-0.5+$dy) * $this->zoom;
-				$tile = $this->getTile(floor($dx), floor($dy));
+	private function drawTile() {
+		for ($x=0; $x<$this->size; $x+=50/$this->zoom) {
+			for ($y=0; $y<$this->size; $y+=50/$this->zoom) {
+				$position = $this->pixelToPosition(new Point($x, $y));
+				$tile = $this->getTile($position->x, $position->y);
+				$position = $this->positionToPixel($position);
 				
-				/*
-				imagestring($this->img, $this->font_size,
-					($this->size/2) - $x,
-					($this->size/2) - $y,
-					$tile['type'][0],
-					$this->colors['red']);
-					*/
-				imagestring($this->img, 1,
-					($this->size/2) - $x,
-					($this->size/2) - $y,
-					"$dx,$dy",
-					$this->colors['red']);
+				if ($tile == null) {
+					continue;
+				}
+				foreach ($tile as $env) {
+					if ($env['type'] == 'ROUTE') {
+						imagefilledrectangle($this->img,
+							$position->x,
+							$position->y,
+							$position->x +  $this->zoom,
+							$position->y +  $this->zoom,
+							$this->colors['route']);
+					}
+					else if ($env['type'] == 'ENVIRONNEMENT') {
+						imagefilledrectangle($this->img,
+							$position->x,
+							$position->y,
+							$position->x +  $this->zoom,
+							$position->y +  $this->zoom,
+							$this->colors['plaine']);
+					}
+					else if ($env['type'] == 'PALISSADE') {
+						imagefilledrectangle($this->img,
+							$position->x,
+							$position->y,
+							$position->x +  $this->zoom,
+							$position->y +  $this->zoom,
+							$this->colors['palissade']);
+					}
+				}
 			}
 		}
 	}
 	
 	private function getTile($x, $y) {
-		$tile = null;
+		$tiles = null;
 		$query = "SELECT type, id FROM carte WHERE x='{$x}' AND y='{$y}';";
 		$res = mysql_query($query);
 		if (mysql_num_rows($res) == 0) {
-			$tile = array();
-			$tile['type'] = 'NA';
-			$tile['id'] = 'NA';
+			$tiles = null;
 		}
 		else {
-			$tile = mysql_fetch_assoc($res);
+			$tiles = array();
+			while ($row = mysql_fetch_assoc($res)) {
+				$tiles[] = array('type'=>$row['type'], '$id'=>$row['id']);
+			}
 		}
 		mysql_free_result($res);
-		return $tile;
+		return $tiles;
 	}
 	
 	public function generateImage() {
@@ -280,6 +296,8 @@ class Carte {
 		
 		// dessin de la grille
 		//$this->drawGrid();
+		// dessin de l'environnement
+		$this->drawTile();
 		
 		// dessin des joueurs
 		foreach ($this->players as $p) {
