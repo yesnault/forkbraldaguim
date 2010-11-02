@@ -4,7 +4,7 @@ error_reporting(E_ALL);
 session_start();
 
 define('CSV_DIR', '/var/www/guim.info/www/braldahim/csv');
-define('FILE_bralduns_csv', CSV_DIR.'bralduns.csv');
+define('FILE_bralduns_csv', CSV_DIR.'/bralduns.csv');
 define('COMMUNAUTE', 1); // l'id de la communauté est 1 (c'est un peu hard codé...)
 
 /*
@@ -163,11 +163,11 @@ EOF;
 		// id_braldun;prenom_braldun;nom_braldun;niveau_braldun;sexe_braldun;nb_ko_braldun;nb_braldun_ko_braldun;nb_plaque_braldun;nb_braldun_plaquage_braldun;nb_monstre_kill_braldun;id_fk_mere_braldun;id_fk_pere_braldun;id_fk_communaute_braldun;id_fk_rang_communaute_braldun;url_blason_braldun;url_avatar_braldun;est_pnj_braldun
 		$content = file(FILE_bralduns_csv);
 		$communaute_id = -1;
+		$keys = explode(';', $content[0]);
 		foreach ($content as $line) {
 			if (preg_match("/^{$bra_num};/", $line) != 1) continue;
 			$values = explode(';', $line);
 			// recherche de l'indice de id_fk_communaute_braldun
-			$keys = explode(';', $content[0]);
 			$max = count($keys);
 			for ($i=0; $i<$max; $i++) {
 				if ($keys[$i] == 'id_fk_communaute_braldun') {
@@ -178,7 +178,7 @@ EOF;
 		}
 		unset($content);
 		if ($communaute_id != COMMUNAUTE) {
-			$this->html_message = "Le braldh&ucirc;n {$bra_num} ne fait pas partie des Permiers Braldh&ucirc;ns.";
+			$this->html_message = "Le brald&ucirc;n {$bra_num} ne fait pas partie des Permiers Brald&ucirc;ns.".$communaute_id;
 			$this->getInscriptionForm();
 			return;
 		}
