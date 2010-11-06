@@ -1,4 +1,22 @@
 <?php
+
+/*
+    This file is part of braldaguim.
+
+    braldaguim is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    braldaguim is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with braldaguim.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 error_reporting(E_ALL);
 
 session_start();
@@ -94,6 +112,7 @@ class Carte {
 	physique de l'image
 	*/
 	private function positionToPixel(Point $p) {
+		//retirer 0.5 pour etre en haut à gauche
 		$x = ($this->size/2) + ($p->x - $this->origine->x) * $this->zoom;
 		$y = ($this->size/2) - ($p->y - $this->origine->y) * $this->zoom;
 		return new Point($x, $y);
@@ -172,10 +191,18 @@ class Carte {
 		}
 		*/
 		if ($this->debug) {
+			$str = "centre: {$this->origine} - zoom: {$this->zoom}";
+			
+			imagefilledrectangle($this->img,
+				10,
+				10,
+				10 + imagefontwidth($this->font_size) * strlen($str),
+				10 + imagefontheight($this->font_size),
+				$this->colors['background']);
+			
 			imagestring($this->img, $this->font_size,
-				10, 10,
-				"centre: {$this->origine} - zoom: {$this->zoom}",
-				$this->colors['red']);
+				10, 10, $str, $this->colors['red']);
+			
 		}
 	}
 	
@@ -218,6 +245,7 @@ class Carte {
 		// On ajout/retire $i pour boucler, et on met à l'echelle avec le zoom.
 		// => $i est le numéro de la case en partant du centre
 		// On boucle tant qu'on a pas atteind une bordure de l'image
+		/*
 		$x = 0;
 		for ($i=0; ($this->size/2) - $x > 0; $i++) {
 			$x =  (-0.5+$i) * $this->zoom;
@@ -227,7 +255,26 @@ class Carte {
 			// horizontale
 			imageline($this->img, 0, ($this->size/2) - $x, $this->size, ($this->size/2) - $x, $this->colors['line']);
 			imageline($this->img, 0, ($this->size/2) + $x, $this->size, ($this->size/2) + $x, $this->colors['line']);
+		}*/
+		$p_logique = new Point($this->origine->x -0.5, $this->origine->y-0.5);
+		$p_physique = $this->positionToPixel($p_logique);
+		do {
+			imageline($this->img, $p_physique->x, 0, $p_physique->x, $this->size, $this->colors['line']);
+			imageline($this->img, 0, $p_physique->y, $this->size, $p_physique->y, $this->colors['line']);
+			$p_logique = new Point($p_logique->x - 1*$this->zoom, $p_logique->y - 1*$this->zoom);
+			$p_physique = $this->positionToPixel($p_logique);
 		}
+		while($p_physique->x > 0 && $p_physique->y > 0);
+		
+		$p_logique = new Point($this->origine->x -0.5, $this->origine->y-0.5);
+		$p_physique = $this->positionToPixel($p_logique);
+		do {
+			imageline($this->img, $p_physique->x, 0, $p_physique->x, $this->size, $this->colors['line']);
+			imageline($this->img, 0, $p_physique->y, $this->size, $p_physique->y, $this->colors['line']);
+			$p_logique = new Point($p_logique->x + 1*$this->zoom, $p_logique->y + 1*$this->zoom);
+			$p_physique = $this->positionToPixel($p_logique);
+		}
+		while($p_physique->x < $this->size && $p_physique->y < $this->size);
 	}
 	
 	/*
@@ -303,19 +350,20 @@ class Carte {
 		foreach ($this->players as $p) {
 			$this->drawPlayer($p);
 		}
-		
-		/*imagefilledellipse($this->img,
+		/*
+		imagefilledellipse($this->img,
 			($this->size/2),
 			($this->size/2),
 			$this->players_size, $this->players_size,
 			$this->colors['blue']);
 		*/
 		// ajout des infos de debug
-		//$this->info();
+		$this->info();
 		
 		header ("Content-type: image/png");
 		imagepng($this->img);
 		imagedestroy($this->img);
+		
 	}
 }
 
