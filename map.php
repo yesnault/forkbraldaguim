@@ -39,6 +39,9 @@ class Point {
 	public function distanceMax(Point $p) {
 		return max(abs($p->y - $this->y), abs($p->x - $this->x));
 	}
+	public function equals(Point $p) {
+		return ($this->x == $p->x && $this->y == $p->y);
+	}
 }
 
 class Player {
@@ -70,7 +73,7 @@ class Carte {
 	private $colors;
 	private $font_size;
 	
-	private $debug = true;
+	private $debug = false;
 	
 	/*
 	Construit une carte de la taille indiqué avec size (en pixel)
@@ -174,12 +177,12 @@ class Carte {
 		// Plus exactement, on ne prend que la moitié de la distance la plus longue
 		// car le barycentre est au centre le l'image et l'image est un carré.
 		
-		// On enlèveégalement 2 fois le nombre de caractère du nom le plus long
+		// On enlève également 1.5 (ou 2) fois le nombre de caractère du nom le plus long
 		// (en pixel) pour etre certain de pouvoir afficher tous les noms qui toucheraient
 		// le bord de l'image.
 		
 		$text = imagefontwidth($this->font_size) * $nom_max;
-		$this->zoom = floor(($this->size - 2*$text) / ($position_max * 2));
+		$this->zoom = floor(($this->size - 1.5*$text) / ($position_max * 2));
 		// On prend une valeur entière de zoom pour tombre juste et pas se prendre la tete
 		// sur le tiling du fond de carte.
 	}
@@ -270,8 +273,14 @@ class Carte {
 	Affiche les image pour chaque case.
 	*/
 	private function drawTile() {
-		for ($x = 0; $x<$this->size; $x+=$this->zoom) {
-			for ($y = 0; $y<$this->size; $y+=$this->zoom) {
+		// On parcours l'ensemble des pixels de gauche à droite et de haut en bas.
+		// Pour chaque position en pixel (x,y), on récupère la position logique en tile.
+		// Ensuite on intérroge la DB pour obtenir le type de tile à afficher.
+		// On boucle, en incrémentant du zoom. Cela dit comme c'est excessivement couteux
+		// on utilise un multiple du zoom (donc le dessin est moins précis)
+		$step = $this->zoom*3;
+		for ($x = 0; $x<$this->size; $x+=$step) {
+			for ($y = 0; $y<$this->size; $y+=$step) {
 				$p_physique = new Point($x, $y);
 				$p_logique = $this->pixelToPosition($p_physique);
 				$tile = $this->getTile($p_logique->x, $p_logique->y);
@@ -281,24 +290,24 @@ class Carte {
 							imagefilledrectangle($this->img,
 								$p_physique->x,
 								$p_physique->y,
-								$p_physique->x +  $this->zoom,
-								$p_physique->y +  $this->zoom,
+								$p_physique->x + $step,
+								$p_physique->y + $step,
 								$this->colors['route']);
 						}
 						else if ($env['type'] == 'ENVIRONNEMENT') {
 							imagefilledrectangle($this->img,
 								$p_physique->x,
 								$p_physique->y,
-								$p_physique->x +  $this->zoom,
-								$p_physique->y +  $this->zoom,
+								$p_physique->x + $step,
+								$p_physique->y + $step,
 								$this->colors['plaine']);
 						}
 						else if ($env['type'] == 'PALISSADE') {
 							imagefilledrectangle($this->img,
 								$p_physique->x,
 								$p_physique->y,
-								$p_physique->x +  $this->zoom,
-								$p_physique->y +  $this->zoom,
+								$p_physique->x + $step,
+								$p_physique->y + $step,
 								$this->colors['palissade']);
 						}
 					}
@@ -324,7 +333,31 @@ class Carte {
 		return $tiles;
 	}
 	
+	/*
+	Affiche le temps utilisé pour générer l'image.
+	*/
+	private function addTimeUsed($time) {
+		$str = sprintf("Généré en %.2fs", $time);
+		$w = imagefontwidth($this->font_size) * strlen($str);
+		$h = imagefontheight($this->font_size);
+		imagefilledrectangle($this->img,
+			10,
+			$this->size - $h,
+			10 + $w,
+			$this->size,
+			$this->colors['background']);
+		
+		imagestring($this->img, $this->font_size,
+			10, $this->size - $h,
+			iconv("UTF8", "ISO-8859-1", $str), $this->colors['red']);
+	}
+
+	/*
+	Génère l'image
+	*/
 	public function generateImage() {
+		$time_start = microtime(true);
+
 		// mise en place du fond
 		imagefilledrectangle($this->img, 0, 0, $this->size, $this->size, $this->colors['background']);
 		
@@ -346,6 +379,9 @@ class Carte {
 		*/
 		// ajout des infos de debug
 		//$this->info();
+		
+		// temps de génération
+		$this->addTimeUsed(microtime(true) - $time_start);
 		
 		header ("Content-type: image/png");
 		imagepng($this->img);
