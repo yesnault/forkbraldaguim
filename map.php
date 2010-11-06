@@ -105,8 +105,13 @@ class Carte {
 		$this->colors['line'] = imagecolorallocate($this->img, 255, 255, 255);
 		$this->colors['background'] = imagecolorallocate($this->img, 0, 59, 0);
 		$this->colors['route'] = imagecolorallocate($this->img, 128, 128, 128);
-		$this->colors['plaine'] = imagecolorallocate($this->img, 128, 255, 128);
 		$this->colors['palissade'] = imagecolorallocate($this->img, 200, 200, 128);
+		// Couleur pour le type ENVIRONNEMENT
+		$this->colors['Plaine'] = imagecolorallocate($this->img, 128, 255, 128);
+		$this->colors['plaine'] = $this->colors['Plaine'];
+		$this->colors['Eau'] = imagecolorallocate($this->img, 128, 128, 255);
+		$this->colors['profonde'] = imagecolorallocate($this->img, 128, 128, 255);
+		$this->colors['peuprofonde'] = imagecolorallocate($this->img, 128, 128, 180);
 	}
 	
 	/*
@@ -278,7 +283,7 @@ class Carte {
 		// Ensuite on intérroge la DB pour obtenir le type de tile à afficher.
 		// On boucle, en incrémentant du zoom. Cela dit comme c'est excessivement couteux
 		// on utilise un multiple du zoom (donc le dessin est moins précis)
-		$step = $this->zoom*3;
+		$step = $this->zoom*2;
 		for ($x = 0; $x<$this->size; $x+=$step) {
 			for ($y = 0; $y<$this->size; $y+=$step) {
 				$p_physique = new Point($x, $y);
@@ -300,7 +305,7 @@ class Carte {
 								$p_physique->y,
 								$p_physique->x + $step,
 								$p_physique->y + $step,
-								$this->colors['plaine']);
+								$this->colors[$env['id']]);
 						}
 						else if ($env['type'] == 'PALISSADE') {
 							imagefilledrectangle($this->img,
@@ -318,7 +323,7 @@ class Carte {
 	
 	private function getTile($x, $y) {
 		$tiles = null;
-		$query = "SELECT type, id FROM carte WHERE x='{$x}' AND y='{$y}';";
+		$query = "SELECT type, id FROM carte WHERE x='{$x}' AND y='{$y}' ORDER BY type ASC, id ASC;";
 		$res = mysql_query($query);
 		if (mysql_num_rows($res) == 0) {
 			$tiles = null;
@@ -326,7 +331,7 @@ class Carte {
 		else {
 			$tiles = array();
 			while ($row = mysql_fetch_assoc($res)) {
-				$tiles[] = array('type'=>$row['type'], '$id'=>$row['id']);
+				$tiles[] = array('type'=>$row['type'], 'id'=>$row['id']);
 			}
 		}
 		mysql_free_result($res);
