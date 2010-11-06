@@ -245,17 +245,6 @@ class Carte {
 		// On ajout/retire $i pour boucler, et on met à l'echelle avec le zoom.
 		// => $i est le numéro de la case en partant du centre
 		// On boucle tant qu'on a pas atteind une bordure de l'image
-		/*
-		$x = 0;
-		for ($i=0; ($this->size/2) - $x > 0; $i++) {
-			$x =  (-0.5+$i) * $this->zoom;
-			// verticale
-			imageline($this->img, ($this->size/2) - $x, 0, ($this->size/2) - $x, $this->size, $this->colors['line']);
-			imageline($this->img, ($this->size/2) + $x, 0, ($this->size/2) + $x, $this->size, $this->colors['line']);
-			// horizontale
-			imageline($this->img, 0, ($this->size/2) - $x, $this->size, ($this->size/2) - $x, $this->colors['line']);
-			imageline($this->img, 0, ($this->size/2) + $x, $this->size, ($this->size/2) + $x, $this->colors['line']);
-		}*/
 		$p_logique = new Point($this->origine->x -0.5, $this->origine->y-0.5);
 		$p_physique = $this->positionToPixel($p_logique);
 		do {
@@ -281,39 +270,37 @@ class Carte {
 	Affiche les image pour chaque case.
 	*/
 	private function drawTile() {
-		for ($x=0; $x<$this->size; $x+=50/$this->zoom) {
-			for ($y=0; $y<$this->size; $y+=50/$this->zoom) {
-				$position = $this->pixelToPosition(new Point($x, $y));
-				$tile = $this->getTile($position->x, $position->y);
-				$position = $this->positionToPixel($position);
-				
-				if ($tile == null) {
-					continue;
-				}
-				foreach ($tile as $env) {
-					if ($env['type'] == 'ROUTE') {
-						imagefilledrectangle($this->img,
-							$position->x,
-							$position->y,
-							$position->x +  $this->zoom,
-							$position->y +  $this->zoom,
-							$this->colors['route']);
-					}
-					else if ($env['type'] == 'ENVIRONNEMENT') {
-						imagefilledrectangle($this->img,
-							$position->x,
-							$position->y,
-							$position->x +  $this->zoom,
-							$position->y +  $this->zoom,
-							$this->colors['plaine']);
-					}
-					else if ($env['type'] == 'PALISSADE') {
-						imagefilledrectangle($this->img,
-							$position->x,
-							$position->y,
-							$position->x +  $this->zoom,
-							$position->y +  $this->zoom,
-							$this->colors['palissade']);
+		for ($x = 0; $x<$this->size; $x+=$this->zoom) {
+			for ($y = 0; $y<$this->size; $y+=$this->zoom) {
+				$p_physique = new Point($x, $y);
+				$p_logique = $this->pixelToPosition($p_physique);
+				$tile = $this->getTile($p_logique->x, $p_logique->y);
+				if ($tile != null) {
+					foreach ($tile as $env) {
+						if ($env['type'] == 'ROUTE') {
+							imagefilledrectangle($this->img,
+								$p_physique->x,
+								$p_physique->y,
+								$p_physique->x +  $this->zoom,
+								$p_physique->y +  $this->zoom,
+								$this->colors['route']);
+						}
+						else if ($env['type'] == 'ENVIRONNEMENT') {
+							imagefilledrectangle($this->img,
+								$p_physique->x,
+								$p_physique->y,
+								$p_physique->x +  $this->zoom,
+								$p_physique->y +  $this->zoom,
+								$this->colors['plaine']);
+						}
+						else if ($env['type'] == 'PALISSADE') {
+							imagefilledrectangle($this->img,
+								$p_physique->x,
+								$p_physique->y,
+								$p_physique->x +  $this->zoom,
+								$p_physique->y +  $this->zoom,
+								$this->colors['palissade']);
+						}
 					}
 				}
 			}
@@ -358,7 +345,7 @@ class Carte {
 			$this->colors['blue']);
 		*/
 		// ajout des infos de debug
-		$this->info();
+		//$this->info();
 		
 		header ("Content-type: image/png");
 		imagepng($this->img);
