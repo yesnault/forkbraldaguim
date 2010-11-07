@@ -27,7 +27,7 @@ define('COMMUNAUTE', 1); // l'id de la communauté est 1 (c'est un peu hard cod�
 
 /*
 CREATE TABLE user(braldahim_id MEDIUMINT PRIMARY KEY, crypted_password VARCHAR(32), prenom TEXT, nom TEXT, x MEDIUMINT, y MEDIUMINT);
-CREATE TABLE carte (x MEDIUMINT, y MEDIUMINT, z MEDIUMINT, type TEXT, id TEXT);
+CREATE TABLE carte (x MEDIUMINT not null, y MEDIUMINT not null, z MEDIUMINT, type TEXT, id TEXT, INDEX (x,y));
 */
 
 class BraldahimApp {
@@ -124,7 +124,7 @@ class BraldahimApp {
 <p>Bienvenue sur la page de positionnement de la communaut&eacute; <b>Les premiers braldh&ucirc;ns</b>.</p>
 <p>Pour vous inscrire, utilisez le lien <a href="index.php?action=inscription">Inscription</a>.</p>
 <p>Vous pourrez ensuite conna&icirc;tre la position des braldh&ucirc;ns de la communaut&eacute;.</p>
-<p>La mise à jour des positions &agrave; lieu tous les jours &agrave; midi.</p>
+<p>La mise à jour des positions &agrave; lieu <u>toutes les 6 heures</u>.</p>
 EOF;
 	}
 
@@ -142,10 +142,10 @@ Vous pouvez obtenir votre mot de passe restreint à l'adresse suivante :
 	<label for="bra_num">Num&eacute;ro du Braldh&ucirc;n :</label>
 	<input id="bra_num" name="bra_num" type="text">
 	<br/>
-	<label for="bra_pw">Mot de passe restreint :</label>
+	<label for="bra_pw">Mot de passe <b><u>restreint</u></b> :</label>
 	<input id="bra_pw" name="bra_pw" type="text">
 	<br/>
-	<input type="submit">
+	<input type="submit" value="Inscription">
 </form>
 EOF;
 	}
@@ -232,7 +232,7 @@ EOF;
 	<label for="bra_pw">Mot de passe :</label>
 	<input id="bra_pw" name="bra_pw" type="password">
 	<br/>
-	<input type="submit">
+	<input type="submit" value="Connexion">
 </form>
 EOF;
 	}
