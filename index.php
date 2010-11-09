@@ -121,9 +121,9 @@ class BraldahimApp {
 	*/
 	private function home() {
 		$this->html_content = <<<EOF
-<p>Bienvenue sur la page de positionnement de la communaut&eacute; <b>Les premiers braldh&ucirc;ns</b>.</p>
+<p>Bienvenue sur la page de positionnement de la communaut&eacute; <b>Les premiers brald&ucirc;ns</b>.</p>
 <p>Pour vous inscrire, utilisez le lien <a href="index.php?action=inscription">Inscription</a>.</p>
-<p>Vous pourrez ensuite conna&icirc;tre la position des braldh&ucirc;ns de la communaut&eacute;.</p>
+<p>Vous pourrez ensuite conna&icirc;tre la position des brald&ucirc;ns de la communaut&eacute;.</p>
 <p>La mise à jour des positions &agrave; lieu <u>toutes les 6 heures</u>.</p>
 EOF;
 	}
@@ -133,13 +133,13 @@ EOF;
 	*/
 	private function getInscriptionForm() {
 		$this->html_content =<<<EOF
-<p>Pour vous inscrire, vous avez besoin de votre num&eacute;ro de braldh&ucirc;n et 
+<p>Pour vous inscrire, vous avez besoin de votre num&eacute;ro de brald&ucirc;n et 
 de votre mot de passe restreint.
 Vous pouvez obtenir votre mot de passe restreint à l'adresse suivante :
 <a target="_blank" href="http://sp.braldahim.com/md5/">http://sp.braldahim.com/md5/</a>.</p>
 
 <form action="index.php?action=inscription_submit" method="POST">
-	<label for="bra_num">Num&eacute;ro du Braldh&ucirc;n :</label>
+	<label for="bra_num">Num&eacute;ro du Brald&ucirc;n :</label>
 	<input id="bra_num" name="bra_num" type="text">
 	<br/>
 	<label for="bra_pw">Mot de passe <b><u>restreint</u></b> :</label>
@@ -204,7 +204,7 @@ EOF;
 		$query = sprintf("SELECT braldahim_id FROM user WHERE braldahim_id=%s;", mysql_real_escape_string($bra_num));
 		$res = mysql_query($query, $this->db);
 		if (mysql_num_rows($res) != 0) {
-			$this->html_message = "Un braldh&ucirc;n existe d&eacute;j&agrave; avec cet identifiant.";
+			$this->html_message = "Un brald&ucirc;n existe d&eacute;j&agrave; avec cet identifiant.";
 			$this->getInscriptionForm();
 			mysql_free_result($res);
 			return;
@@ -226,7 +226,7 @@ EOF;
 <p>Pour vous connecter veuillez indiquer votre num&eacute;ro de brald&ucirc;n et votre mot de passe de braldahim.com.</p>
 
 <form action="index.php?action=login" method="POST">
-	<label for="bra_num">Num&eacute;ro du Braldh&ucirc;n :</label>
+	<label for="bra_num">Num&eacute;ro du Brald&ucirc;n :</label>
 	<input id="bra_num" name="bra_num" type="text">
 	<br/>
 	<label for="bra_pw">Mot de passe :</label>
@@ -308,7 +308,7 @@ EOF;
 		$res = mysql_query($query, $this->db);
 		
 		$content = '<table id="tab_position" border="1">';
-		$content .= '<tr><th>Braldh&ucirc;ns</th><th>X</th><th>Y</th></tr>';
+		$content .= '<tr><th>Brald&ucirc;ns</th><th>X</th><th>Y</th></tr>';
 		while ($row = mysql_fetch_assoc($res)) {
 			$content .= "<tr><td>{$row['prenom']} {$row['nom']}</td><td>{$row['x']}</td><td>{$row['y']}</td></tr>";
 		}
