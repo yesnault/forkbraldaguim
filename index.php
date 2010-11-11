@@ -304,18 +304,77 @@ EOF;
 		if (! isset($_SESSION['bra_num'])) {
 			return;
 		}
-		$query = "SELECT braldahim_id, prenom, nom, x, y FROM user ORDER BY braldahim_id ASC;";
-		$res = mysql_query($query, $this->db);
-		
+		$bralduns = $this->getBralduns();
+		$content = '<div id="position">';
 		$content = '<table id="tab_position" border="1">';
 		$content .= '<tr><th>Brald&ucirc;ns</th><th>X</th><th>Y</th></tr>';
-		while ($row = mysql_fetch_assoc($res)) {
-			$content .= "<tr><td>{$row['prenom']} {$row['nom']}</td><td>{$row['x']}</td><td>{$row['y']}</td></tr>";
+		foreach ($bralduns as $braldun) {
+			$content .= "<tr><td>{$braldun['prenom']} {$braldun['nom']}</td><td>{$braldun['x']}</td><td>{$braldun['y']}</td></tr>";
 		}
 		$content .= '</table>';
-		$content .= '<img id="img_map" src="map.php" />';
-		mysql_free_result($res);
+		$content .= $this->distanceCalc();
+		$content .= '</div>';
+		$content .= '<div id="map"><img id="img_map" src="map.php" /></div>';
 		$this->html_content = $content;
+	}
+	
+	/*
+	Affiche un calculateur de distance entre bralduns
+	*/
+	private function distanceCalc() {
+		$bralduns = $this->getBralduns();
+		$str = '';
+		$str .=<<<EOF
+<script type="text/javascript">
+function calcDistance() {
+	var dp1 = document.getElementById("dist_player1");
+	var dp2 = document.getElementById("dist_player2");
+	var dr = document.getElementById("dist_result");
+	var pos1 = dp1.options[dp1.selectedIndex].value.split(";");
+	var pos2 = dp2.options[dp2.selectedIndex].value.split(";");
+	var dx = pos2[0]-pos1[0];
+	var dy = pos2[1]-pos1[1];
+	var hyp = Math.floor(Math.sqrt(Math.pow(dx,2) + Math.pow(dy,2)));
+	dr.innerHTML = dx+" cases horizontales et "+dy+" cases verticales, soit un déplacement de "+hyp+" cases.";
+}
+</script>
+EOF;
+		$str .= '<div id="dist">La distance s&eacute;parant ';
+		$str .= '<select id="dist_player1">';
+		foreach ($bralduns as $braldun) {
+			$str .= "<option value=\"{$braldun['x']};{$braldun['y']}\">{$braldun['prenom']} {$braldun['nom']}</option>";
+		}
+		$str .= '</select> de <select id="dist_player2">';
+		foreach ($bralduns as $braldun) {
+			$str .= "<option value=\"{$braldun['x']};{$braldun['y']}\">{$braldun['prenom']} {$braldun['nom']}</option>";
+		}
+		$str .= '</select> est de :';
+		$str .= '<br/><span id="dist_result"></span>';
+		$str .= '<br/><input type="button" value="Distance" onClick="javascript:calcDistance();"/>';
+		$str .= "</div>";
+		return $str;
+	}
+	
+	/*
+	Retourne un tableau contenant tous les membres de la communauté
+	*/
+	private function getBralduns() {
+		if (isset($this->bralduns)) {
+			return $this->bralduns;
+		}
+		$this->bralduns = array();
+		$query = "SELECT braldahim_id, prenom, nom, x, y FROM user ORDER BY braldahim_id ASC;";
+		$res = mysql_query($query, $this->db);
+		while ($row = mysql_fetch_assoc($res)) {
+			$tmp = array();
+			foreach ($row as $k => $v) {
+				$tmp[$k] = $v;
+			}
+			$this->bralduns[] = $tmp;
+		}
+		mysql_free_result($res);
+		
+		return $this->bralduns;
 	}
 }
 
@@ -350,21 +409,29 @@ a:hover {color: #F0AE21;}
 	color: #F0AE21;
 }
 #main {
-	margin: 0 2em;
+	margin: 2em 2em 1em;
 }
 #message {
 	background-color: #EF7E68;
 	text-align: center;
 }
 
+#dist {
+	float: left;
+	padding: 0 2em;
+}
 #tab_position {
+	float: left;
 	border-collapse: collapse;
 	border-color: #5D8231;
 }
 #tab_position td, #tab_position th {
 	padding: .5em .3em;
 }
-#img_map {
+#map {
+	clear: both;
+}
+#img_map {	
 	margin: 2em;
 	border: 1px solid black;
 }

@@ -96,23 +96,38 @@ class Carte {
 	}
 	
 	private function createColors() {
+		$colors = array(
+			'black'		=> array(0, 0, 0),
+			'red'		=> array(255, 0, 0),
+			'blue'		=> array(0, 0, 255),
+			// couleurs générales
+			'name_bg'	=> array(255, 255, 255, 64),
+			'line'		=> array(255, 255, 255),
+			'background'	=> array(0, 59, 0),
+			// Couleur pour le type ROUTE
+			'route'		=> array(128, 128, 128),
+			'ruine'		=> array(80, 80, 80),
+			'balise'	=> array(100, 130, 100),
+			'echoppe'	=> array(128, 128, 128),
+			'ville'		=> array(128, 128, 128),
+			'palissade'	=> array(255, 185, 63),
+			// Couleur pour le type ENVIRONNEMENT
+			'plaine'	=> array(128, 255, 128),
+			'eau'		=> array(20, 20, 255),
+			'profonde'	=> array(20, 20, 255),
+			'peuprofonde'	=> array(20, 20, 255)
+		);
+		
 		$this->colors = array();
-		$this->colors['black'] = imagecolorallocate($this->img, 0, 0, 0);
-		$this->colors['red'] = imagecolorallocate($this->img, 255, 0, 0);
-		$this->colors['blue'] = imagecolorallocate($this->img, 0, 0, 255);
+		foreach ($colors as $k => $v) {
+			if (count($v) == 3) {
+				$this->colors[$k] = imagecolorallocate($this->img, $v[0], $v[1], $v[2]);
+			}
+			else {
+				$this->colors[$k] = imagecolorallocatealpha($this->img, $v[0], $v[1], $v[2], $v[3]);
+			}
+		}
 		
-		$this->colors['name_bg'] = imagecolorallocatealpha($this->img, 255, 255, 255, 64);
-		$this->colors['line'] = imagecolorallocate($this->img, 255, 255, 255);
-		$this->colors['background'] = imagecolorallocate($this->img, 0, 59, 0);
-		
-		$this->colors['route'] = imagecolorallocate($this->img, 128, 128, 128);
-		$this->colors['palissade'] = imagecolorallocate($this->img, 200, 200, 128);
-		// Couleur pour le type ENVIRONNEMENT
-		$this->colors['Plaine'] = imagecolorallocate($this->img, 128, 255, 128);
-		$this->colors['plaine'] = $this->colors['Plaine'];
-		$this->colors['Eau'] = imagecolorallocate($this->img, 20, 20, 255);
-		$this->colors['profonde'] = imagecolorallocate($this->img, 20, 20, 255);
-		$this->colors['peuprofonde'] = imagecolorallocate($this->img, 20, 20, 255);
 	}
 	
 	/*
@@ -276,7 +291,7 @@ class Carte {
 	}
 	
 	/*
-	Affiche les image pour chaque case.
+	Affiche les images pour chaque case.
 	*/
 	private function drawTile() {
 		// On parcours l'ensemble des pixels de gauche à droite et de haut en bas.
@@ -306,7 +321,7 @@ class Carte {
 								$p_physique->y,
 								$p_physique->x + $step,
 								$p_physique->y + $step,
-								$this->colors['route']);
+								$this->colors[$env['id']]);
 						}
 						else if ($env['type'] == 'ENVIRONNEMENT') {
 							imagefilledrectangle($this->img,
@@ -325,7 +340,7 @@ class Carte {
 	
 	private function getTile($x, $y) {
 		$tiles = null;
-		$query = "SELECT type, id FROM carte WHERE x='{$x}' AND y='{$y}' ORDER BY type ASC, id ASC;";
+		$query = "SELECT type, lower(id) as id FROM carte WHERE x='{$x}' AND y='{$y}' ORDER BY type ASC, id ASC;";
 		$res = mysql_query($query);
 		if (mysql_num_rows($res) == 0) {
 			$tiles = null;
