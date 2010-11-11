@@ -90,7 +90,7 @@ PLANTE_PREPAREE;x;y;z;quantite_preparee_element_partieplante;nom_type_partieplan
 RUNE;x;y;z;id_rune_element_rune
 TABAC;x;y;z;quantite_feuille_element_tabac;nom_court_type_tabac
 BRALDUN;x;y;z;id_braldun;est_ko_braldun;est_intangible_braldun;est_soule_braldun;soule_camp_braldun;id_fk_soule_match_braldun
-LIEU;x;y;z;id_lieu;nom_lieu;nom_type_lieu;nom_systeme_type_lieu
+--LIEU;x;y;z;id_lieu;nom_lieu;nom_type_lieu;nom_systeme_type_lieu
 MONSTRE;x;y;z;id_monstre;nom_type_monstre;m_taille;niveau_monstre
 NID;x;y;z;id_nid;nom_nid_type_monstre
 --PALISSADE;x;y;z;id_palissade;est_destructible_palissade
@@ -121,6 +121,10 @@ function fetch_vue($url) {
 		}
 		if ($part[0] == 'PALISSADE') {
 			update_palissade($part);
+			continue;
+		}
+		if ($part[0] == 'LIEU') {
+			update_lieu($part);
 			continue;
 		}
 	}
@@ -234,6 +238,45 @@ function update_palissade($line) {
 			mysql_real_escape_string($line[1]),
 			mysql_real_escape_string($line[2]),
 			mysql_real_escape_string($line[3]));
+		mysql_query($query);
+	}
+}
+
+/*
+Insère ou met à jour un element de type LIEU
+LIEU;x;y;z;id_lieu;nom_lieu;nom_type_lieu;nom_systeme_type_lieu
+*/
+function update_lieu($line) {
+	$query = "SELECT x FROM lieu WHERE x=%s AND y=%s AND id_lieu='%s';";
+	$query = sprintf($query,
+		mysql_real_escape_string($line[1]),
+		mysql_real_escape_string($line[2]),
+		mysql_real_escape_string($line[4]));
+	$res = mysql_query($query);
+	if (mysql_num_rows($res) == 0) {
+		// insert
+		$query = "INSERT INTO lieu(x, y, z, id_lieu, nom_lieu, nom_type_lieu, nom_systeme_type_lieu) VALUES(%s, %s, %s, '%s', '%s', '%s', '%s');";
+		$query = sprintf($query,
+			mysql_real_escape_string($line[1]),
+			mysql_real_escape_string($line[2]),
+			mysql_real_escape_string($line[3]),
+			mysql_real_escape_string($line[4]),
+			mysql_real_escape_string($line[5]),
+			mysql_real_escape_string($line[6]),
+			mysql_real_escape_string($line[7]));
+		mysql_query($query);
+	}
+	else {
+		// update
+		$query = "UPDATE lieu SET nom_lieu='%s', nom_type_lieu='%s', nom_systeme_type_lieu='%s'";
+		$query .= "WHERE x=%s AND y=%s AND id_lieu='%s';";
+		$query = sprintf($query,
+			mysql_real_escape_string($line[5]),
+			mysql_real_escape_string($line[6]),
+			mysql_real_escape_string($line[7]),
+			mysql_real_escape_string($line[1]),
+			mysql_real_escape_string($line[2]),
+			mysql_real_escape_string($line[4]));
 		mysql_query($query);
 	}
 }

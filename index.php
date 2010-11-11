@@ -28,6 +28,7 @@ define('COMMUNAUTE', 1); // l'id de la communaut√© est 1 (c'est un peu hard cod√
 /*
 CREATE TABLE user(braldahim_id MEDIUMINT PRIMARY KEY, crypted_password VARCHAR(32), prenom TEXT, nom TEXT, x MEDIUMINT, y MEDIUMINT);
 CREATE TABLE carte (x MEDIUMINT not null, y MEDIUMINT not null, z MEDIUMINT, type TEXT, id TEXT, INDEX (x,y));
+CREATE TABLE lieu(x MEDIUMINT not null, y MEDIUMINT not null, z MEDIUMINT, id_lieu TEXT, nom_lieu TEXT, nom_type_lieu TEXT, nom_systeme_type_lieu TEXT, INDEX(x,y));
 */
 
 class BraldahimApp {

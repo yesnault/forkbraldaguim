@@ -115,7 +115,10 @@ class Carte {
 			'plaine'	=> array(128, 255, 128),
 			'eau'		=> array(20, 20, 255),
 			'profonde'	=> array(20, 20, 255),
-			'peuprofonde'	=> array(20, 20, 255)
+			'peuprofonde'	=> array(20, 20, 255),
+			// Couleur pour les lieux importants
+			'lieu_point'		=> array(255, 0, 0),
+			'lieu_str'		=> array(0, 0, 0),
 		);
 		
 		$this->colors = array();
@@ -147,7 +150,8 @@ class Carte {
 	la fonction retourne les coordonnées logique de la case
 	*/
 	private function pixelToPosition(Point $p) {
-		$x = $this->origine->x + (($p->x - ($this->size/2)) / $this->zoom);
+		// FIXME le "+1" permet de réaligner les joueur et les tiles...
+		$x = $this->origine->x + (($p->x - ($this->size/2)) / $this->zoom)+1;
 		$y = $this->origine->y + (($p->y - ($this->size/2)) / ($this->zoom * -1));
 		return new Point(floor($x), floor($y));
 	}
@@ -338,6 +342,9 @@ class Carte {
 		}
 	}
 	
+	/*
+	Retourne une case represetant un environnement
+	*/
 	private function getTile($x, $y) {
 		$tiles = null;
 		$query = "SELECT type, lower(id) as id FROM carte WHERE x='{$x}' AND y='{$y}' ORDER BY type ASC, id ASC;";
@@ -353,6 +360,49 @@ class Carte {
 		}
 		mysql_free_result($res);
 		return $tiles;
+	}
+	
+	/*
+	Dessine l'ensemble des lieux qui se trouve dans l'espace couvert par la carte
+	*/
+	private function drawLieu() {
+		// On va chercher tous les lieux qui se trouvent
+		// entre les bornes maximales de la carte
+		$p_min = $this->pixelToPosition(new Point(0, $this->size)); // coin bas gauche (min X et min Y)
+		$p_max = $this->pixelToPosition(new Point($this->size, 0)); // coin haut droite (max X et max Y)
+		$query = "SELECT x, y, nom_lieu
+			FROM lieu
+			WHERE x BETWEEN {$p_min->x} AND {$p_max->x}
+			AND y BETWEEN {$p_min->y} AND {$p_max->y};";
+		$res = mysql_query($query);
+		while ($row = mysql_fetch_assoc($res)) {
+			// coordonnées du centre
+			$pos = $this->positionToPixel(new Point($row['x'], $row['y']));
+			
+			$name_width = imagefontwidth($this->font_size) * strlen($row['nom_lieu']);
+			$name_height = imagefontheight($this->font_size);
+			
+			// dessin du point
+			imagefilledellipse($this->img,
+				$pos->x, $pos->y,
+				$this->players_size, $this->players_size,
+				$this->colors['lieu_point']);
+			
+			// dessin du fond du nom
+			imagefilledrectangle($this->img,
+				$pos->x - $name_width / 2,
+				$pos->y,
+				$pos->x + $name_width / 2,
+				$pos->y + $name_height,
+				$this->colors['name_bg']);
+			
+			// dessin du nom
+			imagestring($this->img, $this->font_size,
+				$pos->x - $name_width / 2,
+				$pos->y,
+				$row['nom_lieu'], $this->colors['lieu_str']);
+		}
+		mysql_free_result($res);
 	}
 	
 	/*
@@ -385,8 +435,12 @@ class Carte {
 		
 		// dessin de la grille
 		//$this->drawGrid();
+		
 		// dessin de l'environnement
 		$this->drawTile();
+		
+		// dessin des lieux importants
+		$this->drawLieu();
 		
 		// dessin des joueurs
 		foreach ($this->players as $p) {
