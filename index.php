@@ -35,6 +35,7 @@ class BraldahimApp {
 	private $html_title;
 	private $html_content;
 	private $html_message;
+	private $html_script;
 	private $db;
 	private $action;
 	
@@ -44,8 +45,10 @@ class BraldahimApp {
 		$this->db = mysql_connect("localhost", "braldahim", "braldahim");
 		mysql_select_db("braldahim");
 		$this->html_title = 'Les premiers Brald&ucirc;ns';
+		$this->html_script = '';
 		$this->logged = isset($_SESSION['bra_num']);
 		$this->actionParse();
+		
 	}
 
 	public function __destruct() {
@@ -105,6 +108,13 @@ class BraldahimApp {
 
 	public function getHtmlContent() {
 		return $this->html_content;
+	}
+	
+	public function getHtmlScript() {
+		$str = "window.onload = function () {
+			initOnClick();
+		}";
+		return $this->html_script.$str;
 	}
 	
 	/*
@@ -306,17 +316,54 @@ EOF;
 			return;
 		}
 		$bralduns = $this->getBralduns();
-		$content = '<div id="position">';
-		$content = '<table id="tab_position" border="1">';
-		$content .= '<tr><th>Brald&ucirc;ns</th><th>X</th><th>Y</th></tr>';
+		$tab_bra = '';
 		foreach ($bralduns as $braldun) {
-			$content .= "<tr><td>{$braldun['prenom']} {$braldun['nom']}</td><td>{$braldun['x']}</td><td>{$braldun['y']}</td></tr>";
+			$tab_bra .= "<tr><td>{$braldun['prenom']} {$braldun['nom']}</td><td>{$braldun['x']}</td><td>{$braldun['y']}</td></tr>";
 		}
-		$content .= '</table>';
-		$content .= $this->distanceCalc();
-		$content .= '</div>';
-		$content .= '<div id="map"><img id="img_map" src="map.php" /></div>';
+		$distance = $this->distanceCalc();
+		$content =<<<EOF
+<div id="position">
+	<table id="tab_position" border="1">
+	<tr><th>Brald&ucirc;ns</th><th>X</th><th>Y</th></tr>
+	$tab_bra
+	</table>
+	$distance
+</div>
+<div id="map_wrapper">
+	<div class="map_item" id="map_fond"><img src="map.php?type=fond" /></div>
+	<div class="map_item" id="map_lieu"><img src="map.php?type=lieu" /></div>
+	<div class="map_item" id="map_joueur"><img src="map.php?type=joueur" /></div>
+	<div id="map_legend">
+		<p>Affichage des informations :</p>
+		<br/><input type="checkbox" id="chk_fond" checked="checked" />
+		<label for="chk_fond">Fond de carte</label>
+		<br/><input type="checkbox" id="chk_joueur" checked="checked" />
+		<label for="chk_joueur">Membres</label>
+		<br/><input type="checkbox" id="chk_lieu" checked="checked" />
+		<label for="chk_lieu">Lieux</label>
+	</div>
+</div>
+EOF;
 		$this->html_content = $content;
+		$this->html_script .=<<<EOF
+function show_hide_layer() {
+	this.id.match(/[^_]+_(.*)/);
+	var id_layer = "map_"+RegExp.$1;
+	if (this.checked) {
+		document.getElementById(id_layer).style.visibility = 'visible';
+	}
+	else {
+		document.getElementById(id_layer).style.visibility = 'hidden';
+	}
+}
+
+function initOnClick() {
+	document.getElementById("chk_fond").addEventListener('click', show_hide_layer, false);
+	document.getElementById("chk_joueur").addEventListener('click', show_hide_layer, false);
+	document.getElementById("chk_lieu").addEventListener('click', show_hide_layer, false);
+}
+
+EOF;
 	}
 	
 	/*
@@ -325,8 +372,7 @@ EOF;
 	private function distanceCalc() {
 		$bralduns = $this->getBralduns();
 		$str = '';
-		$str .=<<<EOF
-<script type="text/javascript">
+		$this->html_script .=<<<EOF
 function calcDistance() {
 	var dp1 = document.getElementById("dist_player1");
 	var dp2 = document.getElementById("dist_player2");
@@ -338,12 +384,12 @@ function calcDistance() {
 	var hyp = Math.floor(Math.sqrt(Math.pow(dx,2) + Math.pow(dy,2)));
 	dr.innerHTML = dx+" cases horizontales et "+dy+" cases verticales, soit un déplacement de "+hyp+" cases.";
 }
-</script>
 EOF;
 		$str .= '<div id="dist">La distance s&eacute;parant ';
 		$str .= '<select id="dist_player1">';
 		foreach ($bralduns as $braldun) {
-			$str .= "<option value=\"{$braldun['x']};{$braldun['y']}\">{$braldun['prenom']} {$braldun['nom']}</option>";
+			$c = ($_SESSION['bra_num'] == $braldun['braldahim_id']) ? ' selected="selected" ' : '';
+			$str .= "<option {$c} value=\"{$braldun['x']};{$braldun['y']}\">{$braldun['prenom']} {$braldun['nom']}</option>";
 		}
 		$str .= '</select> de <select id="dist_player2">';
 		foreach ($bralduns as $braldun) {
@@ -429,16 +475,29 @@ a:hover {color: #F0AE21;}
 #tab_position td, #tab_position th {
 	padding: .5em .3em;
 }
-#map {
+
+
+#map_wrapper {
 	clear: both;
+	position: relative;
 }
-#img_map {	
-	margin: 2em;
+.map_item {
+	position: absolute;
+	top: 0;
+	left: 0;
 	border: 1px solid black;
+	margin: 10px 10px;
+}
+#map_legend{
+	position: absolute;
+	top: 0;
+	left: 520px;
+	margin: 10px 10px;
 }
 </style>
 
 <title><?php  echo $app->getHtmlTitle(); ?></title>
+<script type="text/javascript"><?php echo $app->getHtmlScript(); ?></script>
 </head>
 <body>
 

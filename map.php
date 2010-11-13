@@ -21,10 +21,20 @@ error_reporting(E_ALL);
 
 session_start();
 if (! isset($_SESSION['bra_num'])) exit();
-/*
-Genere la carte des positions
-*/
 
+$carte = null;
+if (isset($_REQUEST['type'])) {
+	$carte = new Carte(500, $_REQUEST['type']);
+}
+else {
+	$carte = new Carte(500);
+}
+
+$carte->generateImage();
+
+/*
+Classe utilitaire représentant un point (comme dans les cours de 1ere année...)
+*/
 class Point {
 	public $x;
 	public $y;
@@ -44,6 +54,9 @@ class Point {
 	}
 }
 
+/*
+Classe représantant un joueur et sa postion
+*/
 class Player {
 	public $id;
 	public $nom;
@@ -62,11 +75,15 @@ class Player {
 	}
 }
 
+/*
+Genere une carte du monde centrée sur les joueurs
+*/
 class Carte {
 	private $db;
 	private $players;
 	private $player_size;
 	private $size;
+	private $type;
 	private $origine;
 	private $zoom;
 	private $img;
@@ -77,9 +94,11 @@ class Carte {
 	
 	/*
 	Construit une carte de la taille indiqué avec size (en pixel)
+	et representant le sujet indiqué par type (fond, joueur, lieu)
 	*/
-	public function __construct($size) {
+	public function __construct($size, $type="fond") {
 		$this->size = $size;
+		$this->type = $type;
 		$this->players_size = 10; // un rond de 5 pixel de diametre
 		$this->zoom = 1;
 		$this->font_size = 2;
@@ -101,9 +120,11 @@ class Carte {
 			'red'		=> array(255, 0, 0),
 			'blue'		=> array(0, 0, 255),
 			// couleurs générales
-			'name_bg'	=> array(255, 255, 255, 64),
+			'name_bg'	=> array(255, 255, 255, 10),
 			'line'		=> array(255, 255, 255),
 			'background'	=> array(0, 59, 0),
+			'transparent'	=> array(10, 10, 10),
+			
 			// Couleur pour le type ROUTE
 			'route'		=> array(128, 128, 128),
 			'ruine'		=> array(80, 80, 80),
@@ -117,8 +138,8 @@ class Carte {
 			'profonde'	=> array(20, 20, 255),
 			'peuprofonde'	=> array(20, 20, 255),
 			// Couleur pour les lieux importants
-			'lieu_point'		=> array(255, 0, 0),
-			'lieu_str'		=> array(0, 0, 0),
+			'lieu_point'	=> array(255, 0, 0),
+			'lieu_str'	=> array(0, 0, 0),
 		);
 		
 		$this->colors = array();
@@ -238,7 +259,8 @@ class Carte {
 		// coordonnées du centre
 		$pos = $this->positionToPixel($p->position);
 		
-		$name = "{$p->prenom} {$p->nom} {$p->position}";
+		//$name = "{$p->prenom} {$p->nom} {$p->position}";
+		$name = "{$p->prenom} {$p->nom}";
 		$name_width = imagefontwidth($this->font_size) * strlen($name);
 		$name_height = imagefontheight($this->font_size);
 		
@@ -429,23 +451,36 @@ class Carte {
 	*/
 	public function generateImage() {
 		$time_start = microtime(true);
-
-		// mise en place du fond
-		imagefilledrectangle($this->img, 0, 0, $this->size, $this->size, $this->colors['background']);
+		
+		switch($this->type) {
+			case "fond":
+				// mise en place du fond
+				imagefilledrectangle($this->img, 0, 0, $this->size, $this->size, $this->colors['background']);
+				// dessin de l'environnement
+				$this->drawTile();
+				// temps de génération
+				$this->addTimeUsed(microtime(true) - $time_start);
+				break;
+			case "joueur":
+				// mise en place du fond
+				imagefilledrectangle($this->img, 0, 0, $this->size, $this->size, $this->colors['transparent']);
+				// dessin des joueurs
+				foreach ($this->players as $p) {
+					$this->drawPlayer($p);
+				}
+				break;
+			case "lieu":
+				// mise en place du fond
+				imagefilledrectangle($this->img, 0, 0, $this->size, $this->size, $this->colors['transparent']);
+				// dessin des lieux importants
+				$this->drawLieu();
+				break;
+		}
+		imagecolortransparent($this->img, $this->colors['transparent']);
 		
 		// dessin de la grille
 		//$this->drawGrid();
 		
-		// dessin de l'environnement
-		$this->drawTile();
-		
-		// dessin des lieux importants
-		$this->drawLieu();
-		
-		// dessin des joueurs
-		foreach ($this->players as $p) {
-			$this->drawPlayer($p);
-		}
 		/*
 		imagefilledellipse($this->img,
 			($this->size/2),
@@ -456,17 +491,11 @@ class Carte {
 		// ajout des infos de debug
 		//$this->info();
 		
-		// temps de génération
-		$this->addTimeUsed(microtime(true) - $time_start);
-		
 		header ("Content-type: image/png");
 		imagepng($this->img);
 		imagedestroy($this->img);
 		
 	}
 }
-
-$carte = new Carte(500);
-$carte->generateImage();
 
 ?>
