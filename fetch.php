@@ -95,7 +95,7 @@ MONSTRE;x;y;z;id_monstre;nom_type_monstre;m_taille;niveau_monstre
 NID;x;y;z;id_nid;nom_nid_type_monstre
 --PALISSADE;x;y;z;id_palissade;est_destructible_palissade
 BUISSON;x;y;z;id_buisson;nom_type_buisson
-BOSQUET;x;y;z;id_bosquet;nom_systeme_type_bosquet
+--BOSQUET;x;y;z;id_bosquet;nom_systeme_type_bosquet
 --ROUTE;x;y;z;id_route;type_route
 BALLON_SOULE;x;y;z;present
 
@@ -135,7 +135,7 @@ Insère ou met à jour un element de type environnement
 ENVIRONNEMENT;x;y;z;nom_systeme_environnement;nom_environnement
 */
 function update_environnement($line) {
-	$query = "SELECT x FROM carte WHERE x=%s AND y=%s AND z=%s AND type='ENVIRONNEMENT';";
+	$query = "SELECT x FROM environnement WHERE x=%s AND y=%s AND z=%s;";
 	$query = sprintf($query,
 		mysql_real_escape_string($line[1]),
 		mysql_real_escape_string($line[2]),
@@ -143,23 +143,22 @@ function update_environnement($line) {
 	$res = mysql_query($query);
 	if (mysql_num_rows($res) == 0) {
 		// insert
-		$query = "INSERT INTO carte(x, y, z, type, id) VALUES(%s, %s, %s, 'ENVIRONNEMENT', '%s');";
+		$query = "INSERT INTO environnement(x, y, z, nom_systeme_environnement, nom_environnement) VALUES(%s, %s, %s, '%s', '%s');";
 		$query = sprintf($query,
 			mysql_real_escape_string($line[1]),
 			mysql_real_escape_string($line[2]),
 			mysql_real_escape_string($line[3]),
-			mysql_real_escape_string($line[4]));
+			mysql_real_escape_string($line[4]),
+			mysql_real_escape_string($line[5]));
 		mysql_query($query);
 		
 	}
 	else {
 		// update
-		$query = "UPDATE carte SET x=%s, y=%s, z=%s, id='%s' ";
-		$query .= " WHERE x=%s AND y=%s AND z=%s AND type='ENVIRONNEMENT';";
+		$query = "UPDATE environnement SET nom_systeme_environnement='%s', nom_environnement='%s' ";
+		$query .= " WHERE x=%s AND y=%s AND z=%s ;";
 		$query = sprintf($query,
-			mysql_real_escape_string($line[1]),
-			mysql_real_escape_string($line[2]),
-			mysql_real_escape_string($line[3]),
+			mysql_real_escape_string($line[4]),
 			mysql_real_escape_string($line[5]),
 			mysql_real_escape_string($line[1]),
 			mysql_real_escape_string($line[2]),
@@ -173,7 +172,7 @@ Insère ou met à jour un element de type route
 ROUTE;x;y;z;id_route;type_route
 */
 function update_route($line) {
-	$query = "SELECT x FROM carte WHERE x=%s AND y=%s AND z=%s AND type='ROUTE';";
+	$query = "SELECT x FROM route WHERE x=%s AND y=%s AND z=%s;";
 	$query = sprintf($query,
 		mysql_real_escape_string($line[1]),
 		mysql_real_escape_string($line[2]),
@@ -181,22 +180,22 @@ function update_route($line) {
 	$res = mysql_query($query);
 	if (mysql_num_rows($res) == 0) {
 		// insert
-		$query = "INSERT INTO carte(x, y, z, type, id) VALUES(%s, %s, %s, 'ROUTE', '%s');";
+		$query = "INSERT INTO route(x, y, z, id_route, type_route) VALUES(%s, %s, %s, '%s', '%s');";
 		$query = sprintf($query,
 			mysql_real_escape_string($line[1]),
 			mysql_real_escape_string($line[2]),
 			mysql_real_escape_string($line[3]),
+			mysql_real_escape_string($line[4]),
 			mysql_real_escape_string($line[5]));
 		mysql_query($query);
+		
 	}
 	else {
 		// update
-		$query = "UPDATE carte SET x=%s, y=%s, z=%s, id='%s'";
-		$query .= "WHERE x=%s AND y=%s AND z=%s AND type='ROUTE';";
+		$query = "UPDATE route SET id_route='%s', type_route='%s' ";
+		$query .= " WHERE x=%s AND y=%s AND z=%s ;";
 		$query = sprintf($query,
-			mysql_real_escape_string($line[1]),
-			mysql_real_escape_string($line[2]),
-			mysql_real_escape_string($line[3]),
+			mysql_real_escape_string($line[4]),
 			mysql_real_escape_string($line[5]),
 			mysql_real_escape_string($line[1]),
 			mysql_real_escape_string($line[2]),
@@ -210,7 +209,7 @@ Insère ou met à jour un element de type palissade
 PALISSADE;x;y;z;id_palissade;est_destructible_palissade
 */
 function update_palissade($line) {
-	$query = "SELECT x FROM carte WHERE x=%s AND y=%s AND z=%s AND type='PALISSADE';";
+	$query = "SELECT x FROM palissade WHERE x=%s AND y=%s AND z=%s;";
 	$query = sprintf($query,
 		mysql_real_escape_string($line[1]),
 		mysql_real_escape_string($line[2]),
@@ -218,22 +217,59 @@ function update_palissade($line) {
 	$res = mysql_query($query);
 	if (mysql_num_rows($res) == 0) {
 		// insert
-		$query = "INSERT INTO carte(x, y, z, type, id) VALUES(%s, %s, %s, 'PALISSADE', '%s');";
+		$query = "INSERT INTO palissade(x, y, z, id_palissade, est_destructible_palissade) VALUES(%s, %s, %s, '%s', '%s');";
 		$query = sprintf($query,
 			mysql_real_escape_string($line[1]),
 			mysql_real_escape_string($line[2]),
 			mysql_real_escape_string($line[3]),
+			mysql_real_escape_string($line[4]),
 			mysql_real_escape_string($line[5]));
 		mysql_query($query);
+		
 	}
 	else {
 		// update
-		$query = "UPDATE carte SET x=%s, y=%s, z=%s, id='%s'";
-		$query .= "WHERE x=%s AND y=%s AND z=%s AND type='PALISSADE';";
+		$query = "UPDATE palissade SET id_palissade='%s', est_destructible_palissade='%s' ";
+		$query .= " WHERE x=%s AND y=%s AND z=%s ;";
+		$query = sprintf($query,
+			mysql_real_escape_string($line[4]),
+			mysql_real_escape_string($line[5]),
+			mysql_real_escape_string($line[1]),
+			mysql_real_escape_string($line[2]),
+			mysql_real_escape_string($line[3]));
+		mysql_query($query);
+	}
+}
+
+/*
+Insère ou met à jour un element de type palissade
+BOSQUET;x;y;z;id_bosquet;nom_systeme_type_bosquet
+*/
+function update_bosquet($line) {
+	$query = "SELECT x FROM bosquet WHERE x=%s AND y=%s AND z=%s;";
+	$query = sprintf($query,
+		mysql_real_escape_string($line[1]),
+		mysql_real_escape_string($line[2]),
+		mysql_real_escape_string($line[3]));
+	$res = mysql_query($query);
+	if (mysql_num_rows($res) == 0) {
+		// insert
+		$query = "INSERT INTO bosquet(x, y, z, id_bosquet, nom_systeme_type_bosquet) VALUES(%s, %s, %s, '%s', '%s');";
 		$query = sprintf($query,
 			mysql_real_escape_string($line[1]),
 			mysql_real_escape_string($line[2]),
 			mysql_real_escape_string($line[3]),
+			mysql_real_escape_string($line[4]),
+			mysql_real_escape_string($line[5]));
+		mysql_query($query);
+		
+	}
+	else {
+		// update
+		$query = "UPDATE bosquet SET id_bosquet='%s', nom_systeme_type_bosquet='%s' ";
+		$query .= " WHERE x=%s AND y=%s AND z=%s ;";
+		$query = sprintf($query,
+			mysql_real_escape_string($line[4]),
 			mysql_real_escape_string($line[5]),
 			mysql_real_escape_string($line[1]),
 			mysql_real_escape_string($line[2]),

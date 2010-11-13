@@ -323,57 +323,60 @@ class Carte {
 				$p_physique = new Point($x, $y);
 				$p_logique = $this->pixelToPosition($p_physique);
 				$tile = $this->getTile($p_logique->x, $p_logique->y);
-				if ($tile != null) {
-					foreach ($tile as $env) {
-						if ($env['type'] == 'PALISSADE') {
-							imagefilledrectangle($this->img,
-								$p_physique->x,
-								$p_physique->y,
-								$p_physique->x + $step,
-								$p_physique->y + $step,
-								$this->colors['palissade']);
-						}
-						else if ($env['type'] == 'ROUTE') {
-							imagefilledrectangle($this->img,
-								$p_physique->x,
-								$p_physique->y,
-								$p_physique->x + $step,
-								$p_physique->y + $step,
-								$this->colors[$env['id']]);
-						}
-						else if ($env['type'] == 'ENVIRONNEMENT') {
-							imagefilledrectangle($this->img,
-								$p_physique->x,
-								$p_physique->y,
-								$p_physique->x + $step,
-								$p_physique->y + $step,
-								$this->colors[$env['id']]);
-						}
-						
-					}
+				if ($tile == null) {
+					continue;
 				}
+				$color = '';
+				switch($tile['type']) {
+					case 'palissade':
+						$color = $this->colors['palissade'];
+						break;
+					case 'route':
+						$color = $this->colors[strtolower($tile['type_route'])];
+						break;
+					case 'environnement':
+						$color = $this->colors[strtolower($tile['nom_systeme_environnement'])];
+						break;
+					case 'bosquet':
+						$color = $this->colors[strtolower($tile['nom_systeme_type_bosquet'])];
+						break;
+					default:
+						$color = $this->colors['black'];
+				}
+				imagefilledrectangle($this->img,
+					$p_physique->x,
+					$p_physique->y,
+					$p_physique->x + $step,
+					$p_physique->y + $step,
+					$color);
 			}
 		}
 	}
 	
 	/*
-	Retourne une case represetant un environnement
+	Retourne les détails correspondant à une case
 	*/
 	private function getTile($x, $y) {
-		$tiles = null;
-		$query = "SELECT type, lower(id) as id FROM carte WHERE x='{$x}' AND y='{$y}' ORDER BY type ASC, id ASC;";
-		$res = mysql_query($query);
-		if (mysql_num_rows($res) == 0) {
-			$tiles = null;
-		}
-		else {
-			$tiles = array();
-			while ($row = mysql_fetch_assoc($res)) {
-				$tiles[] = array('type'=>$row['type'], 'id'=>$row['id']);
+		$tile = null;
+		// on va essayer toutes les tables dans un ordre précis
+		// et on s'arrête dès qu'on a une info pertinente
+		$table_list = array('palissade', 'route', 'bosquet', 'environnement');
+		foreach ($table_list as $table) {
+			$query = "SELECT * FROM {$table} WHERE x='{$x}' AND y='{$y}';";
+			$res = mysql_query($query);
+			if (mysql_num_rows($res) == 0) {
+				mysql_free_result($res);
+				continue;
+			}
+			else {
+				$row = mysql_fetch_assoc($res);
+				$tile = $row;
+				$tile['type'] = $table;
+				mysql_free_result($res);
+				break;
 			}
 		}
-		mysql_free_result($res);
-		return $tiles;
+		return $tile;
 	}
 	
 	/*
