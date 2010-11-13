@@ -90,7 +90,7 @@ class Carte {
 	private $colors;
 	private $font_size;
 	
-	private $debug = false;
+	private $debug = true;
 	
 	/*
 	Construit une carte de la taille indiqué avec size (en pixel)
@@ -233,26 +233,18 @@ class Carte {
 		// sur le tiling du fond de carte.
 	}
 	
-	public function info() {
-		/*
-		foreach ($this->players as $p) {
-			echo "$p<br>";
-		}
-		*/
-		if ($this->debug) {
-			$str = "centre: {$this->origine} - zoom: {$this->zoom}";
-			
-			imagefilledrectangle($this->img,
-				10,
-				10,
-				10 + imagefontwidth($this->font_size) * strlen($str),
-				10 + imagefontheight($this->font_size),
-				$this->colors['background']);
-			
-			imagestring($this->img, $this->font_size,
-				10, 10, $str, $this->colors['red']);
-			
-		}
+	private function info() {
+		$str = "centre: {$this->origine} - zoom: {$this->zoom}";
+		
+		imagefilledrectangle($this->img,
+			10,
+			10,
+			10 + imagefontwidth($this->font_size) * strlen($str),
+			10 + imagefontheight($this->font_size),
+			$this->colors['background']);
+		
+		imagestring($this->img, $this->font_size,
+			10, 10, iconv("UTF8", "ISO-8859-1", $str), $this->colors['red']);	
 	}
 	
 	private function drawPlayer($p) {
@@ -273,16 +265,16 @@ class Carte {
 		// dessin du fond du nom
 		imagefilledrectangle($this->img,
 			$pos->x - $name_width / 2,
-			$pos->y,
+			$pos->y + $this->players_size / 2,
 			$pos->x + $name_width / 2,
-			$pos->y + $name_height,
+			$pos->y + $this->players_size / 2 + $name_height,
 			$this->colors['name_bg']);
 		
 		// dessin du nom
 		imagestring($this->img, $this->font_size,
 			$pos->x - $name_width / 2,
-			$pos->y,
-			$name, $this->colors['red']);
+			$pos->y + $this->players_size / 2,
+			iconv("UTF8", "ISO-8859-1", $name), $this->colors['red']);
 	}
 	
 	
@@ -385,9 +377,24 @@ class Carte {
 	}
 	
 	/*
-	Dessine l'ensemble des lieux qui se trouve dans l'espace couvert par la carte
+	Dessine uniquement les lieux mythique et les lieux de quetes
 	*/
-	private function drawLieu() {
+	private function drawLieuMythiqueQuetes() {
+		$this->drawLieu("nom_systeme_type_lieu IN ('lieumythique', 'quete')");
+	}
+	
+	/*
+	Dessine tous les lieux non spécifiques
+	*/
+	private function drawLieuStandard() {
+		$this->drawLieu("nom_systeme_type_lieu NOT IN ('lieumythique', 'quete')");
+	}
+	
+	/*
+	Dessine l'ensemble des lieux qui se trouve dans l'espace couvert par la carte
+	On peut restreindre la liste en passant une clause where.
+	*/
+	private function drawLieu($where=null) {
 		// On va chercher tous les lieux qui se trouvent
 		// entre les bornes maximales de la carte
 		$p_min = $this->pixelToPosition(new Point(0, $this->size)); // coin bas gauche (min X et min Y)
@@ -395,7 +402,12 @@ class Carte {
 		$query = "SELECT x, y, nom_lieu
 			FROM lieu
 			WHERE x BETWEEN {$p_min->x} AND {$p_max->x}
-			AND y BETWEEN {$p_min->y} AND {$p_max->y};";
+			AND y BETWEEN {$p_min->y} AND {$p_max->y}";
+		if ($where != null && $where != '') {
+			$query .= " AND $where ";
+		}
+		$query .= ";";
+		
 		$res = mysql_query($query);
 		while ($row = mysql_fetch_assoc($res)) {
 			// coordonnées du centre
@@ -411,18 +423,18 @@ class Carte {
 				$this->colors['lieu_point']);
 			
 			// dessin du fond du nom
-			imagefilledrectangle($this->img,
+			/*imagefilledrectangle($this->img,
 				$pos->x - $name_width / 2,
 				$pos->y,
 				$pos->x + $name_width / 2,
 				$pos->y + $name_height,
 				$this->colors['name_bg']);
-			
+			*/
 			// dessin du nom
 			imagestring($this->img, $this->font_size,
 				$pos->x - $name_width / 2,
 				$pos->y,
-				$row['nom_lieu'], $this->colors['lieu_str']);
+				iconv("UTF8", "ISO-8859-1", $row['nom_lieu']), $this->colors['lieu_str']);
 		}
 		mysql_free_result($res);
 	}
@@ -460,6 +472,10 @@ class Carte {
 				$this->drawTile();
 				// temps de génération
 				$this->addTimeUsed(microtime(true) - $time_start);
+				// ajout des infos de debug
+				if ($this->debug) {
+					$this->info();
+				}
 				break;
 			case "joueur":
 				// mise en place du fond
@@ -475,6 +491,18 @@ class Carte {
 				// dessin des lieux importants
 				$this->drawLieu();
 				break;
+			case "lieumythique":
+				// mise en place du fond
+				imagefilledrectangle($this->img, 0, 0, $this->size, $this->size, $this->colors['transparent']);
+				// dessin des lieux importants
+				$this->drawLieuMythiqueQuetes();
+				break;
+			case "lieustandard":
+				// mise en place du fond
+				imagefilledrectangle($this->img, 0, 0, $this->size, $this->size, $this->colors['transparent']);
+				// dessin des lieux importants
+				$this->drawLieuStandard();
+				break;
 		}
 		imagecolortransparent($this->img, $this->colors['transparent']);
 		
@@ -488,8 +516,7 @@ class Carte {
 			$this->players_size, $this->players_size,
 			$this->colors['blue']);
 		*/
-		// ajout des infos de debug
-		//$this->info();
+		
 		
 		header ("Content-type: image/png");
 		imagepng($this->img);

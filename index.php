@@ -331,16 +331,23 @@ EOF;
 </div>
 <div id="map_wrapper">
 	<div class="map_item" id="map_fond"><img src="map.php?type=fond" /></div>
-	<div class="map_item" id="map_lieu"><img src="map.php?type=lieu" /></div>
+	<div class="map_item" id="map_lieumythique"><img src="map.php?type=lieumythique" /></div>
+	<div class="map_item" id="map_lieustandard"><img src="map.php?type=lieustandard" /></div>
 	<div class="map_item" id="map_joueur"><img src="map.php?type=joueur" /></div>
 	<div id="map_legend">
 		<p>Affichage des informations :</p>
+		
 		<br/><input type="checkbox" id="chk_fond" checked="checked" />
 		<label for="chk_fond">Fond de carte</label>
+		
 		<br/><input type="checkbox" id="chk_joueur" checked="checked" />
 		<label for="chk_joueur">Membres</label>
-		<br/><input type="checkbox" id="chk_lieu" checked="checked" />
-		<label for="chk_lieu">Lieux</label>
+		
+		<br/><input type="checkbox" id="chk_lieumythique" checked="checked" />
+		<label for="chk_lieumythique">Lieux mythiques et lieux de qu&ecirc;tes </label>
+		
+		<br/><input type="checkbox" id="chk_lieustandard" checked="checked" />
+		<label for="chk_lieustandard">Lieux standard</label>
 	</div>
 </div>
 EOF;
@@ -360,7 +367,8 @@ function show_hide_layer() {
 function initOnClick() {
 	document.getElementById("chk_fond").addEventListener('click', show_hide_layer, false);
 	document.getElementById("chk_joueur").addEventListener('click', show_hide_layer, false);
-	document.getElementById("chk_lieu").addEventListener('click', show_hide_layer, false);
+	document.getElementById("chk_lieumythique").addEventListener('click', show_hide_layer, false);
+	document.getElementById("chk_lieustandard").addEventListener('click', show_hide_layer, false);
 }
 
 EOF;
