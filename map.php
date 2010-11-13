@@ -107,6 +107,9 @@ class Carte {
 		$this->img = imagecreatetruecolor($this->size, $this->size);
 		$this->createColors();
 		
+		// pour la légende, on n'a pas besoin d'aller plus loin
+		if ($type=='legende') return;
+		
 		$this->db = mysql_connect("localhost", "braldahim", "braldahim");
 		mysql_select_db("braldahim");
 		
@@ -123,6 +126,7 @@ class Carte {
 			'name_bg'	=> array(255, 255, 255, 10),
 			'line'		=> array(255, 255, 255),
 			'background'	=> array(0, 59, 0),
+			'legendbg'	=> array(59, 159, 59),
 			'transparent'	=> array(10, 10, 10),
 			
 			// Couleur pour le type ROUTE
@@ -383,14 +387,14 @@ class Carte {
 	Dessine uniquement les lieux mythique et les lieux de quetes
 	*/
 	private function drawLieuMythiqueQuetes() {
-		$this->drawLieu("nom_systeme_type_lieu IN ('lieumythique', 'quete')");
+		$this->drawLieu("nom_systeme_type_lieu IN ('lieumythique', 'quete', 'ruine')");
 	}
 	
 	/*
 	Dessine tous les lieux non spécifiques
 	*/
 	private function drawLieuStandard() {
-		$this->drawLieu("nom_systeme_type_lieu NOT IN ('lieumythique', 'quete')");
+		$this->drawLieu("nom_systeme_type_lieu NOT IN ('lieumythique', 'quete', 'ruine')");
 	}
 	
 	/*
@@ -440,6 +444,50 @@ class Carte {
 				iconv("UTF8", "ISO-8859-1", $row['nom_lieu']), $this->colors['lieu_str']);
 		}
 		mysql_free_result($res);
+	}
+	
+	/*
+	Dessine la légende
+	*/
+	private function drawLegend() {
+		$x = 50;
+		$y = 100;
+		$h = imagefontheight($this->font_size);
+		
+		imagefilledrectangle($this->img, $x, $y, $x+150, $y+250, $this->colors['legendbg']);
+		imagerectangle($this->img, $x, $y, $x+150, $y+250, $this->colors['black']);
+		imagestring($this->img, $this->font_size, $x+10, $y+$h, 'Legende', $this->colors['black']);
+		$x += 30;
+		$y += 50;
+		
+		imagefilledrectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['plaine']);
+		imagerectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['black']);
+		imagestring($this->img, $this->font_size, $x+$h+10, $y, 'Plaine', $this->colors['black']);
+		$y += 2*$h;
+		
+		imagefilledrectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['eau']);
+		imagerectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['black']);
+		imagestring($this->img, $this->font_size, $x+$h+10, $y, 'Eau', $this->colors['black']);
+		$y += 2*$h;
+		
+		imagefilledrectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['route']);
+		imagerectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['black']);
+		imagestring($this->img, $this->font_size, $x+$h+10, $y, 'Route', $this->colors['black']);
+		$y += 2*$h;
+		
+		imagefilledrectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['balise']);
+		imagerectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['black']);
+		imagestring($this->img, $this->font_size, $x+$h+10, $y, 'Balise', $this->colors['black']);
+		$y += 2*$h;
+		
+		imagefilledrectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['palissade']);
+		imagerectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['black']);
+		imagestring($this->img, $this->font_size, $x+$h+10, $y, 'Palissade', $this->colors['black']);
+		$y += 2*$h;
+		
+		imagefilledrectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['ruine']);
+		imagerectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['black']);
+		imagestring($this->img, $this->font_size, $x+$h+10, $y, 'Ruine', $this->colors['black']);
 	}
 	
 	/*
@@ -506,6 +554,13 @@ class Carte {
 				// dessin des lieux importants
 				$this->drawLieuStandard();
 				break;
+			case "legende":
+				// mise en place du fond
+				imagefilledrectangle($this->img, 0, 0, $this->size, $this->size, $this->colors['transparent']);
+				// dessin des lieux importants
+				$this->drawLegend();
+				break;
+				
 		}
 		imagecolortransparent($this->img, $this->colors['transparent']);
 		

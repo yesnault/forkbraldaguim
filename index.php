@@ -339,7 +339,9 @@ EOF;
 	<div class="map_item" id="map_lieumythique"><img src="map.php?type=lieumythique" /></div>
 	<div class="map_item" id="map_lieustandard"><img src="map.php?type=lieustandard" /></div>
 	<div class="map_item" id="map_joueur"><img src="map.php?type=joueur" /></div>
-	<div id="map_legend">
+	<div class="map_item" id="map_legende"><img src="map.php?type=legende" /></div>
+	
+	<div id="map_info">
 		<p>Affichage des informations :</p>
 		
 		<br/><input type="checkbox" id="chk_fond" checked="checked" />
@@ -353,6 +355,9 @@ EOF;
 		
 		<br/><input type="checkbox" id="chk_lieustandard" checked="checked" />
 		<label for="chk_lieustandard">Lieux standard</label>
+		
+		<br/><input type="checkbox" id="chk_legende" />
+		<label for="chk_legende">Legende</label>
 	</div>
 </div>
 EOF;
@@ -374,6 +379,7 @@ function initOnClick() {
 	document.getElementById("chk_joueur").addEventListener('click', show_hide_layer, false);
 	document.getElementById("chk_lieumythique").addEventListener('click', show_hide_layer, false);
 	document.getElementById("chk_lieustandard").addEventListener('click', show_hide_layer, false);
+	document.getElementById("chk_legende").addEventListener('click', show_hide_layer, false);
 }
 
 EOF;
@@ -501,7 +507,10 @@ a:hover {color: #F0AE21;}
 	border: 1px solid black;
 	margin: 10px 10px;
 }
-#map_legend{
+#map_legende {
+	visibility: hidden;
+}
+#map_info {
 	position: absolute;
 	top: 0;
 	left: 520px;
