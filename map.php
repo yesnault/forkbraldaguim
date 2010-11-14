@@ -126,6 +126,10 @@ class Carte {
 	On se base sur la présence de joueurs qui ont été mis à jour.
 	*/
 	private function needToUpdate() {
+		if ($this->debug) {
+			$this->use_cache = false;
+			return;
+		}
 		$query = "SELECT count(*) FROM user WHERE updated=true;";
 		$res = mysql_query($query);
 		$this->use_cache = false;
@@ -146,6 +150,7 @@ class Carte {
 			'background'	=> array(0, 59, 0),
 			'legendbg'	=> array(59, 159, 59),
 			'transparent'	=> array(10, 10, 10),
+			'player'	=> array(70, 220, 240),
 			
 			// Couleur pour le type ROUTE
 			'route'		=> array(128, 128, 128),
@@ -285,7 +290,13 @@ class Carte {
 		imagefilledellipse($this->img,
 			$pos->x, $pos->y,
 			$this->players_size, $this->players_size,
-			$this->colors['blue']);
+			$this->colors['player']);
+		
+		// dessin du point
+		imageellipse($this->img,
+			$pos->x, $pos->y,
+			$this->players_size, $this->players_size,
+			$this->colors['black']);
 		
 		// dessin du fond du nom
 		imagefilledrectangle($this->img,
