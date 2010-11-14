@@ -353,7 +353,7 @@ EOF;
 		<br/><input type="checkbox" id="chk_lieumythique" checked="checked" />
 		<label for="chk_lieumythique">Lieux mythiques et lieux de qu&ecirc;tes </label>
 		
-		<br/><input type="checkbox" id="chk_lieustandard" checked="checked" />
+		<br/><input type="checkbox" id="chk_lieustandard" />
 		<label for="chk_lieustandard">Lieux standard</label>
 		
 		<br/><input type="checkbox" id="chk_legende" />
@@ -507,7 +507,7 @@ a:hover {color: #F0AE21;}
 	border: 1px solid black;
 	margin: 10px 10px;
 }
-#map_legende {
+#map_legende, #map_lieustandard {
 	visibility: hidden;
 }
 #map_info {

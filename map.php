@@ -89,8 +89,9 @@ class Carte {
 	private $img;
 	private $colors;
 	private $font_size;
+	private $use_cache;
 	
-	private $debug = true;
+	private $debug = false;
 	
 	/*
 	Construit une carte de la taille indiqué avec size (en pixel)
@@ -107,14 +108,31 @@ class Carte {
 		$this->img = imagecreatetruecolor($this->size, $this->size);
 		$this->createColors();
 		
-		// pour la légende, on n'a pas besoin d'aller plus loin
-		if ($type=='legende') return;
-		
 		$this->db = mysql_connect("localhost", "braldahim", "braldahim");
 		mysql_select_db("braldahim");
 		
+		$this->needToUpdate();
+		
+		// pour la légende, on n'a pas besoin d'aller plus loin
+		if ($type=='legende') return;
+		
 		$this->getPlayers();
 		$this->setBarycentre();
+	}
+	
+	/*
+	Met à jour l'attribut 'use_cache', qui indique si on doit utiliser
+	les images en cache ou bien les regénérer.
+	On se base sur la présence de joueurs qui ont été mis à jour.
+	*/
+	private function needToUpdate() {
+		$query = "SELECT count(*) FROM user WHERE updated=true;";
+		$res = mysql_query($query);
+		$this->use_cache = false;
+		if ($row = mysql_fetch_row($res)) {
+			 $this->use_cache = ($row[0] == 0);
+		}
+		mysql_free_result($res);
 	}
 	
 	private function createColors() {
@@ -251,6 +269,9 @@ class Carte {
 			10, 10, iconv("UTF8", "ISO-8859-1", $str), $this->colors['red']);	
 	}
 	
+	/*
+	Dessine un joueur : un point plus son nom
+	*/
 	private function drawPlayer($p) {
 		// coordonnées du centre
 		$pos = $this->positionToPixel($p->position);
@@ -513,73 +534,77 @@ class Carte {
 	Génère l'image
 	*/
 	public function generateImage() {
-		$time_start = microtime(true);
+		$file = "cache/{$this->type}.png";
 		
-		switch($this->type) {
-			case "fond":
-				// mise en place du fond
-				imagefilledrectangle($this->img, 0, 0, $this->size, $this->size, $this->colors['background']);
-				// dessin de l'environnement
-				$this->drawTile();
-				// temps de génération
-				$this->addTimeUsed(microtime(true) - $time_start);
-				// ajout des infos de debug
-				if ($this->debug) {
-					$this->info();
-				}
-				break;
-			case "joueur":
-				// mise en place du fond
-				imagefilledrectangle($this->img, 0, 0, $this->size, $this->size, $this->colors['transparent']);
-				// dessin des joueurs
-				foreach ($this->players as $p) {
-					$this->drawPlayer($p);
-				}
-				break;
-			case "lieu":
-				// mise en place du fond
-				imagefilledrectangle($this->img, 0, 0, $this->size, $this->size, $this->colors['transparent']);
-				// dessin des lieux importants
-				$this->drawLieu();
-				break;
-			case "lieumythique":
-				// mise en place du fond
-				imagefilledrectangle($this->img, 0, 0, $this->size, $this->size, $this->colors['transparent']);
-				// dessin des lieux importants
-				$this->drawLieuMythiqueQuetes();
-				break;
-			case "lieustandard":
-				// mise en place du fond
-				imagefilledrectangle($this->img, 0, 0, $this->size, $this->size, $this->colors['transparent']);
-				// dessin des lieux importants
-				$this->drawLieuStandard();
-				break;
-			case "legende":
-				// mise en place du fond
-				imagefilledrectangle($this->img, 0, 0, $this->size, $this->size, $this->colors['transparent']);
-				// dessin des lieux importants
-				$this->drawLegend();
-				break;
-				
+		// si on n'utilise pas le cache alors on génère l'image
+		if (! $this->use_cache) {
+			switch($this->type) {
+				case "fond":
+					$time_start = microtime(true);
+					// mise en place du fond
+					imagefilledrectangle($this->img, 0, 0, $this->size, $this->size, $this->colors['background']);
+					// dessin de l'environnement
+					$this->drawTile();
+					// temps de génération
+					$this->addTimeUsed(microtime(true) - $time_start);
+					// ajout des infos de debug
+					if ($this->debug) {
+						$this->info();
+					}
+					break;
+				case "joueur":
+					// mise en place du fond
+					imagefilledrectangle($this->img, 0, 0, $this->size, $this->size, $this->colors['transparent']);
+					// dessin des joueurs
+					foreach ($this->players as $p) {
+						$this->drawPlayer($p);
+					}
+					break;
+				case "lieu":
+					// mise en place du fond
+					imagefilledrectangle($this->img, 0, 0, $this->size, $this->size, $this->colors['transparent']);
+					// dessin des lieux importants
+					$this->drawLieu();
+					break;
+				case "lieumythique":
+					// mise en place du fond
+					imagefilledrectangle($this->img, 0, 0, $this->size, $this->size, $this->colors['transparent']);
+					// dessin des lieux importants
+					$this->drawLieuMythiqueQuetes();
+					break;
+				case "lieustandard":
+					// mise en place du fond
+					imagefilledrectangle($this->img, 0, 0, $this->size, $this->size, $this->colors['transparent']);
+					// dessin des lieux importants
+					$this->drawLieuStandard();
+					break;
+				case "legende":
+					// mise en place du fond
+					imagefilledrectangle($this->img, 0, 0, $this->size, $this->size, $this->colors['transparent']);
+					// dessin des lieux importants
+					$this->drawLegend();
+					break;
+					
+			}
+			imagecolortransparent($this->img, $this->colors['transparent']);
+			imagepng($this->img, $file);
+			imagedestroy($this->img);
+			mysql_query("UPDATE user SET updated=false;");
 		}
-		imagecolortransparent($this->img, $this->colors['transparent']);
-		
 		// dessin de la grille
 		//$this->drawGrid();
 		
-		/*
-		imagefilledellipse($this->img,
-			($this->size/2),
-			($this->size/2),
-			$this->players_size, $this->players_size,
-			$this->colors['blue']);
-		*/
-		
-		
-		header ("Content-type: image/png");
-		imagepng($this->img);
-		imagedestroy($this->img);
-		
+		// on va chercher le fichier précédement créé
+		if (file_exists($file)) {
+			header('Content-Disposition: attachment; filename='.basename($file));
+			header('Content-type: image/png');
+			header('Content-Transfer-Encoding: binary');
+			header('Content-Length: ' . filesize($file));
+			ob_clean();
+			flush();
+			readfile($file);
+			exit;
+		}
 	}
 }
 

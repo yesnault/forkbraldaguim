@@ -50,7 +50,8 @@ function fetch_position($url) {
 Met à jour la db avec le braldhun concerné
 */
 function update_braldhun($braldhun) {
-	$query = sprintf("UPDATE user SET prenom='%s', nom='%s', x=%s, y=%s WHERE braldahim_id=%s;",
+	// on passe le flag 'updated' à true pour que la génération de la carte ait lieu
+	$query = sprintf("UPDATE user SET prenom='%s', nom='%s', x=%s, y=%s, updated=true WHERE braldahim_id=%s;",
 		mysql_real_escape_string($braldhun['prenom']),
 		mysql_real_escape_string($braldhun['nom']),
 		mysql_real_escape_string($braldhun['x']),
