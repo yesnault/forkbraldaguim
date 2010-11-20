@@ -117,7 +117,7 @@ class Carte {
 		if ($type=='legende') return;
 		
 		$this->getPlayers();
-		$this->setBarycentre();
+		$this->setOrigine();
 	}
 	
 	/*
