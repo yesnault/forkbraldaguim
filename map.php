@@ -126,10 +126,11 @@ class Carte {
 	On se base sur la présence de joueurs qui ont été mis à jour.
 	*/
 	private function needToUpdate() {
-		if ($this->debug) {
+		if ($this->debug || !file_exists("cache/{$this->type}.png")) {
 			$this->use_cache = false;
 			return;
 		}
+		/*
 		$query = "SELECT count(*) FROM user WHERE updated=true;";
 		$res = mysql_query($query);
 		$this->use_cache = false;
@@ -137,6 +138,24 @@ class Carte {
 			 $this->use_cache = ($row[0] == 0);
 		}
 		mysql_free_result($res);
+		*/
+		$query = sprintf("SELECT dirty FROM ressource WHERE type='%s';",
+			mysql_real_escape_string($this->type));
+		$res = mysql_query($query);
+		$this->use_cache = false;
+		if ($row = mysql_fetch_row($res)) {
+			 $this->use_cache = ($row[0] == 0);
+		}
+		mysql_free_result($res);
+	}
+
+	/*
+	Change la valeur du champ dirty dans la table ressource pour le type en cours
+	*/
+	private function updateRessource() {
+		$query = sprintf("UPDATE ressource SET dirty=false WHERE type='%s';",
+			mysql_real_escape_string($this->type));
+		mysql_query($query);
 	}
 	
 	private function createColors() {
@@ -225,18 +244,25 @@ class Carte {
 	Calcul les coordonnées du centre du repere de la carte
 	Calcul egalement l'echelle de la carte (min, max)
 	*/
-	private function setBarycentre() {
-		//on additionne les positions pour le calcul du barycentre
-		$tot_x = $tot_y = 0;
+	private function setOrigine() {
+		// On cherche le centre des joueurs : le max moins le min divisé par 2
+		$max_x = $min_x = null;
+		$max_y = $min_y = null;
 		foreach ($this->players as $p) {
-			$tot_x += $p->position->x;
-			$tot_y += $p->position->y;
+			if ($max_x == null) {
+				$max_x = $min_x = $p->position->x;
+				$max_y = $min_y = $p->position->y;
+			}
+			else {
+				$max_x = max($max_x, $p->position->x);
+				$min_x = min($min_x, $p->position->x);
+				$max_y = max($max_y, $p->position->y);
+				$min_y = min($min_y, $p->position->y);
+			}
 		}
+		$this->origine = new Point(($min_x+$max_x)/2, ($min_y+$max_y)/2);
 		
-		// on place le barycentre des joueurs comme origine
-		$this->origine = new Point($tot_x/count($this->players), $tot_y/count($this->players));
-		
-		// On cherche la position la plus éloignée du barycentre (sur x ou y) en valeur absolue
+		// On cherche la position la plus éloignée du centre (sur x ou y) en valeur absolue
 		// On cherche également le nom le plus long à afficher (pour prévoir de la marge)
 		$position_max = 1;
 		$nom_max = 0;
@@ -597,9 +623,11 @@ class Carte {
 					break;
 					
 			}
+			$this->updateRessource();
 			imagecolortransparent($this->img, $this->colors['transparent']);
 			imagepng($this->img, $file);
 			imagedestroy($this->img);
+			// FIXME : avoir un flag par image sinon pb !
 			mysql_query("UPDATE user SET updated=false;");
 		}
 		// dessin de la grille

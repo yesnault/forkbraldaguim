@@ -58,6 +58,8 @@ function update_braldhun($braldhun) {
 		mysql_real_escape_string($braldhun['y']),
 		mysql_real_escape_string($braldhun['idBraldun']));
 	mysql_query($query);
+	$query = "UPDATE ressource SET dirty=true;";
+	mysql_query($query);
 }
 
 /*
@@ -109,6 +111,7 @@ function fetch_vue($url) {
 	foreach ($content as $line) {
 		if (preg_match("/^ERREUR-/", $line) == 1) {
 			// erreur lors de l'appel du script (cf : http://sp.braldahim.com/)
+			echo "ERREUR:\n$line\n";
 			return;
 		}
 		$part = explode(';', trim($line));

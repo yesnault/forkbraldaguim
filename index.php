@@ -34,6 +34,13 @@ CREATE TABLE palissade(x MEDIUMINT not null, y MEDIUMINT not null, z MEDIUMINT, 
 CREATE TABLE route(x MEDIUMINT not null, y MEDIUMINT not null, z MEDIUMINT, id_route TEXT, type_route TEXT, INDEX (x), INDEX (y));
 CREATE TABLE bosquet(x MEDIUMINT not null, y MEDIUMINT not null, z MEDIUMINT, id_bosquet TEXT, nom_systeme_type_bosquet TEXT, INDEX (x), INDEX (y));
 
+CREATE TABLE ressource(type VARCHAR(255) PRIMARY KEY, dirty BOOLEAN);
+INSERT INTO ressource(type, dirty) VALUES('fond', false);
+INSERT INTO ressource(type, dirty) VALUES('joueur', false);
+INSERT INTO ressource(type, dirty) VALUES('lieu', false);
+INSERT INTO ressource(type, dirty) VALUES('lieumythique', false);
+INSERT INTO ressource(type, dirty) VALUES('lieustandard', false);
+INSERT INTO ressource(type, dirty) VALUES('legende', false);
 */
 
 class BraldahimApp {
