@@ -135,10 +135,12 @@ class Carte {
 		$res = mysql_query($query);
 		$this->use_cache = false;
 		if ($row = mysql_fetch_row($res)) {
-			 $this->use_cache = ($row[0] == 0);
+			$this->use_cache = ($row[0] == 0);
 		}
 		mysql_free_result($res);
+		return;
 		*/
+		
 		$query = sprintf("SELECT dirty FROM ressource WHERE type='%s';",
 			mysql_real_escape_string($this->type));
 		$res = mysql_query($query);
@@ -318,7 +320,7 @@ class Carte {
 			$this->players_size, $this->players_size,
 			$this->colors['player']);
 		
-		// dessin du point
+		// dessin du contour du point
 		imageellipse($this->img,
 			$pos->x, $pos->y,
 			$this->players_size, $this->players_size,
@@ -385,11 +387,11 @@ class Carte {
 		// afin de recuperer l'ensemble des points pour lesquels on a une info.
 		// C'est incoyablement plus rapide que de lancer une requête par point logique :
 		// il y a un facteur 100 (0.1s à 10s) !
-		$p_min = $this->pixelToPosition(new Point(0, 0));
-		$p_max = $this->pixelToPosition(new Point($this->size, $this->size));
+		$p_min = $this->pixelToPosition(new Point(0, $this->size)); // coin bas gauche (min X et min Y)
+		$p_max = $this->pixelToPosition(new Point($this->size, 0)); // coin haut droite (max X et max Y)
 		$tiles_list = $this->getTiles(
 			$p_min->x, $p_max->x,
-			$p_max->y, $p_min->y
+			$p_min->y, $p_max->y
 			);
 		foreach ($tiles_list as $name => $tile) {
 			list($x, $y) = explode(';', $name);
@@ -494,6 +496,12 @@ class Carte {
 				$pos->x, $pos->y,
 				$this->players_size, $this->players_size,
 				$this->colors['lieu_point']);
+			
+			// dessin du contour du point
+			imageellipse($this->img,
+				$pos->x, $pos->y,
+				$this->players_size, $this->players_size,
+				$this->colors['black']);
 			
 			// dessin du fond du nom
 			/*imagefilledrectangle($this->img,
@@ -635,8 +643,6 @@ class Carte {
 			imagecolortransparent($this->img, $this->colors['transparent']);
 			imagepng($this->img, $file);
 			imagedestroy($this->img);
-			// FIXME : avoir un flag par image sinon pb !
-			mysql_query("UPDATE user SET updated=false;");
 		}
 		// dessin de la grille
 		//$this->drawGrid();
