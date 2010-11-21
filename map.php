@@ -379,66 +379,74 @@ class Carte {
 		// Ensuite on intérroge la DB pour obtenir le type de tile à afficher.
 		// On boucle, en incrémentant du zoom. Cela dit comme c'est excessivement couteux
 		// on utilise un multiple du zoom (donc le dessin est moins précis)
-		$step = $this->zoom;
-		for ($x = 0; $x<$this->size; $x+=$step) {
-			for ($y = 0; $y<$this->size; $y+=$step) {
-				$p_physique = new Point($x, $y);
-				$p_logique = $this->pixelToPosition($p_physique);
-				$tile = $this->getTile($p_logique->x, $p_logique->y);
-				if ($tile == null) {
-					continue;
-				}
-				$color = '';
-				switch($tile['type']) {
-					case 'palissade':
-						$color = $this->colors['palissade'];
-						break;
-					case 'route':
-						$color = $this->colors[strtolower($tile['type_route'])];
-						break;
-					case 'environnement':
-						$color = $this->colors[strtolower($tile['nom_systeme_environnement'])];
-						break;
-					case 'bosquet':
-						$color = $this->colors[strtolower($tile['nom_systeme_type_bosquet'])];
-						break;
-					default:
-						$color = $this->colors['black'];
-				}
-				imagefilledrectangle($this->img,
-					$p_physique->x,
-					$p_physique->y,
-					$p_physique->x + $step,
-					$p_physique->y + $step,
-					$color);
+		
+		// On cherche les position minimun et maximum sur le repère "position",
+		// puis on interroge la base de données avec des "x between ... AND ..."
+		// afin de recuperer l'ensemble des points pour lesquels on a une info.
+		// C'est incoyablement plus rapide que de lancer une requête par point logique :
+		// il y a un facteur 100 (0.1s à 10s) !
+		$p_min = $this->pixelToPosition(new Point(0, 0));
+		$p_max = $this->pixelToPosition(new Point($this->size, $this->size));
+		$tiles_list = $this->getTiles(
+			$p_min->x, $p_max->x,
+			$p_max->y, $p_min->y
+			);
+		foreach ($tiles_list as $name => $tile) {
+			list($x, $y) = explode(';', $name);
+			$p_physique = $this->positionToPixel(new Point($x, $y));
+			$color = '';
+			switch($tile['type']) {
+				case 'palissade':
+					$color = $this->colors['palissade'];
+					break;
+				case 'route':
+					$color = $this->colors[strtolower($tile['type_route'])];
+					break;
+				case 'environnement':
+					$color = $this->colors[strtolower($tile['nom_systeme_environnement'])];
+					break;
+				case 'bosquet':
+					$color = $this->colors[strtolower($tile['nom_systeme_type_bosquet'])];
+					break;
+				default:
+					$color = $this->colors['black'];
 			}
+			imagefilledrectangle($this->img,
+				$p_physique->x,
+				$p_physique->y,
+				$p_physique->x + $this->zoom,
+				$p_physique->y + $this->zoom,
+				$color);
 		}
 	}
 	
 	/*
-	Retourne les détails correspondant à une case
+	Retourne les détails correspondant à l'ensemble des cases passées en paramètre.
 	*/
-	private function getTile($x, $y) {
-		$tile = null;
+	private function getTiles($x_min, $x_max, $y_min, $y_max) {
+		$tiles = array();;
 		// on va essayer toutes les tables dans un ordre précis
 		// et on s'arrête dès qu'on a une info pertinente
 		$table_list = array('palissade', 'route', 'bosquet', 'environnement');
 		foreach ($table_list as $table) {
-			$query = "SELECT * FROM {$table} WHERE x='{$x}' AND y='{$y}';";
+			$query = "SELECT * FROM {$table} WHERE x BETWEEN {$x_min} AND {$x_max} AND y BETWEEN {$y_min} AND {$y_max}";
 			$res = mysql_query($query);
 			if (mysql_num_rows($res) == 0) {
 				mysql_free_result($res);
 				continue;
 			}
 			else {
-				$row = mysql_fetch_assoc($res);
-				$tile = $row;
-				$tile['type'] = $table;
+				while ($row = mysql_fetch_assoc($res)) {
+					$name = $row['x'].';'.$row['y'];
+					if (! array_key_exists($name, $tiles)) {
+						$tiles[$name] = $row;
+						$tiles[$name]['type'] = $table;
+					}
+				}
 				mysql_free_result($res);
-				break;
 			}
 		}
-		return $tile;
+		return $tiles;
 	}
 	
 	/*
