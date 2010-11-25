@@ -308,6 +308,9 @@ class Carte {
 	private function drawPlayer($p) {
 		// coordonnées du centre
 		$pos = $this->positionToPixel($p->position);
+		// pour faire pointer au centre de la case
+		$pos->x += +$this->zoom/2;
+		$pos->y += +$this->zoom/2;
 		
 		//$name = "{$p->prenom} {$p->nom} {$p->position}";
 		$name = "{$p->prenom} {$p->nom}";
@@ -487,7 +490,10 @@ class Carte {
 		while ($row = mysql_fetch_assoc($res)) {
 			// coordonnées du centre
 			$pos = $this->positionToPixel(new Point($row['x'], $row['y']));
-			
+			// pour faire pointer au centre de la case
+			$pos->x += +$this->zoom/2;
+			$pos->y += +$this->zoom/2;
+		
 			$name_width = imagefontwidth($this->font_size) * strlen($row['nom_lieu']);
 			$name_height = imagefontheight($this->font_size);
 			
