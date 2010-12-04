@@ -183,6 +183,10 @@ class Fetch {
 				$this->update_lieu($part);
 				continue;
 			}
+			if ($part[0] == 'BOSQUET') {
+				$this->update_bosquet($part);
+				continue;
+			}
 		}
 	}
 
