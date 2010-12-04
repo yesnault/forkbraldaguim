@@ -25,24 +25,6 @@ define('CSV_DIR', '/var/www/guim.info/www/braldahim/csv');
 define('FILE_bralduns_csv', CSV_DIR.'/bralduns.csv');
 define('COMMUNAUTE', 1); // l'id de la communauté est 1 (c'est un peu hard codé...)
 
-/*
-CREATE TABLE user(braldahim_id MEDIUMINT PRIMARY KEY, crypted_password VARCHAR(32), prenom TEXT, nom TEXT, x MEDIUMINT, y MEDIUMINT);
-CREATE TABLE carte (x MEDIUMINT not null, y MEDIUMINT not null, z MEDIUMINT, type TEXT, id TEXT, INDEX (x,y));
-CREATE TABLE lieu(x MEDIUMINT not null, y MEDIUMINT not null, z MEDIUMINT, id_lieu TEXT, nom_lieu TEXT, nom_type_lieu TEXT, nom_systeme_type_lieu TEXT, INDEX (x), INDEX (y));
-CREATE TABLE environnement(x MEDIUMINT not null, y MEDIUMINT not null, z MEDIUMINT, nom_systeme_environnement TEXT, nom_environnement TEXT, INDEX (x), INDEX (y));
-CREATE TABLE palissade(x MEDIUMINT not null, y MEDIUMINT not null, z MEDIUMINT, id_palissade TEXT, est_destructible_palissade TEXT, INDEX (x), INDEX (y));
-CREATE TABLE route(x MEDIUMINT not null, y MEDIUMINT not null, z MEDIUMINT, id_route TEXT, type_route TEXT, INDEX (x), INDEX (y));
-CREATE TABLE bosquet(x MEDIUMINT not null, y MEDIUMINT not null, z MEDIUMINT, id_bosquet TEXT, nom_systeme_type_bosquet TEXT, INDEX (x), INDEX (y));
-
-CREATE TABLE ressource(type VARCHAR(255) PRIMARY KEY, dirty BOOLEAN);
-INSERT INTO ressource(type, dirty) VALUES('fond', false);
-INSERT INTO ressource(type, dirty) VALUES('joueur', false);
-INSERT INTO ressource(type, dirty) VALUES('lieu', false);
-INSERT INTO ressource(type, dirty) VALUES('lieumythique', false);
-INSERT INTO ressource(type, dirty) VALUES('lieustandard', false);
-INSERT INTO ressource(type, dirty) VALUES('legende', false);
-*/
-
 class BraldahimApp {
 	private $html_title;
 	private $html_content;
@@ -123,9 +105,70 @@ class BraldahimApp {
 	}
 	
 	public function getHtmlScript() {
-		$str = "window.onload = function () {
-			initOnClick();
-		}";
+		$str =<<<EOF
+window.onload = function () {
+	initOnClick();
+}
+function initOnClick() {
+	document.getElementById("chk_fond").addEventListener('click', show_hide_layer, false);
+	document.getElementById("chk_joueur").addEventListener('click', show_hide_layer, false);
+	document.getElementById("chk_lieumythique").addEventListener('click', show_hide_layer, false);
+	document.getElementById("chk_lieustandard").addEventListener('click', show_hide_layer, false);
+	document.getElementById("chk_legende").addEventListener('click', show_hide_layer, false);
+	
+	document.getElementById("update_link").addEventListener('click', fetch_position, false);
+}
+function show_hide_layer() {
+	this.id.match(/[^_]+_(.*)/);
+	var id_layer = "map_"+RegExp.$1;
+	if (this.checked) {
+		document.getElementById(id_layer).style.visibility = 'visible';
+	}
+	else {
+		document.getElementById(id_layer).style.visibility = 'hidden';
+	}
+}
+function calcDistance() {
+	var dp1 = document.getElementById("dist_player1");
+	var dp2 = document.getElementById("dist_player2");
+	var dr = document.getElementById("dist_result");
+	var pos1 = dp1.options[dp1.selectedIndex].value.split(";");
+	var pos2 = dp2.options[dp2.selectedIndex].value.split(";");
+	var dx = pos2[0]-pos1[0];
+	var dy = pos2[1]-pos1[1];
+	var hyp = Math.floor(Math.sqrt(Math.pow(dx,2) + Math.pow(dy,2)));
+	dr.innerHTML = dx+" cases horizontales et "+dy+" cases verticales, soit un déplacement de "+hyp+" cases.";
+}
+function getHTTPObject() {
+	if (window.XMLHttpRequest) {
+		return new XMLHttpRequest();
+	}
+	else if (window.ActiveXObject) {
+		return new ActiveXObject("Microsoft.XMLHTTP");
+	}
+	else {
+		return null;
+	}
+}
+function fetch_position() {
+	httpObject = getHTTPObject();
+	if (httpObject == null) return;
+	httpObject.open("GET", "fetch.php", true);
+	httpObject.send(null);
+	httpObject.onreadystatechange = setOutput;
+	document.getElementById('update_link').src = 'img/Throbber-small.gif';
+}
+function setOutput() {
+	if (httpObject.readyState == 4) {
+		if (httpObject.responseText == 'ok') {
+			document.getElementById('update_link').src = 'img/Throbber-small.png';
+		}
+		else {
+			document.getElementById('update_link').src = 'img/error.png';
+		}
+	}
+}
+EOF;
 		return $this->html_script.$str;
 	}
 	
@@ -330,7 +373,20 @@ EOF;
 		$bralduns = $this->getBralduns();
 		$tab_bra = '';
 		foreach ($bralduns as $braldun) {
-			$tab_bra .= "<tr><td>{$braldun['prenom']} {$braldun['nom']}</td><td>{$braldun['x']}</td><td>{$braldun['y']}</td></tr>";
+			$update_link = '';
+			// si c'est le joueur connecté, on affiche un lien pour la maj
+			if ($_SESSION['bra_num'] == $braldun['braldahim_id']) {
+				$update_link =<<<EOF
+<img id="update_link" src="img/Throbber-small.png" />
+EOF;
+			}
+			$tab_bra .=<<<EOF
+<tr>
+	<td>{$braldun['prenom']} {$braldun['nom']} {$update_link}</td>
+	<td>{$braldun['x']}</td>
+	<td>{$braldun['y']}</td>
+</tr>
+EOF;
 		}
 		$distance = $this->distanceCalc();
 		$content =<<<EOF
@@ -369,27 +425,6 @@ EOF;
 </div>
 EOF;
 		$this->html_content = $content;
-		$this->html_script .=<<<EOF
-function show_hide_layer() {
-	this.id.match(/[^_]+_(.*)/);
-	var id_layer = "map_"+RegExp.$1;
-	if (this.checked) {
-		document.getElementById(id_layer).style.visibility = 'visible';
-	}
-	else {
-		document.getElementById(id_layer).style.visibility = 'hidden';
-	}
-}
-
-function initOnClick() {
-	document.getElementById("chk_fond").addEventListener('click', show_hide_layer, false);
-	document.getElementById("chk_joueur").addEventListener('click', show_hide_layer, false);
-	document.getElementById("chk_lieumythique").addEventListener('click', show_hide_layer, false);
-	document.getElementById("chk_lieustandard").addEventListener('click', show_hide_layer, false);
-	document.getElementById("chk_legende").addEventListener('click', show_hide_layer, false);
-}
-
-EOF;
 	}
 	
 	/*
@@ -398,19 +433,6 @@ EOF;
 	private function distanceCalc() {
 		$bralduns = $this->getBralduns();
 		$str = '';
-		$this->html_script .=<<<EOF
-function calcDistance() {
-	var dp1 = document.getElementById("dist_player1");
-	var dp2 = document.getElementById("dist_player2");
-	var dr = document.getElementById("dist_result");
-	var pos1 = dp1.options[dp1.selectedIndex].value.split(";");
-	var pos2 = dp2.options[dp2.selectedIndex].value.split(";");
-	var dx = pos2[0]-pos1[0];
-	var dy = pos2[1]-pos1[1];
-	var hyp = Math.floor(Math.sqrt(Math.pow(dx,2) + Math.pow(dy,2)));
-	dr.innerHTML = dx+" cases horizontales et "+dy+" cases verticales, soit un déplacement de "+hyp+" cases.";
-}
-EOF;
 		$str .= '<div id="dist">La distance s&eacute;parant ';
 		$str .= '<select id="dist_player1">';
 		foreach ($bralduns as $braldun) {

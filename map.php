@@ -126,11 +126,13 @@ class Carte {
 	On se base sur la présence de joueurs qui ont été mis à jour.
 	*/
 	private function needToUpdate() {
+		// debug ou existence des fichiers
 		if ($this->debug || !file_exists("cache/{$this->type}.png")) {
 			$this->use_cache = false;
 			return;
 		}
-		/*
+		
+		// des joueurs ont été mis à jour
 		$query = "SELECT count(*) FROM user WHERE updated=true;";
 		$res = mysql_query($query);
 		$this->use_cache = false;
@@ -138,9 +140,11 @@ class Carte {
 			$this->use_cache = ($row[0] == 0);
 		}
 		mysql_free_result($res);
-		return;
-		*/
+		if (! $this->use_cache) {
+			return;
+		}
 		
+		// des ressources ont été mise à jour
 		$query = sprintf("SELECT dirty FROM ressource WHERE type='%s';",
 			mysql_real_escape_string($this->type));
 		$res = mysql_query($query);
@@ -157,6 +161,15 @@ class Carte {
 	private function updateRessource() {
 		$query = sprintf("UPDATE ressource SET dirty=false WHERE type='%s';",
 			mysql_real_escape_string($this->type));
+		mysql_query($query);
+	}
+	
+	/*
+	Change la valeur du champ updated dans la table user
+	*/
+	private function updateUser($id) {
+		$query = sprintf("UPDATE user SET updated=false WHERE braldahim_id=%s;",
+			mysql_real_escape_string($id));
 		mysql_query($query);
 	}
 	
@@ -230,7 +243,6 @@ class Carte {
 	Recupere les joueurs de la communauté
 	*/
 	private function getPlayers() {
-		//$query = "SELECT braldahim_id, prenom, nom, x, y FROM user WHERE x IS NOT NULL AND y IS NOT NULL ORDER BY braldahim_id ASC LIMIT 1;";
 		$query = "SELECT braldahim_id, prenom, nom, x, y FROM user WHERE x IS NOT NULL AND y IS NOT NULL ORDER BY braldahim_id ASC;";
 		$res = mysql_query($query);
 		while ($row = mysql_fetch_assoc($res)) {
@@ -617,6 +629,7 @@ class Carte {
 					// dessin des joueurs
 					foreach ($this->players as $p) {
 						$this->drawPlayer($p);
+						$this->updateUser($p->id);
 					}
 					break;
 				case "lieu":

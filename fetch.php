@@ -48,6 +48,27 @@ class Fetch {
 		}
 	}
 	
+	public function fetchOnePlayer($id) {
+		$query = sprintf("SELECT braldahim_id, crypted_password FROM user WHERE braldahim_id=%s;",
+			mysql_real_escape_string($id));
+		$res = mysql_query($query);
+		
+		if (! $res) die('Impossible de lancer une requete');
+		
+		while ($row = mysql_fetch_assoc($res)) {
+			if (is_null($row['crypted_password']) || $row['crypted_password'] == 'NULL') {
+				continue;
+			}
+			$url = "http://sp.braldahim.com/scripts/profil/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['crypted_password']}&version=1";
+			//$url = "http://www.guim.info/braldahim/toto.php?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['crypted_password']}&version=1";
+			$this->fetch_position($url);
+			
+			$url = "http://sp.braldahim.com/scripts/vue/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['crypted_password']}&version=1";
+			//$url = "http://www.guim.info/braldahim/toto.php?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['crypted_password']}&version=1";
+			$this->fetch_vue($url);
+		}
+	}
+	
 	/*
 	MAJ de la position du joueur
 	Va chercher le contenu de l'url, le traite et le stock en db
@@ -178,7 +199,7 @@ class Fetch {
 		$res = mysql_query($query);
 		if (mysql_num_rows($res) == 0) {
 			// insert
-			$query = "INSERT INTO environnement(x, y, z, nom_systeme_environnement, nom_environnement) VALUES(%s, %s, %s, '%s', '%s');";
+			$query = "INSERT INTO environnement(x, y, z, nom_systeme_environnement, nom_environnement, last_update) VALUES(%s, %s, %s, '%s', '%s', current_date);";
 			$query = sprintf($query,
 				mysql_real_escape_string($line[1]),
 				mysql_real_escape_string($line[2]),
@@ -190,7 +211,7 @@ class Fetch {
 		}
 		else {
 			// update
-			$query = "UPDATE environnement SET nom_systeme_environnement='%s', nom_environnement='%s' ";
+			$query = "UPDATE environnement SET nom_systeme_environnement='%s', nom_environnement='%s', last_update=current_date ";
 			$query .= " WHERE x=%s AND y=%s AND z=%s ;";
 			$query = sprintf($query,
 				mysql_real_escape_string($line[4]),
@@ -215,7 +236,7 @@ class Fetch {
 		$res = mysql_query($query);
 		if (mysql_num_rows($res) == 0) {
 			// insert
-			$query = "INSERT INTO route(x, y, z, id_route, type_route) VALUES(%s, %s, %s, '%s', '%s');";
+			$query = "INSERT INTO route(x, y, z, id_route, type_route, last_update) VALUES(%s, %s, %s, '%s', '%s', current_date);";
 			$query = sprintf($query,
 				mysql_real_escape_string($line[1]),
 				mysql_real_escape_string($line[2]),
@@ -227,7 +248,7 @@ class Fetch {
 		}
 		else {
 			// update
-			$query = "UPDATE route SET id_route='%s', type_route='%s' ";
+			$query = "UPDATE route SET id_route='%s', type_route='%s', last_update=current_date ";
 			$query .= " WHERE x=%s AND y=%s AND z=%s ;";
 			$query = sprintf($query,
 				mysql_real_escape_string($line[4]),
@@ -252,7 +273,7 @@ class Fetch {
 		$res = mysql_query($query);
 		if (mysql_num_rows($res) == 0) {
 			// insert
-			$query = "INSERT INTO palissade(x, y, z, id_palissade, est_destructible_palissade) VALUES(%s, %s, %s, '%s', '%s');";
+			$query = "INSERT INTO palissade(x, y, z, id_palissade, est_destructible_palissade, last_update) VALUES(%s, %s, %s, '%s', '%s', current_date);";
 			$query = sprintf($query,
 				mysql_real_escape_string($line[1]),
 				mysql_real_escape_string($line[2]),
@@ -264,7 +285,7 @@ class Fetch {
 		}
 		else {
 			// update
-			$query = "UPDATE palissade SET id_palissade='%s', est_destructible_palissade='%s' ";
+			$query = "UPDATE palissade SET id_palissade='%s', est_destructible_palissade='%s', last_update=current_date ";
 			$query .= " WHERE x=%s AND y=%s AND z=%s ;";
 			$query = sprintf($query,
 				mysql_real_escape_string($line[4]),
@@ -289,7 +310,7 @@ class Fetch {
 		$res = mysql_query($query);
 		if (mysql_num_rows($res) == 0) {
 			// insert
-			$query = "INSERT INTO bosquet(x, y, z, id_bosquet, nom_systeme_type_bosquet) VALUES(%s, %s, %s, '%s', '%s');";
+			$query = "INSERT INTO bosquet(x, y, z, id_bosquet, nom_systeme_type_bosquet, last_update) VALUES(%s, %s, %s, '%s', '%s', current_date);";
 			$query = sprintf($query,
 				mysql_real_escape_string($line[1]),
 				mysql_real_escape_string($line[2]),
@@ -301,7 +322,7 @@ class Fetch {
 		}
 		else {
 			// update
-			$query = "UPDATE bosquet SET id_bosquet='%s', nom_systeme_type_bosquet='%s' ";
+			$query = "UPDATE bosquet SET id_bosquet='%s', nom_systeme_type_bosquet='%s', last_update=current_date ";
 			$query .= " WHERE x=%s AND y=%s AND z=%s ;";
 			$query = sprintf($query,
 				mysql_real_escape_string($line[4]),
@@ -326,7 +347,7 @@ class Fetch {
 		$res = mysql_query($query);
 		if (mysql_num_rows($res) == 0) {
 			// insert
-			$query = "INSERT INTO lieu(x, y, z, id_lieu, nom_lieu, nom_type_lieu, nom_systeme_type_lieu) VALUES(%s, %s, %s, '%s', '%s', '%s', '%s');";
+			$query = "INSERT INTO lieu(x, y, z, id_lieu, nom_lieu, nom_type_lieu, nom_systeme_type_lieu, last_update) VALUES(%s, %s, %s, '%s', '%s', '%s', '%s', current_date);";
 			$query = sprintf($query,
 				mysql_real_escape_string($line[1]),
 				mysql_real_escape_string($line[2]),
@@ -339,7 +360,7 @@ class Fetch {
 		}
 		else {
 			// update
-			$query = "UPDATE lieu SET nom_lieu='%s', nom_type_lieu='%s', nom_systeme_type_lieu='%s'";
+			$query = "UPDATE lieu SET nom_lieu='%s', nom_type_lieu='%s', nom_systeme_type_lieu='%s', last_update=current_date ";
 			$query .= "WHERE x=%s AND y=%s AND id_lieu='%s';";
 			$query = sprintf($query,
 				mysql_real_escape_string($line[5]),
@@ -353,7 +374,21 @@ class Fetch {
 	}
 }
 
-$fetch = new Fetch();
-$fetch->fetchAllPlayers();
-
+// si on est en mode CLI, alors on met à jour tous les joueurs
+if ( isset($_SERVER['argc']) && $_SERVER['argc'] >= 1 ) {
+	$fetch = new Fetch();
+	$fetch->fetchAllPlayers();
+}
+// si on est en mode WEB, on ne met à jour que le joueur demandé
+else {
+	session_start();
+	if (! isset($_SESSION['bra_num'])) {
+		echo "not connected";
+		exit;
+	}
+	/*$fetch = new Fetch();
+	$fetch->fetchOnePlayer($_SESSION['bra_num']);*/
+	sleep(1);
+	echo "ok";
+}
 ?>
