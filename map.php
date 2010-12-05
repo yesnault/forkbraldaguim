@@ -22,6 +22,8 @@ error_reporting(E_ALL);
 session_start();
 if (! isset($_SESSION['bra_num'])) exit();
 
+require_once("conf.php");
+
 $carte = null;
 if (isset($_REQUEST['type'])) {
 	$carte = new Carte(500, $_REQUEST['type']);
@@ -91,7 +93,7 @@ class Carte {
 	private $font_size;
 	private $use_cache;
 	
-	private $debug = false;
+	private $debug = true;
 	
 	/*
 	Construit une carte de la taille indiqué avec size (en pixel)
@@ -108,8 +110,8 @@ class Carte {
 		$this->img = imagecreatetruecolor($this->size, $this->size);
 		$this->createColors();
 		
-		$this->db = mysql_connect("localhost", "braldahim", "braldahim");
-		mysql_select_db("braldahim");
+		$this->db = mysql_connect(DB_HOST, DB_USER, DB_PASS);
+		mysql_select_db(DB_NAME);
 		
 		$this->needToUpdate();
 		
@@ -198,6 +200,8 @@ class Carte {
 			'eau'		=> array(20, 20, 255),
 			'profonde'	=> array(20, 20, 255),
 			'peuprofonde'	=> array(20, 20, 255),
+			// Couleur pour le type BOSQUET
+			'peupliers'	=> array(50, 200, 50),
 			// Couleur pour les lieux importants
 			'lieu_point'	=> array(255, 0, 0),
 			'lieu_str'	=> array(0, 0, 0),
@@ -560,6 +564,11 @@ class Carte {
 		imagefilledrectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['eau']);
 		imagerectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['black']);
 		imagestring($this->img, $this->font_size, $x+$h+10, $y, 'Eau', $this->colors['black']);
+		$y += 2*$h;
+		
+		imagefilledrectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['peupliers']);
+		imagerectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['black']);
+		imagestring($this->img, $this->font_size, $x+$h+10, $y, 'Bosquet', $this->colors['black']);
 		$y += 2*$h;
 		
 		imagefilledrectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['route']);

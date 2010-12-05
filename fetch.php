@@ -17,13 +17,15 @@
     along with braldaguim.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+require_once(dirname(__FILE__)."/conf.php");
+
 class Fetch {
 	
 	private $db;
 	
 	public function __construct() {
-		$this->db = mysql_connect("localhost", "braldahim", "braldahim") or die('Impossible de se connecter');
-		mysql_select_db("braldahim");
+		$this->db = mysql_connect(DB_HOST, DB_USER, DB_PASS) or die('Impossible de se connecter');
+		mysql_select_db(DB_NAME);
 		
 		//mysql_free_result($res);
 	}

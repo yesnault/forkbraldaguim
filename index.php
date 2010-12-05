@@ -21,9 +21,7 @@ error_reporting(E_ALL);
 
 session_start();
 
-define('CSV_DIR', '/var/www/guim.info/www/braldahim/csv');
-define('FILE_bralduns_csv', CSV_DIR.'/bralduns.csv');
-define('COMMUNAUTE', 1); // l'id de la communauté est 1 (c'est un peu hard codé...)
+require_once("conf.php");
 
 class BraldahimApp {
 	private $html_title;
@@ -36,8 +34,8 @@ class BraldahimApp {
 	public $logged; // est on connecté ?
 	
 	public function __construct() {
-		$this->db = mysql_connect("localhost", "braldahim", "braldahim");
-		mysql_select_db("braldahim");
+		$this->db = mysql_connect(DB_HOST, DB_USER, DB_PASS);
+		mysql_select_db(DB_NAME);
 		$this->html_title = 'Les premiers Brald&ucirc;ns';
 		$this->html_script = '';
 		$this->logged = isset($_SESSION['bra_num']);
