@@ -394,7 +394,7 @@ else {
 	}
 	/*$fetch = new Fetch();
 	$fetch->fetchOnePlayer($_SESSION['bra_num']);*/
-	sleep(1);
+	//sleep(1);
 	echo "ok";
 }
 ?>

@@ -108,12 +108,14 @@ window.onload = function () {
 	initOnClick();
 }
 function initOnClick() {
+	// show/hide map layer
 	document.getElementById("chk_fond").addEventListener('click', show_hide_layer, false);
 	document.getElementById("chk_joueur").addEventListener('click', show_hide_layer, false);
 	document.getElementById("chk_lieumythique").addEventListener('click', show_hide_layer, false);
 	document.getElementById("chk_lieustandard").addEventListener('click', show_hide_layer, false);
 	document.getElementById("chk_legende").addEventListener('click', show_hide_layer, false);
 	
+	// refresh player's position
 	document.getElementById("update_link").addEventListener('click', fetch_position, false);
 }
 function show_hide_layer() {
@@ -153,10 +155,10 @@ function fetch_position() {
 	if (httpObject == null) return;
 	httpObject.open("GET", "fetch.php", true);
 	httpObject.send(null);
-	httpObject.onreadystatechange = setOutput;
+	httpObject.onreadystatechange = updatePositionIcon;
 	document.getElementById('update_link').src = 'img/Throbber-small.gif';
 }
-function setOutput() {
+function updatePositionIcon() {
 	if (httpObject.readyState == 4) {
 		if (httpObject.responseText == 'ok') {
 			document.getElementById('update_link').src = 'img/Throbber-small.png';
@@ -369,6 +371,9 @@ EOF;
 			return;
 		}
 		$bralduns = $this->getBralduns();
+		$zoom = (array_key_exists('zoom', $_REQUEST) && is_numeric($_REQUEST['zoom'])) ? $_REQUEST['zoom'] : 1;
+		
+		// pour chaque braldun on affiche sa position
 		$tab_bra = '';
 		foreach ($bralduns as $braldun) {
 			$update_link = '';
@@ -386,7 +391,16 @@ EOF;
 </tr>
 EOF;
 		}
+		
+		// construction de la calculatrice de deplacement
 		$distance = $this->distanceCalc();
+		
+		// construction des formulaires de zoom/deplacement
+		// pb avec les valeurs -1 0 1
+		$controle = $this->getMoveForm("zoom=".($zoom-1), "zoom -");
+		$controle .= $this->getMoveForm("zoom=".($zoom+1), "zoom +");
+		
+		// construction de l'affichage de la page
 		$content =<<<EOF
 <div id="position">
 	<table id="tab_position" border="1">
@@ -396,11 +410,11 @@ EOF;
 	$distance
 </div>
 <div id="map_wrapper">
-	<div class="map_item" id="map_fond"><img src="map.php?type=fond" /></div>
-	<div class="map_item" id="map_lieumythique"><img src="map.php?type=lieumythique" /></div>
-	<div class="map_item" id="map_lieustandard"><img src="map.php?type=lieustandard" /></div>
-	<div class="map_item" id="map_joueur"><img src="map.php?type=joueur" /></div>
-	<div class="map_item" id="map_legende"><img src="map.php?type=legende" /></div>
+	<div class="map_item" id="map_fond"><img src="map.php?type=fond&zoom=$zoom" /></div>
+	<div class="map_item" id="map_lieumythique"><img src="map.php?type=lieumythique&zoom=$zoom" /></div>
+	<div class="map_item" id="map_lieustandard"><img src="map.php?type=lieustandard&zoom=$zoom" /></div>
+	<div class="map_item" id="map_joueur"><img src="map.php?type=joueur&zoom=$zoom" /></div>
+	<div class="map_item" id="map_legende"><img src="map.php?type=legende&zoom=$zoom" /></div>
 	
 	<div id="map_info">
 		<p>Affichage des informations :</p>
@@ -419,10 +433,24 @@ EOF;
 		
 		<br/><input type="checkbox" id="chk_legende" />
 		<label for="chk_legende">Legende</label>
+		<br />
+		$controle
 	</div>
 </div>
 EOF;
 		$this->html_content = $content;
+	}
+	
+	/*
+	Construit un formulaire pour le deplacement/zoom indiqué
+	$action : chaine à ajouter à l'attribut action du formulaire
+	$name : valeur du tag input
+	*/
+	private function getMoveForm($action, $name) {
+		$str =<<<EOF
+<a href="index.php?action=position&{$action}">{$name}</a><br />
+EOF;
+		return $str;
 	}
 	
 	/*
@@ -482,7 +510,10 @@ $app = new BraldahimApp();
 <meta http-equiv="Cache-Control" content="no-cache" />
 
 <style type="text/css">
-body {background-color: #003B00; color: #FFFFFF;}
+body {
+	background-color: #003B00;
+	color: #FFFFFF;
+}
 a:link, a:visited {color: #BBBBFF;}
 a:hover {color: #F0AE21;}
 #menu ul {
@@ -571,6 +602,5 @@ a:hover {color: #F0AE21;}
 		<?php  echo $app->getHtmlContent(); ?>
 	</div>
 </div>
-
 </body>
 </html>

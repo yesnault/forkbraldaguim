@@ -25,12 +25,16 @@ if (! isset($_SESSION['bra_num'])) exit();
 require_once("conf.php");
 
 $carte = null;
+$zoom = null;
+$type = null;
+
+if (isset($_REQUEST['zoom'])) {
+	$zoom = $_REQUEST['zoom'];
+}
 if (isset($_REQUEST['type'])) {
-	$carte = new Carte(500, $_REQUEST['type']);
+	$type = $_REQUEST['type'];
 }
-else {
-	$carte = new Carte(500);
-}
+$carte = new Carte(500, $type, $zoom);
 
 $carte->generateImage();
 
@@ -88,6 +92,7 @@ class Carte {
 	private $type;
 	private $origine;
 	private $zoom;
+	private $user_zoom;
 	private $img;
 	private $colors;
 	private $font_size;
@@ -99,13 +104,23 @@ class Carte {
 	Construit une carte de la taille indiqué avec size (en pixel)
 	et representant le sujet indiqué par type (fond, joueur, lieu)
 	*/
-	public function __construct($size, $type="fond") {
+	public function __construct($size, $type, $user_zoom) {
 		$this->size = $size;
-		$this->type = $type;
+		$this->type = ($type == null) ? "fond" : $type;
 		$this->players_size = 10; // un rond de 5 pixel de diametre
 		$this->zoom = 1;
 		$this->font_size = 2;
 		$this->players = array();
+		
+		if ($user_zoom == null || !is_numeric($user_zoom) || $user_zoom == 0) {
+			$this->user_zoom = 1;
+		}
+		elseif ($user_zoom < 0) {
+			$this->user_zoom = 1/($user_zoom*-1);
+		}
+		else {
+			$this->user_zoom = $user_zoom;
+		}
 		
 		$this->img = imagecreatetruecolor($this->size, $this->size);
 		$this->createColors();
@@ -302,6 +317,7 @@ class Carte {
 		$this->zoom = floor(($this->size - 1.5*$text) / ($position_max * 2));
 		// On prend une valeur entière de zoom pour tombre juste et pas se prendre la tete
 		// sur le tiling du fond de carte.
+		$this->zoom = $this->zoom * $this->user_zoom;
 	}
 	
 	private function info() {
