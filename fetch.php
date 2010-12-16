@@ -98,6 +98,7 @@ class Fetch {
 			if ($keys[$i] == 'y') {$braldhun['y'] = $value[$i];continue;}
 		}
 		$this->update_braldhun($braldhun);
+		file_put_contents('cache/'.$braldhun['idBraldun'].'-'.date("YmdHi"), $content);
 	}
 
 	/*
@@ -190,6 +191,7 @@ class Fetch {
 				continue;
 			}
 		}
+		file_put_contents('cache/'.date("YmdHi").'-'.uniqid(), $content);
 	}
 
 	/*

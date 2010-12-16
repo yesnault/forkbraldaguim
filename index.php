@@ -371,7 +371,7 @@ EOF;
 			return;
 		}
 		$bralduns = $this->getBralduns();
-		$zoom = (array_key_exists('zoom', $_REQUEST) && is_numeric($_REQUEST['zoom'])) ? $_REQUEST['zoom'] : 1;
+		$zoom = (array_key_exists('zoom', $_REQUEST) && is_numeric($_REQUEST['zoom'])) ? $_REQUEST['zoom'] : 0;
 		
 		// pour chaque braldun on affiche sa position
 		$tab_bra = '';
@@ -396,7 +396,6 @@ EOF;
 		$distance = $this->distanceCalc();
 		
 		// construction des formulaires de zoom/deplacement
-		// pb avec les valeurs -1 0 1
 		$controle = $this->getMoveForm("zoom=".($zoom-1), "zoom -");
 		$controle .= $this->getMoveForm("zoom=".($zoom+1), "zoom +");
 		
@@ -556,6 +555,7 @@ a:hover {color: #F0AE21;}
 
 #map_wrapper {
 	clear: both;
+	height: 520px;
 	position: relative;
 }
 .map_item {

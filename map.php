@@ -113,10 +113,7 @@ class Carte {
 		$this->players = array();
 		
 		if ($user_zoom == null || !is_numeric($user_zoom) || $user_zoom == 0) {
-			$this->user_zoom = 1;
-		}
-		elseif ($user_zoom < 0) {
-			$this->user_zoom = 1/($user_zoom*-1);
+			$this->user_zoom = 0;
 		}
 		else {
 			$this->user_zoom = $user_zoom;
@@ -133,6 +130,11 @@ class Carte {
 		// pour la légende, on n'a pas besoin d'aller plus loin
 		if ($type=='legende') return;
 		
+		// nettoyage du cache si on doit le regénérer
+		if (! $this->use_cache) {
+			$this->clean_cache();
+		}
+		
 		$this->getPlayers();
 		$this->setOrigine();
 	}
@@ -144,7 +146,7 @@ class Carte {
 	*/
 	private function needToUpdate() {
 		// debug ou existence des fichiers
-		if ($this->debug || !file_exists("cache/{$this->type}.png")) {
+		if ($this->debug || !file_exists("cache/{$this->type}.{$this->user_zoom}.png")) {
 			$this->use_cache = false;
 			return;
 		}
@@ -172,6 +174,13 @@ class Carte {
 		mysql_free_result($res);
 	}
 
+	/*
+	Parcourt le 'cache' et efface tous les fichiers png
+	*/
+	private function clean_cache() {
+		array_map("unlink", glob('cache/*.png'));
+	}
+	
 	/*
 	Change la valeur du champ dirty dans la table ressource pour le type en cours
 	*/
@@ -217,6 +226,7 @@ class Carte {
 			'peuprofonde'	=> array(20, 20, 255),
 			// Couleur pour le type BOSQUET
 			'peupliers'	=> array(50, 200, 50),
+			'hetres'	=> array(50, 200, 50),
 			// Couleur pour les lieux importants
 			'lieu_point'	=> array(255, 0, 0),
 			'lieu_str'	=> array(0, 0, 0),
@@ -317,7 +327,14 @@ class Carte {
 		$this->zoom = floor(($this->size - 1.5*$text) / ($position_max * 2));
 		// On prend une valeur entière de zoom pour tombre juste et pas se prendre la tete
 		// sur le tiling du fond de carte.
-		$this->zoom = $this->zoom * $this->user_zoom;
+		$tmp_z = $this->zoom + $this->user_zoom;
+		if ($tmp_z > 0) {
+			$this->zoom = $this->zoom + $this->user_zoom; // ajout du zoom choisi par l'utilisateur
+		}
+		else {
+			// pour des zoom inferieur a 1, on passe sur des puissance de 0.5 (on divise pas 2 a chaque fois)
+			$this->zoom = pow(0.5, 1-$tmp_z);
+		}
 	}
 	
 	private function info() {
@@ -420,13 +437,15 @@ class Carte {
 		// On cherche les position minimun et maximum sur le repère "position",
 		// puis on interroge la base de données avec des "x between ... AND ..."
 		// afin de recuperer l'ensemble des points pour lesquels on a une info.
-		// C'est incoyablement plus rapide que de lancer une requête par point logique :
+		// C'est incroyablement plus rapide que de lancer une requête par point logique :
 		// il y a un facteur 100 (0.1s à 10s) !
 		$p_min = $this->pixelToPosition(new Point(0, $this->size)); // coin bas gauche (min X et min Y)
 		$p_max = $this->pixelToPosition(new Point($this->size, 0)); // coin haut droite (max X et max Y)
 		$tiles_list = $this->getTiles(
-			$p_min->x, $p_max->x,
-			$p_min->y, $p_max->y
+			$p_min->x-1, // -1 pour avoir les tiles à cheval sur le bord gauche
+			$p_max->x,
+			$p_min->y,
+			$p_max->y+1 // +1 pour avoir les tiles à cheval sur le bord haut
 			);
 		foreach ($tiles_list as $name => $tile) {
 			list($x, $y) = explode(';', $name);
@@ -619,7 +638,7 @@ class Carte {
 			$this->size - $h,
 			10 + $w,
 			$this->size,
-			$this->colors['background']);
+			$this->colors['name_bg']);
 		
 		imagestring($this->img, $this->font_size,
 			10, $this->size - $h,
@@ -630,7 +649,7 @@ class Carte {
 	Génère l'image
 	*/
 	public function generateImage() {
-		$file = "cache/{$this->type}.png";
+		$file = "cache/{$this->type}.{$this->user_zoom}.png";
 		
 		// si on n'utilise pas le cache alors on génère l'image
 		if (! $this->use_cache) {
