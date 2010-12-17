@@ -371,7 +371,12 @@ EOF;
 			return;
 		}
 		$bralduns = $this->getBralduns();
-		$zoom = (array_key_exists('zoom', $_REQUEST) && is_numeric($_REQUEST['zoom'])) ? $_REQUEST['zoom'] : 0;
+		// informations de positionnement
+		$zoom = (array_key_exists('zoom', $_REQUEST) && is_numeric($_REQUEST['zoom'])) ? $_REQUEST['zoom'] : 4;
+		$y = (array_key_exists('y', $_REQUEST) && is_numeric($_REQUEST['y'])) ? $_REQUEST['y'] : 0;
+		$x = (array_key_exists('x', $_REQUEST) && is_numeric($_REQUEST['x'])) ? $_REQUEST['x'] : 0;
+		
+		if ($zoom < 1 ) $zoom = 1;
 		
 		// pour chaque braldun on affiche sa position
 		$tab_bra = '';
@@ -396,24 +401,30 @@ EOF;
 		$distance = $this->distanceCalc();
 		
 		// construction des formulaires de zoom/deplacement
-		$controle = $this->getMoveForm("zoom=".($zoom-1), "zoom -");
-		$controle .= $this->getMoveForm("zoom=".($zoom+1), "zoom +");
+		$move_var = array(
+			'zoom' => $zoom,
+			'y' => $y,
+			'x' => $x
+			);
+		$move_delta = pow(2, $zoom+1); // le decallage est dependant du zoom
+		
+		$ctrl_zoom_p = $this->getMoveControle($move_var, 'zoom', $zoom-1, "zoom +");
+		$ctrl_zoom_m = $this->getMoveControle($move_var, 'zoom', $zoom+1, "zoom -");
+		$ctrl_haut = $this->getMoveControle($move_var, 'y', $y+$move_delta, "Haut");
+		$ctrl_bas = $this->getMoveControle($move_var, 'y', $y-$move_delta, "Bas");
+		$ctrl_gauche = $this->getMoveControle($move_var, 'x', $x-$move_delta, "Gauche");
+		$ctrl_droite = $this->getMoveControle($move_var, 'x', $x+$move_delta, "Droite");
+		
+		$url_append = "zoom=$zoom&y=$y&x=$x";
 		
 		// construction de l'affichage de la page
 		$content =<<<EOF
-<div id="position">
-	<table id="tab_position" border="1">
-	<tr><th>Brald&ucirc;ns</th><th>X</th><th>Y</th></tr>
-	$tab_bra
-	</table>
-	$distance
-</div>
 <div id="map_wrapper">
-	<div class="map_item" id="map_fond"><img src="map.php?type=fond&zoom=$zoom" /></div>
-	<div class="map_item" id="map_lieumythique"><img src="map.php?type=lieumythique&zoom=$zoom" /></div>
-	<div class="map_item" id="map_lieustandard"><img src="map.php?type=lieustandard&zoom=$zoom" /></div>
-	<div class="map_item" id="map_joueur"><img src="map.php?type=joueur&zoom=$zoom" /></div>
-	<div class="map_item" id="map_legende"><img src="map.php?type=legende&zoom=$zoom" /></div>
+	<div class="map_item" id="map_fond"><img src="map.php?type=fond&$url_append" /></div>
+	<div class="map_item" id="map_lieumythique"><img src="map.php?type=lieumythique&$url_append" /></div>
+	<div class="map_item" id="map_lieustandard"><img src="map.php?type=lieustandard&$url_append" /></div>
+	<div class="map_item" id="map_joueur"><img src="map.php?type=joueur&$url_append" /></div>
+	<div class="map_item" id="map_legende"><img src="map.php?type=legende&$url_append" /></div>
 	
 	<div id="map_info">
 		<p>Affichage des informations :</p>
@@ -433,8 +444,20 @@ EOF;
 		<br/><input type="checkbox" id="chk_legende" />
 		<label for="chk_legende">Legende</label>
 		<br />
-		$controle
+		<table>
+			<tr><td>$ctrl_zoom_m</td><td>$ctrl_zoom_p</td></tr>
+			<tr><td></td><td>$ctrl_haut</td><td></td></tr>
+			<tr><td>$ctrl_gauche</td><td></td><td>$ctrl_droite</td></tr>
+			<tr><td></td><td>$ctrl_bas</td><td></td></tr>
+		</table>
 	</div>
+</div>
+<div id="position">
+	<table id="tab_position" border="1">
+	<tr><th>Brald&ucirc;ns</th><th>X</th><th>Y</th></tr>
+	$tab_bra
+	</table>
+	$distance
 </div>
 EOF;
 		$this->html_content = $content;
@@ -442,12 +465,19 @@ EOF;
 	
 	/*
 	Construit un formulaire pour le deplacement/zoom indiqué
-	$action : chaine à ajouter à l'attribut action du formulaire
+	$move_var : tableau des valeur par defaut de chaque controle
+	$action : nom de la clé dans le tableau $move_var
+	$value : valeur à utiliser pour cette clé
 	$name : valeur du tag input
 	*/
-	private function getMoveForm($action, $name) {
+	private function getMoveControle($move_var, $action, $value, $name) {
+		$param = array();
+		foreach ($move_var as $k => $v) {
+			$param[] = ($k == $action) ? "{$k}={$value}" : "{$k}={$v}";
+		}
+		$param_str = implode($param, '&');
 		$str =<<<EOF
-<a href="index.php?action=position&{$action}">{$name}</a><br />
+<a href="index.php?action=position&{$param_str}">{$name}</a><br />
 EOF;
 		return $str;
 	}
@@ -539,6 +569,9 @@ a:hover {color: #F0AE21;}
 	text-align: center;
 }
 
+#position {
+	margin: 1em 0 0 0;
+}
 #dist {
 	float: left;
 	padding: 0 2em;

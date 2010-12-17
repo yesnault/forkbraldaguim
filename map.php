@@ -34,7 +34,13 @@ if (isset($_REQUEST['zoom'])) {
 if (isset($_REQUEST['type'])) {
 	$type = $_REQUEST['type'];
 }
-$carte = new Carte(500, $type, $zoom);
+if (isset($_REQUEST['x'])) {
+	$x = $_REQUEST['x'];
+}
+if (isset($_REQUEST['y'])) {
+	$y = $_REQUEST['y'];
+}
+$carte = new Carte(500, $type, $zoom, $x, $y);
 
 $carte->generateImage();
 
@@ -92,11 +98,13 @@ class Carte {
 	private $type;
 	private $origine;
 	private $zoom;
-	private $user_zoom;
+	private $user_x;
+	private $user_y;
 	private $img;
 	private $colors;
 	private $font_size;
 	private $use_cache;
+	private $filename;
 	
 	private $debug = true;
 	
@@ -104,19 +112,33 @@ class Carte {
 	Construit une carte de la taille indiqué avec size (en pixel)
 	et representant le sujet indiqué par type (fond, joueur, lieu)
 	*/
-	public function __construct($size, $type, $user_zoom) {
+	public function __construct($size, $type, $user_zoom, $user_x, $user_y) {
 		$this->size = $size;
 		$this->type = ($type == null) ? "fond" : $type;
 		$this->players_size = 10; // un rond de 5 pixel de diametre
-		$this->zoom = 1;
 		$this->font_size = 2;
 		$this->players = array();
 		
-		if ($user_zoom == null || !is_numeric($user_zoom) || $user_zoom == 0) {
-			$this->user_zoom = 0;
+		$this->zoom = 4;
+		if ($user_zoom != null && is_numeric($user_zoom) && 0 < $user_zoom && $user_zoom < 100) {
+			$this->zoom = floor($user_zoom);
+		}
+		// niveau de zoom => largeur des tiles
+		// 40 est la largeur des tiles dans le zoom le plus fort (1)
+		$this->tile_size = 40 / pow(2, $this->zoom-1);
+		
+		if ($user_x == null || !is_numeric($user_x) || $user_x == 0) {
+			$this->user_x = 0;
 		}
 		else {
-			$this->user_zoom = $user_zoom;
+			$this->user_x = $user_x;
+		}
+		
+		if ($user_y == null || !is_numeric($user_y) || $user_y == 0) {
+			$this->user_y = 0;
+		}
+		else {
+			$this->user_y = $user_y;
 		}
 		
 		$this->img = imagecreatetruecolor($this->size, $this->size);
@@ -124,6 +146,10 @@ class Carte {
 		
 		$this->db = mysql_connect(DB_HOST, DB_USER, DB_PASS);
 		mysql_select_db(DB_NAME);
+		mysql_set_charset('utf8', $this->db);
+		mysql_query("SET character_set_results = 'utf8', character_set_client = 'utf8', character_set_connection = 'utf8', character_set_database = 'utf8', character_set_server = 'utf8'");
+		
+		$this->filename = "cache/img/{$this->type}.{$this->zoom}.{$this->user_x}.{$this->user_y}.png";
 		
 		$this->needToUpdate();
 		
@@ -146,7 +172,7 @@ class Carte {
 	*/
 	private function needToUpdate() {
 		// debug ou existence des fichiers
-		if ($this->debug || !file_exists("cache/{$this->type}.{$this->user_zoom}.png")) {
+		if ($this->debug || !file_exists($this->filename)) {
 			$this->use_cache = false;
 			return;
 		}
@@ -178,7 +204,7 @@ class Carte {
 	Parcourt le 'cache' et efface tous les fichiers png
 	*/
 	private function clean_cache() {
-		array_map("unlink", glob('cache/*.png'));
+		array_map("unlink", glob('cache/img/*.png'));
 	}
 	
 	/*
@@ -251,8 +277,8 @@ class Carte {
 	*/
 	private function positionToPixel(Point $p) {
 		//retirer 0.5 pour etre en haut à gauche
-		$x = ($this->size/2) + ($p->x - $this->origine->x) * $this->zoom;
-		$y = ($this->size/2) - ($p->y - $this->origine->y) * $this->zoom;
+		$x = ($this->size/2) + ($p->x - $this->origine->x) * $this->tile_size;
+		$y = ($this->size/2) - ($p->y - $this->origine->y) * $this->tile_size;
 		return new Point($x, $y);
 	}
 	
@@ -262,8 +288,8 @@ class Carte {
 	*/
 	private function pixelToPosition(Point $p) {
 		// FIXME le "+1" permet de réaligner les joueur et les tiles...
-		$x = $this->origine->x + (($p->x - ($this->size/2)) / $this->zoom)+1;
-		$y = $this->origine->y + (($p->y - ($this->size/2)) / ($this->zoom * -1));
+		$x = $this->origine->x + (($p->x - ($this->size/2)) / $this->tile_size)+1;
+		$y = $this->origine->y + (($p->y - ($this->size/2)) / ($this->tile_size * -1));
 		return new Point(floor($x), floor($y));
 	}
 	
@@ -288,23 +314,14 @@ class Carte {
 	Calcul egalement l'echelle de la carte (min, max)
 	*/
 	private function setOrigine() {
-		// On cherche le centre des joueurs : le max moins le min divisé par 2
-		$max_x = $min_x = null;
-		$max_y = $min_y = null;
-		foreach ($this->players as $p) {
-			if ($max_x == null) {
-				$max_x = $min_x = $p->position->x;
-				$max_y = $min_y = $p->position->y;
-			}
-			else {
-				$max_x = max($max_x, $p->position->x);
-				$min_x = min($min_x, $p->position->x);
-				$max_y = max($max_y, $p->position->y);
-				$min_y = min($min_y, $p->position->y);
-			}
-		}
-		$this->origine = new Point(($min_x+$max_x)/2, ($min_y+$max_y)/2);
+		$this->origine = new Point(0, 0);
 		
+		// On décalle l'origine comme le souhaite l'utilisateur
+		$this->origine->x += $this->user_x;
+		$this->origine->y += $this->user_y;
+		
+		// Calcul du zoom pour afficher tous les joueurs en cas de valeur par defaut
+		/*
 		// On cherche la position la plus éloignée du centre (sur x ou y) en valeur absolue
 		// On cherche également le nom le plus long à afficher (pour prévoir de la marge)
 		$position_max = 1;
@@ -312,29 +329,7 @@ class Carte {
 		foreach ($this->players as $p) {
 			$position_max = max($position_max, $p->position->distanceMax($this->origine));
 			$nom_max = max($nom_max, strlen("{$p->prenom} {$p->nom}"));
-		}
-		
-		// Le zoom est égale au rapport entre la largeur en pixel de l'image
-		// et le nombre de case séparant le joueur le plus éloigné du barycentre.
-		// Plus exactement, on ne prend que la moitié de la distance la plus longue
-		// car le barycentre est au centre le l'image et l'image est un carré.
-		
-		// On enlève également 1.5 (ou 2) fois le nombre de caractère du nom le plus long
-		// (en pixel) pour etre certain de pouvoir afficher tous les noms qui toucheraient
-		// le bord de l'image.
-		
-		$text = imagefontwidth($this->font_size) * $nom_max;
-		$this->zoom = floor(($this->size - 1.5*$text) / ($position_max * 2));
-		// On prend une valeur entière de zoom pour tombre juste et pas se prendre la tete
-		// sur le tiling du fond de carte.
-		$tmp_z = $this->zoom + $this->user_zoom;
-		if ($tmp_z > 0) {
-			$this->zoom = $this->zoom + $this->user_zoom; // ajout du zoom choisi par l'utilisateur
-		}
-		else {
-			// pour des zoom inferieur a 1, on passe sur des puissance de 0.5 (on divise pas 2 a chaque fois)
-			$this->zoom = pow(0.5, 1-$tmp_z);
-		}
+		}*/
 	}
 	
 	private function info() {
@@ -358,8 +353,9 @@ class Carte {
 		// coordonnées du centre
 		$pos = $this->positionToPixel($p->position);
 		// pour faire pointer au centre de la case
-		$pos->x += +$this->zoom/2;
-		$pos->y += +$this->zoom/2;
+		//$pos->x += +$this->zoom/2;
+		$pos->x += +$this->tile_size/2;
+		$pos->y += +$this->tile_size/2;
 		
 		//$name = "{$p->prenom} {$p->nom} {$p->position}";
 		$name = "{$p->prenom} {$p->nom}";
@@ -470,8 +466,8 @@ class Carte {
 			imagefilledrectangle($this->img,
 				$p_physique->x,
 				$p_physique->y,
-				$p_physique->x + $this->zoom,
-				$p_physique->y + $this->zoom,
+				$p_physique->x + $this->tile_size,
+				$p_physique->y + $this->tile_size,
 				$color);
 		}
 	}
@@ -542,8 +538,8 @@ class Carte {
 			// coordonnées du centre
 			$pos = $this->positionToPixel(new Point($row['x'], $row['y']));
 			// pour faire pointer au centre de la case
-			$pos->x += +$this->zoom/2;
-			$pos->y += +$this->zoom/2;
+			$pos->x += +$this->tile_size/2;
+			$pos->y += +$this->tile_size/2;
 		
 			$name_width = imagefontwidth($this->font_size) * strlen($row['nom_lieu']);
 			$name_height = imagefontheight($this->font_size);
@@ -649,8 +645,6 @@ class Carte {
 	Génère l'image
 	*/
 	public function generateImage() {
-		$file = "cache/{$this->type}.{$this->user_zoom}.png";
-		
 		// si on n'utilise pas le cache alors on génère l'image
 		if (! $this->use_cache) {
 			switch($this->type) {
@@ -704,21 +698,21 @@ class Carte {
 			}
 			$this->updateRessource();
 			imagecolortransparent($this->img, $this->colors['transparent']);
-			imagepng($this->img, $file);
+			imagepng($this->img, $this->filename);
 			imagedestroy($this->img);
 		}
 		// dessin de la grille
 		//$this->drawGrid();
 		
 		// on va chercher le fichier précédement créé
-		if (file_exists($file)) {
-			header('Content-Disposition: attachment; filename='.basename($file));
+		if (file_exists($this->filename)) {
+			header('Content-Disposition: attachment; filename='.basename($this->filename));
 			header('Content-type: image/png');
 			header('Content-Transfer-Encoding: binary');
-			header('Content-Length: ' . filesize($file));
+			header('Content-Length: ' . filesize($this->filename));
 			ob_clean();
 			flush();
-			readfile($file);
+			readfile($this->filename);
 			exit;
 		}
 	}
