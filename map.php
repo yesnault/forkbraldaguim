@@ -106,7 +106,7 @@ class Carte {
 	private $use_cache;
 	private $filename;
 	
-	private $debug = true;
+	private $debug = false;
 	
 	/*
 	Construit une carte de la taille indiqué avec size (en pixel)
@@ -204,7 +204,7 @@ class Carte {
 	Parcourt le 'cache' et efface tous les fichiers png
 	*/
 	private function clean_cache() {
-		array_map("unlink", glob('cache/img/*.png'));
+		array_map("unlink", glob('cache/img/${$this->type}*.png'));
 	}
 	
 	/*

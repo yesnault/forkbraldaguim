@@ -65,7 +65,7 @@ class Fetch {
 			//$url = "http://www.guim.info/braldahim/toto.php?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['crypted_password']}&version=1";
 			$this->fetch_position($url);
 			
-			$url = "http://sp.braldahim.com/scripts/vue/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['crypted_password']}&version=1";
+			$url = "http://sp.braldahim.com/scripts/vue/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['crypted_password']}&version=2";
 			//$url = "http://www.guim.info/braldahim/toto.php?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['crypted_password']}&version=1";
 			$this->fetch_vue($url);
 		}
@@ -82,6 +82,18 @@ class Fetch {
 		// content[1] = entete
 		// content[2] = valeur
 		// en tete : idBraldun;prenom;nom;x;y;z;paRestant;DLA;DureeProchainTour;PvRestant;bmPVmax;bbdf;nivAgilite;nivForce;nivVigueur;nivSagesse;bmAgilite;bmForce;bmVigueur;bmSagesse;bmBddfAgilite;bmBddfForce;bmBddfVigueur;bmBddfSagesse;bmVue;regeneration;bmRegeneration;pxPerso;pxCommun;pi;niveau;poidsTransportable;poidsTransporte;armureNaturelle;armureEquipement;bmAttaque;bmDegat;bmDefense;nbKo;nbKill;nbKoBraldun;estEngage;estEngageProchainTour;estIntangible;nbPlaquagesSubis;nbPlaquagesEffectues 
+		/* idBraldun;prenom;nom;x;y;z;paRestant;DLA;DureeProchainTour;
+			dateDebutTour;dateFinTour;dateFinLatence;
+			dateDebutCumul;dureeCourantTour;dureeBmTour;
+			PvRestant;bmPVmax;bbdf;
+			nivAgilite;nivForce;nivVigueur;nivSagesse;
+			bmAgilite;bmForce;bmVigueur;bmSagesse;
+			bmBddfAgilite;bmBddfForce;bmBddfVigueur;bmBddfSagesse;
+			bmVue;regeneration;bmRegeneration;
+			pxPerso;pxCommun;pi;niveau;poidsTransportable;poidsTransporte;armureNaturelle;
+			armureEquipement;bmAttaque;bmDegat;bmDefense;nbKo;nbKill;nbKoBraldun;
+			estEngage;estEngageProchainTour;estIntangible;nbPlaquagesSubis;nbPlaquagesEffectues
+		*/
 		
 		if (preg_match("/^ERREUR-/", $content[0]) == 1) {
 			// erreur lors de l'appel du script (cf : http://sp.braldahim.com/)
@@ -191,7 +203,7 @@ class Fetch {
 				continue;
 			}
 		}
-		file_put_contents('cache/'.date("YmdHi").'-'.uniqid(), $content);
+		file_put_contents('cache/'.$braldhun['idBraldun'].'-'.date("YmdHi").'-'.uniqid(), $content);
 	}
 
 	/*
