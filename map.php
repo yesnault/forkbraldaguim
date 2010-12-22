@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 /*
     This file is part of braldaguim.
@@ -105,12 +105,16 @@ class Carte {
 	private $font_size;
 	private $use_cache;
 	private $filename;
+	private $p_min; // point min en coordonnées position
+	private $p_max; // point max en coordonnées position
 	
 	private $debug = false;
 	
 	/*
 	Construit une carte de la taille indiqué avec size (en pixel)
 	et representant le sujet indiqué par type (fond, joueur, lieu)
+	$user_zoom : valeur du zoom utilisateur
+	$user_x, $user_y : décalage demandé par l'utilisateur par rapport à l'origine
 	*/
 	public function __construct($size, $type, $user_zoom, $user_x, $user_y) {
 		$this->size = $size;
@@ -204,7 +208,7 @@ class Carte {
 	Parcourt le 'cache' et efface tous les fichiers png
 	*/
 	private function clean_cache() {
-		array_map("unlink", glob('cache/img/${$this->type}*.png'));
+		array_map("unlink", glob("cache/img/{$this->type}*.png"));
 	}
 	
 	/*
@@ -232,7 +236,7 @@ class Carte {
 			'blue'		=> array(0, 0, 255),
 			// couleurs générales
 			'name_bg'	=> array(255, 255, 255, 10),
-			'line'		=> array(255, 255, 255),
+			'grid'		=> array(255, 255, 255),
 			'background'	=> array(0, 59, 0),
 			'legendbg'	=> array(59, 159, 59),
 			'transparent'	=> array(10, 10, 10),
@@ -250,6 +254,9 @@ class Carte {
 			'eau'		=> array(20, 20, 255),
 			'profonde'	=> array(20, 20, 255),
 			'peuprofonde'	=> array(20, 20, 255),
+			'montagne'	=> array(200, 200, 200),
+			'marais'	=> array(110, 128, 60),
+			'gazon'	=> array(0, 200, 0),
 			// Couleur pour le type BOSQUET
 			'peupliers'	=> array(50, 200, 50),
 			'hetres'	=> array(50, 200, 50),
@@ -267,7 +274,6 @@ class Carte {
 				$this->colors[$k] = imagecolorallocatealpha($this->img, $v[0], $v[1], $v[2], $v[3]);
 			}
 		}
-		
 	}
 	
 	/*
@@ -293,6 +299,16 @@ class Carte {
 		return new Point(floor($x), floor($y));
 	}
 	
+	/*
+	Tronque les coordonnées d'un point en pixel
+	pour qu'il ne dépasse pas les dimensions de l'image
+	*/
+	private function truncatePoint($p) {
+		if ($p->x < 0) $p->x = 0;
+		if ($p->y < 0) $p->y = 0;
+		if ($p->x > $this->size) $p->x = $this->size;
+		if ($p->y > $this->size) $p->y = $this->size;
+	}
 	
 	/*
 	Recupere les joueurs de la communauté
@@ -309,6 +325,7 @@ class Carte {
 		}
 		mysql_free_result($res);
 	}
+	
 	/*
 	Calcul les coordonnées du centre du repere de la carte
 	Calcul egalement l'echelle de la carte (min, max)
@@ -320,6 +337,8 @@ class Carte {
 		$this->origine->x += $this->user_x;
 		$this->origine->y += $this->user_y;
 		
+		$this->p_min = $this->pixelToPosition(new Point(0, $this->size)); // coin bas gauche (min X et min Y)
+		$this->p_max = $this->pixelToPosition(new Point($this->size, 0)); // coin haut droite (max X et max Y)
 		// Calcul du zoom pour afficher tous les joueurs en cas de valeur par defaut
 		/*
 		// On cherche la position la plus éloignée du centre (sur x ou y) en valeur absolue
@@ -353,9 +372,8 @@ class Carte {
 		// coordonnées du centre
 		$pos = $this->positionToPixel($p->position);
 		// pour faire pointer au centre de la case
-		//$pos->x += +$this->zoom/2;
-		$pos->x += +$this->tile_size/2;
-		$pos->y += +$this->tile_size/2;
+		$pos->x += $this->tile_size/2;
+		$pos->y += $this->tile_size/2;
 		
 		//$name = "{$p->prenom} {$p->nom} {$p->position}";
 		$name = "{$p->prenom} {$p->nom}";
@@ -389,35 +407,39 @@ class Carte {
 			iconv("UTF8", "ISO-8859-1", $name), $this->colors['red']);
 	}
 	
-	
 	/*
 	Dessine la grille
 	*/
 	private function drawGrid() {
-		// On part du centre ($this->size/2), on enleve/ajoute 0.5 car le point est au milieu
-		// de la case et on veut le tour de la case.
-		// On ajout/retire $i pour boucler, et on met à l'echelle avec le zoom.
-		// => $i est le numéro de la case en partant du centre
-		// On boucle tant qu'on a pas atteind une bordure de l'image
-		$p_logique = new Point($this->origine->x -0.5, $this->origine->y-0.5);
-		$p_physique = $this->positionToPixel($p_logique);
-		do {
-			imageline($this->img, $p_physique->x, 0, $p_physique->x, $this->size, $this->colors['line']);
-			imageline($this->img, 0, $p_physique->y, $this->size, $p_physique->y, $this->colors['line']);
-			$p_logique = new Point($p_logique->x - 1*$this->zoom, $p_logique->y - 1*$this->zoom);
-			$p_physique = $this->positionToPixel($p_logique);
-		}
-		while($p_physique->x > 0 && $p_physique->y > 0);
+		// on affiche 2 items verticalement et horizontalement
+		$distance = floor($this->size / 3);
+		$pixel = new Point($distance, 0);
+		$position = $this->pixelToPosition($pixel);
+		imagestring($this->img, $this->font_size,
+			$pixel->x,
+			3,
+			$position->x, $this->colors['grid']);
 		
-		$p_logique = new Point($this->origine->x -0.5, $this->origine->y-0.5);
-		$p_physique = $this->positionToPixel($p_logique);
-		do {
-			imageline($this->img, $p_physique->x, 0, $p_physique->x, $this->size, $this->colors['line']);
-			imageline($this->img, 0, $p_physique->y, $this->size, $p_physique->y, $this->colors['line']);
-			$p_logique = new Point($p_logique->x + 1*$this->zoom, $p_logique->y + 1*$this->zoom);
-			$p_physique = $this->positionToPixel($p_logique);
-		}
-		while($p_physique->x < $this->size && $p_physique->y < $this->size);
+		$pixel = new Point($distance*2, 0);
+		$position = $this->pixelToPosition($pixel);
+		imagestring($this->img, $this->font_size,
+			$pixel->x,
+			3,
+			$position->x, $this->colors['grid']);
+		
+		$pixel = new Point(0, $distance);
+		$position = $this->pixelToPosition($pixel);
+		imagestring($this->img, $this->font_size,
+			3,
+			$pixel->y,
+			$position->y, $this->colors['grid']);
+		
+		$pixel = new Point(0, $distance*2);
+		$position = $this->pixelToPosition($pixel);
+		imagestring($this->img, $this->font_size,
+			3,
+			$pixel->y,
+			$position->y, $this->colors['grid']);
 	}
 	
 	/*
@@ -435,14 +457,8 @@ class Carte {
 		// afin de recuperer l'ensemble des points pour lesquels on a une info.
 		// C'est incroyablement plus rapide que de lancer une requête par point logique :
 		// il y a un facteur 100 (0.1s à 10s) !
-		$p_min = $this->pixelToPosition(new Point(0, $this->size)); // coin bas gauche (min X et min Y)
-		$p_max = $this->pixelToPosition(new Point($this->size, 0)); // coin haut droite (max X et max Y)
-		$tiles_list = $this->getTiles(
-			$p_min->x-1, // -1 pour avoir les tiles à cheval sur le bord gauche
-			$p_max->x,
-			$p_min->y,
-			$p_max->y+1 // +1 pour avoir les tiles à cheval sur le bord haut
-			);
+		
+		$tiles_list = $this->getTiles();
 		foreach ($tiles_list as $name => $tile) {
 			list($x, $y) = explode(';', $name);
 			$p_physique = $this->positionToPixel(new Point($x, $y));
@@ -475,7 +491,11 @@ class Carte {
 	/*
 	Retourne les détails correspondant à l'ensemble des cases passées en paramètre.
 	*/
-	private function getTiles($x_min, $x_max, $y_min, $y_max) {
+	private function getTiles() {
+		$x_min = $this->p_min->x-1; // -1 pour avoir les tiles à cheval sur le bord gauche
+		$x_max = $this->p_max->x;
+		$y_min = $this->p_min->y;
+		$y_max = $this->p_max->y+1; // +1 pour avoir les tiles à cheval sur le bord haut
 		$tiles = array();;
 		// on va essayer toutes les tables dans un ordre précis
 		// et on s'arrête dès qu'on a une info pertinente
@@ -499,6 +519,90 @@ class Carte {
 			}
 		}
 		return $tiles;
+	}
+	
+	/*
+	Dessine les zones issues du csv
+	*/
+	private function drawZone() {
+		$zones = $this->getZone();
+		foreach ($zones as $z) {
+			$p1 = $this->positionToPixel(new Point($z['x_min_zone'], $z['y_max_zone']));
+			$p2 = $this->positionToPixel(new Point($z['x_max_zone'], $z['y_min_zone']));
+			$this->truncatePoint(&$p1);
+			$this->truncatePoint(&$p2);
+			imagefilledrectangle($this->img,
+				$p1->x,
+				$p1->y,
+				$p2->x + $this->tile_size,
+				$p2->y + $this->tile_size,
+				$this->colors[$z['nom_systeme_environnement']]);
+		}
+	}
+	
+	/*
+	Retourne un tableau de toutes les zones
+	*/
+	private function getZone() {
+		$zones = array();
+		$query = "SELECT nom_systeme_environnement,
+			x_min_zone, y_min_zone,
+			x_max_zone, y_max_zone
+			FROM zone";
+		$res = mysql_query($query);
+		if (mysql_num_rows($res) == 0) {
+			mysql_free_result($res);
+		}
+		else {
+			while ($row = mysql_fetch_assoc($res)) {
+				$zones[] = $row;
+			}
+			mysql_free_result($res);
+		}
+		return $zones;
+	}
+	
+	/*
+	Dessine les villes issues du csv
+	*/
+	private function drawVille() {
+		$zones = array();
+		$query = "SELECT nom_ville,
+			x_min_ville, y_min_ville,
+			x_max_ville, y_max_ville
+			FROM ville";
+		$res = mysql_query($query);
+		if (mysql_num_rows($res) != 0) {
+			while ($row = mysql_fetch_assoc($res)) {
+				// on calcul les 4 points du polygone.
+				$p1 = $this->positionToPixel(new Point($row['x_min_ville'], $row['y_max_ville']));
+				$p2 = $this->positionToPixel(new Point($row['x_max_ville'], $row['y_max_ville']));
+				$p3 = $this->positionToPixel(new Point($row['x_max_ville'], $row['y_min_ville']));
+				$p4 = $this->positionToPixel(new Point($row['x_min_ville'], $row['y_min_ville']));
+				$this->truncatePoint(&$p1);
+				$this->truncatePoint(&$p2);
+				$this->truncatePoint(&$p3);
+				$this->truncatePoint(&$p4);
+				// on ne dessine pas la ville si elle n'est pas "dans le champ"
+				if ($p1->equals($p2) || $p2->equals($p3)) continue;
+				// dessin du contour de la ville
+				imagepolygon($this->img,
+					array(
+						$p1->x, $p1->y,
+						$p2->x + $this->tile_size, $p2->y,
+						$p3->x + $this->tile_size, $p3->y + $this->tile_size,
+						$p4->x, $p4->y + $this->tile_size,
+					),
+					4, $this->colors['red']);
+				$name_width = imagefontwidth($this->font_size) * strlen($row['nom_ville']);
+				// dessin du nom
+				imagestring($this->img, $this->font_size,
+					$p1->x + (($p2->x + $this->tile_size - $p1->x) / 2) - ($name_width / 2),
+					$p3->y + $this->tile_size,
+					iconv("UTF8", "ISO-8859-1", $row['nom_ville']), $this->colors['red']);
+			}
+		}
+		mysql_free_result($res);
 	}
 	
 	/*
@@ -538,8 +642,8 @@ class Carte {
 			// coordonnées du centre
 			$pos = $this->positionToPixel(new Point($row['x'], $row['y']));
 			// pour faire pointer au centre de la case
-			$pos->x += +$this->tile_size/2;
-			$pos->y += +$this->tile_size/2;
+			$pos->x += $this->tile_size/2;
+			$pos->y += $this->tile_size/2;
 		
 			$name_width = imagefontwidth($this->font_size) * strlen($row['nom_lieu']);
 			$name_height = imagefontheight($this->font_size);
@@ -630,14 +734,12 @@ class Carte {
 		$w = imagefontwidth($this->font_size) * strlen($str);
 		$h = imagefontheight($this->font_size);
 		imagefilledrectangle($this->img,
-			10,
-			$this->size - $h,
-			10 + $w,
-			$this->size,
+			0, $this->size - $h,
+			2 + $w, $this->size,
 			$this->colors['name_bg']);
 		
 		imagestring($this->img, $this->font_size,
-			10, $this->size - $h,
+			2, $this->size - $h,
 			iconv("UTF8", "ISO-8859-1", $str), $this->colors['red']);
 	}
 
@@ -652,8 +754,14 @@ class Carte {
 					$time_start = microtime(true);
 					// mise en place du fond
 					imagefilledrectangle($this->img, 0, 0, $this->size, $this->size, $this->colors['background']);
+					// dessin des zones géographiques
+					$this->drawZone();
 					// dessin de l'environnement
 					$this->drawTile();
+					// dessin des villes
+					$this->drawVille();
+					// dessin de la grille
+					$this->drawGrid();
 					// temps de génération
 					$this->addTimeUsed(microtime(true) - $time_start);
 					// ajout des infos de debug
@@ -701,8 +809,6 @@ class Carte {
 			imagepng($this->img, $this->filename);
 			imagedestroy($this->img);
 		}
-		// dessin de la grille
-		//$this->drawGrid();
 		
 		// on va chercher le fichier précédement créé
 		if (file_exists($this->filename)) {
@@ -710,6 +816,7 @@ class Carte {
 			header('Content-type: image/png');
 			header('Content-Transfer-Encoding: binary');
 			header('Content-Length: ' . filesize($this->filename));
+			//header('Cache-Control: public, max-age=60' );
 			ob_clean();
 			flush();
 			readfile($this->filename);

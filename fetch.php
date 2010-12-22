@@ -40,7 +40,7 @@ class Fetch {
 			if (is_null($row['crypted_password']) || $row['crypted_password'] == 'NULL') {
 				continue;
 			}
-			$url = "http://sp.braldahim.com/scripts/profil/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['crypted_password']}&version=1";
+			$url = "http://sp.braldahim.com/scripts/profil/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['crypted_password']}&version=2";
 			//$url = "http://www.guim.info/braldahim/toto.php?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['crypted_password']}&version=1";
 			$this->fetch_position($url);
 			

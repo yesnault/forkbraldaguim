@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 /*
     This file is part of braldaguim.
@@ -36,6 +36,8 @@ class BraldahimApp {
 	public function __construct() {
 		$this->db = mysql_connect(DB_HOST, DB_USER, DB_PASS);
 		mysql_select_db(DB_NAME);
+		mysql_set_charset('utf8', $this->db);
+		mysql_query("SET character_set_results = 'utf8', character_set_client = 'utf8', character_set_connection = 'utf8', character_set_database = 'utf8', character_set_server = 'utf8'");
 		$this->html_title = 'Les premiers Brald&ucirc;ns';
 		$this->html_script = '';
 		$this->logged = isset($_SESSION['bra_num']);
@@ -108,15 +110,25 @@ window.onload = function () {
 	initOnClick();
 }
 function initOnClick() {
-	// show/hide map layer
-	document.getElementById("chk_fond").addEventListener('click', show_hide_layer, false);
-	document.getElementById("chk_joueur").addEventListener('click', show_hide_layer, false);
-	document.getElementById("chk_lieumythique").addEventListener('click', show_hide_layer, false);
-	document.getElementById("chk_lieustandard").addEventListener('click', show_hide_layer, false);
-	document.getElementById("chk_legende").addEventListener('click', show_hide_layer, false);
+	if (! window.ActiveXObject) {
+		// show/hide map layer
+		document.getElementById("chk_fond").addEventListener('click', show_hide_layer, false);
+		document.getElementById("chk_joueur").addEventListener('click', show_hide_layer, false);
+		document.getElementById("chk_lieumythique").addEventListener('click', show_hide_layer, false);
+		document.getElementById("chk_lieustandard").addEventListener('click', show_hide_layer, false);
+		document.getElementById("chk_legende").addEventListener('click', show_hide_layer, false);
+		// refresh player's position
+		//document.getElementById("update_link").addEventListener('click', fetch_position, false);	
+	}
+	else {
+		document.getElementById("chk_fond").onclick = show_hide_layer;
+		document.getElementById("chk_joueur").onclick = show_hide_layer;
+		document.getElementById("chk_lieumythique").onclick = show_hide_layer;
+		document.getElementById("chk_lieustandard").onclick = show_hide_layer;
+		document.getElementById("chk_legende").onclick = show_hide_layer;
+		//document.getElementById("update_link").onclick = fetch_position;
+	}
 	
-	// refresh player's position
-	document.getElementById("update_link").addEventListener('click', fetch_position, false);
 }
 function show_hide_layer() {
 	this.id.match(/[^_]+_(.*)/);
@@ -371,28 +383,47 @@ EOF;
 			return;
 		}
 		$bralduns = $this->getBralduns();
+		$villes = $this->getVilles();
+		
 		// informations de positionnement
 		$zoom = (array_key_exists('zoom', $_REQUEST) && is_numeric($_REQUEST['zoom'])) ? $_REQUEST['zoom'] : 4;
+		if ($zoom < 1 ) $zoom = 1;
 		$y = (array_key_exists('y', $_REQUEST) && is_numeric($_REQUEST['y'])) ? $_REQUEST['y'] : 0;
 		$x = (array_key_exists('x', $_REQUEST) && is_numeric($_REQUEST['x'])) ? $_REQUEST['x'] : 0;
+		$url_append = "zoom=$zoom&y=$y&x=$x";
 		
-		if ($zoom < 1 ) $zoom = 1;
-		
-		// pour chaque braldun on affiche sa position
+		// pour chaque braldun on affiche :
+		// un lien pour centrer la carte sur sa position,
+		// son nom, sa position
 		$tab_bra = '';
 		foreach ($bralduns as $braldun) {
 			$update_link = '';
 			// si c'est le joueur connecté, on affiche un lien pour la maj
-			if ($_SESSION['bra_num'] == $braldun['braldahim_id']) {
+			/*if ($_SESSION['bra_num'] == $braldun['braldahim_id']) {
 				$update_link =<<<EOF
 <img id="update_link" src="img/Throbber-small.png" />
 EOF;
-			}
+			}*/
+			$user_pos = $this->getMoveControl($zoom, $braldun['x'], $braldun['y'], "X");
 			$tab_bra .=<<<EOF
 <tr>
-	<td>{$braldun['prenom']} {$braldun['nom']} {$update_link}</td>
+	<td>{$user_pos}	{$braldun['prenom']} {$braldun['nom']} {$update_link}</td>
 	<td>{$braldun['x']}</td>
 	<td>{$braldun['y']}</td>
+</tr>
+EOF;
+		}
+		
+		// pour chaque ville on affiche :
+		// un lien pour centrer la carte sur sa position,
+		// son nom
+		$tab_ville = '';
+		foreach ($villes as $v) {
+			$v_pos = $this->getMoveControl($zoom, $v['x'], $v['y'], "X");
+			$tab_ville .=<<<EOF
+<tr>
+	<td>{$v_pos} {$v['nom_ville']}</td>
+	<td>{$v['nom_region']}</td>
 </tr>
 EOF;
 		}
@@ -401,24 +432,18 @@ EOF;
 		$distance = $this->distanceCalc();
 		
 		// construction des formulaires de zoom/deplacement
-		$move_var = array(
-			'zoom' => $zoom,
-			'y' => $y,
-			'x' => $x
-			);
 		$move_delta = pow(2, $zoom+1); // le decallage est dependant du zoom
 		
-		$ctrl_zoom_p = $this->getMoveControle($move_var, 'zoom', $zoom-1, "zoom +");
-		$ctrl_zoom_m = $this->getMoveControle($move_var, 'zoom', $zoom+1, "zoom -");
-		$ctrl_haut = $this->getMoveControle($move_var, 'y', $y+$move_delta, "Haut");
-		$ctrl_bas = $this->getMoveControle($move_var, 'y', $y-$move_delta, "Bas");
-		$ctrl_gauche = $this->getMoveControle($move_var, 'x', $x-$move_delta, "Gauche");
-		$ctrl_droite = $this->getMoveControle($move_var, 'x', $x+$move_delta, "Droite");
-		
-		$url_append = "zoom=$zoom&y=$y&x=$x";
+		$ctrl_zoom_p = $this->getMoveControl($zoom-1, $x, $y, "zoom +");
+		$ctrl_zoom_m = $this->getMoveControl($zoom+1, $x, $y, "zoom -");
+		$ctrl_haut = $this->getMoveControl($zoom, $x, $y+$move_delta, "Haut");
+		$ctrl_bas = $this->getMoveControl($zoom, $x, $y-$move_delta, "Bas");
+		$ctrl_gauche = $this->getMoveControl($zoom, $x-$move_delta, $y, "Gauche");
+		$ctrl_droite = $this->getMoveControl($zoom, $x+$move_delta, $y, "Droite");
 		
 		// construction de l'affichage de la page
 		$content =<<<EOF
+
 <div id="map_wrapper">
 	<div class="map_item" id="map_fond"><img src="map.php?type=fond&$url_append" /></div>
 	<div class="map_item" id="map_lieumythique"><img src="map.php?type=lieumythique&$url_append" /></div>
@@ -453,9 +478,13 @@ EOF;
 	</div>
 </div>
 <div id="position">
-	<table id="tab_position" border="1">
+	<table class="tab_position" border="1">
 	<tr><th>Brald&ucirc;ns</th><th>X</th><th>Y</th></tr>
 	$tab_bra
+	</table>
+	<table class="tab_position" border="1">
+	<tr><th>Ville</th><th>R&eacute;gion</th></tr>
+	$tab_ville
 	</table>
 	$distance
 </div>
@@ -464,20 +493,14 @@ EOF;
 	}
 	
 	/*
-	Construit un formulaire pour le deplacement/zoom indiqué
-	$move_var : tableau des valeur par defaut de chaque controle
-	$action : nom de la clé dans le tableau $move_var
-	$value : valeur à utiliser pour cette clé
-	$name : valeur du tag input
+	Construit un lien pour le deplacement/zoom indiqué
+	$zoom : niveau de zoom
+	$x, $y : positionnement
+	$inner : contenu du lien à afficher
 	*/
-	private function getMoveControle($move_var, $action, $value, $name) {
-		$param = array();
-		foreach ($move_var as $k => $v) {
-			$param[] = ($k == $action) ? "{$k}={$value}" : "{$k}={$v}";
-		}
-		$param_str = implode($param, '&');
+	private function getMoveControl($zoom, $x, $y, $inner) {
 		$str =<<<EOF
-<a href="index.php?action=position&{$param_str}">{$name}</a><br />
+<a href="index.php?action=position&zoom={$zoom}&x={$x}&y={$y}">{$inner}</a>
 EOF;
 		return $str;
 	}
@@ -526,6 +549,32 @@ EOF;
 		
 		return $this->bralduns;
 	}
+
+	/*
+	Retourne un tableau contenant les villes
+	*/
+	private function getVilles() {
+		if (isset($this->villes)) {
+			return $this->villes;
+		}
+		$this->villes = array();
+		$query = "SELECT nom_ville, nom_region,
+			floor(x_min_ville + (x_max_ville - x_min_ville) / 2) as x,
+			floor(y_min_ville +(y_max_ville - y_min_ville) / 2) as y
+			FROM ville
+			ORDER BY nom_ville ASC;";
+		$res = mysql_query($query, $this->db);
+		while ($row = mysql_fetch_assoc($res)) {
+			$tmp = array();
+			foreach ($row as $k => $v) {
+				$tmp[$k] = $v;
+			}
+			$this->villes[] = $tmp;
+		}
+		mysql_free_result($res);
+		
+		return $this->villes;
+	}
 }
 
 $app = new BraldahimApp();
@@ -562,7 +611,7 @@ a:hover {color: #F0AE21;}
 	color: #F0AE21;
 }
 #main {
-	margin: 2em 2em 1em;
+	margin: 1em 2em;
 }
 #message {
 	background-color: #EF7E68;
@@ -576,12 +625,13 @@ a:hover {color: #F0AE21;}
 	float: left;
 	padding: 0 2em;
 }
-#tab_position {
+.tab_position {
 	float: left;
 	border-collapse: collapse;
 	border-color: #5D8231;
+	margin: 0 1em 1em 0;
 }
-#tab_position td, #tab_position th {
+.tab_position td, #tab_position th {
 	padding: .5em .3em;
 }
 

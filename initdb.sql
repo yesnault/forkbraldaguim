@@ -5,7 +5,7 @@ CREATE TABLE user(
 	nom TEXT,
 	x MEDIUMINT,
 	y MEDIUMINT
-);
+) CHARACTER SET utf8;
 
 CREATE TABLE carte (
 	x MEDIUMINT not null,
@@ -14,7 +14,7 @@ CREATE TABLE carte (
 	id TEXT,
 	last_update DATE,
 	INDEX (x,y)
-);
+) CHARACTER SET utf8;
 
 CREATE TABLE lieu(x MEDIUMINT not null,
 	y MEDIUMINT not null,
@@ -26,7 +26,7 @@ CREATE TABLE lieu(x MEDIUMINT not null,
 	last_update DATE,
 	INDEX (x),
 	INDEX (y)
-);
+) CHARACTER SET utf8;
 
 CREATE TABLE environnement(
 	x MEDIUMINT not null,
@@ -37,7 +37,7 @@ CREATE TABLE environnement(
 	last_update DATE,
 	INDEX (x),
 	INDEX (y)
-);
+) CHARACTER SET utf8;
 
 CREATE TABLE palissade(
 	x MEDIUMINT not null,
@@ -48,7 +48,7 @@ CREATE TABLE palissade(
 	last_update DATE,
 	INDEX (x),
 	INDEX (y)
-);
+) CHARACTER SET utf8;
 
 CREATE TABLE route(
 	x MEDIUMINT not null,
@@ -59,7 +59,7 @@ CREATE TABLE route(
 	last_update DATE,
 	INDEX (x),
 	INDEX (y)
-);
+) CHARACTER SET utf8;
 
 CREATE TABLE bosquet(
 	x MEDIUMINT not null,
@@ -70,12 +70,12 @@ CREATE TABLE bosquet(
 	last_update DATE,
 	INDEX (x),
 	INDEX (y)
-);
+) CHARACTER SET utf8;
 
 CREATE TABLE ressource(
 	type VARCHAR(255) PRIMARY KEY,
 	dirty BOOLEAN
-);
+) CHARACTER SET utf8;
 
 INSERT INTO ressource(type, dirty) VALUES('fond', false);
 INSERT INTO ressource(type, dirty) VALUES('joueur', false);
@@ -83,3 +83,30 @@ INSERT INTO ressource(type, dirty) VALUES('lieu', false);
 INSERT INTO ressource(type, dirty) VALUES('lieumythique', false);
 INSERT INTO ressource(type, dirty) VALUES('lieustandard', false);
 INSERT INTO ressource(type, dirty) VALUES('legende', false);
+
+CREATE TABLE zone(
+	id_zone MEDIUMINT not null,
+	id_fk_environnement_zone MEDIUMINT not null,
+	nom_systeme_environnement TEXT,
+	x_min_zone MEDIUMINT,
+	x_max_zone MEDIUMINT,
+	y_min_zone MEDIUMINT,
+	y_max_zone MEDIUMINT,
+	INDEX (x_min_zone),
+	INDEX (x_max_zone),
+	INDEX (y_min_zone),
+	INDEX (y_max_zone)
+) CHARACTER SET utf8;
+
+CREATE TABLE ville(
+	id_ville MEDIUMINT not null,
+	nom_ville TEXT,
+	est_capitale_ville TEXT,
+	x_min_ville MEDIUMINT,
+	y_min_ville MEDIUMINT,
+	x_max_ville MEDIUMINT,
+	y_max_ville MEDIUMINT,
+	id_region MEDIUMINT,
+	nom_region TEXT,
+	INDEX(id_ville)
+) CHARACTER SET utf8;
