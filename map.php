@@ -102,13 +102,14 @@ class Carte {
 	private $user_y;
 	private $img;
 	private $colors;
-	private $font_size;
+	private $font_size; // for gd font
+	private $ttfont_size; // for ttf font
 	private $use_cache;
 	private $filename;
 	private $p_min; // point min en coordonnées position
 	private $p_max; // point max en coordonnées position
 	
-	private $debug = false;
+	private $debug = true;
 	
 	/*
 	Construit une carte de la taille indiqué avec size (en pixel)
@@ -121,6 +122,7 @@ class Carte {
 		$this->type = ($type == null) ? "fond" : $type;
 		$this->players_size = 10; // un rond de 5 pixel de diametre
 		$this->font_size = 2;
+		$this->ttfont_size = 8;
 		$this->players = array();
 		
 		$this->zoom = 4;
@@ -235,11 +237,12 @@ class Carte {
 			'red'		=> array(255, 0, 0),
 			'blue'		=> array(0, 0, 255),
 			// couleurs générales
-			'name_bg'	=> array(255, 255, 255, 10),
+			'name_bg'	=> array(255, 255, 255, 60),
 			'grid'		=> array(255, 255, 255),
 			'background'	=> array(0, 59, 0),
 			'legendbg'	=> array(59, 159, 59),
 			'transparent'	=> array(10, 10, 10),
+			'transparent_alpha'	=> array(10, 10, 10, 127),
 			'player'	=> array(70, 220, 240),
 			
 			// Couleur pour le type ROUTE
@@ -369,16 +372,24 @@ class Carte {
 	Dessine un joueur : un point plus son nom
 	*/
 	private function drawPlayer($p) {
+		// Pour obtenir un fond transparent et des polices antialiasées
+		// il faut supprimer l'alphablending et activé la transparence du png
+		// avec imagesavealpha
+		imagesavealpha($this->img, true);
+		imagealphablending($this->img, false);
+		imagefill($this->img, 0, 0, $this->colors['transparent_alpha']);
+		
 		// coordonnées du centre
 		$pos = $this->positionToPixel($p->position);
 		// pour faire pointer au centre de la case
 		$pos->x += $this->tile_size/2;
 		$pos->y += $this->tile_size/2;
 		
-		//$name = "{$p->prenom} {$p->nom} {$p->position}";
+		// nom et bounding box
 		$name = "{$p->prenom} {$p->nom}";
-		$name_width = imagefontwidth($this->font_size) * strlen($name);
-		$name_height = imagefontheight($this->font_size);
+		$bbox = imagettfbbox($this->ttfont_size, 0, "./DejaVuSans.ttf", $name);
+		$name_width = $bbox[2] - $bbox[0];
+		$name_height = $bbox[5] - $bbox[3];
 		
 		// dessin du point
 		imagefilledellipse($this->img,
@@ -395,16 +406,16 @@ class Carte {
 		// dessin du fond du nom
 		imagefilledrectangle($this->img,
 			$pos->x - $name_width / 2,
-			$pos->y + $this->players_size / 2,
+			$pos->y - $name_height  + $this->players_size / 2,
 			$pos->x + $name_width / 2,
-			$pos->y + $this->players_size / 2 + $name_height,
+			$pos->y + $this->players_size / 2,
 			$this->colors['name_bg']);
 		
-		// dessin du nom
-		imagestring($this->img, $this->font_size,
+		// dessin du nom	
+		imagettftext($this->img, $this->ttfont_size, 0,
 			$pos->x - $name_width / 2,
-			$pos->y + $this->players_size / 2,
-			iconv("UTF8", "ISO-8859-1", $name), $this->colors['red']);
+			$pos->y - $name_height + $this->players_size / 2,
+			$this->colors['red'], "./DejaVuSans.ttf", $name);
 	}
 	
 	/*
@@ -594,12 +605,15 @@ class Carte {
 						$p4->x, $p4->y + $this->tile_size,
 					),
 					4, $this->colors['red']);
-				$name_width = imagefontwidth($this->font_size) * strlen($row['nom_ville']);
+				
+				$bbox = imagettfbbox($this->ttfont_size, 0, "./DejaVuSans.ttf", $row['nom_ville']);
+				$name_width = $bbox[2] - $bbox[0];
+				$name_height = $bbox[5] - $bbox[3];
 				// dessin du nom
-				imagestring($this->img, $this->font_size,
+				imagettftext($this->img, $this->ttfont_size, 0,
 					$p1->x + (($p2->x + $this->tile_size - $p1->x) / 2) - ($name_width / 2),
-					$p3->y + $this->tile_size,
-					iconv("UTF8", "ISO-8859-1", $row['nom_ville']), $this->colors['red']);
+					$p3->y - $name_height + $this->tile_size,
+					$this->colors['red'], "./DejaVuSans.ttf", $row['nom_ville']);
 			}
 		}
 		mysql_free_result($res);
@@ -624,6 +638,10 @@ class Carte {
 	On peut restreindre la liste en passant une clause where.
 	*/
 	private function drawLieu($where=null) {
+		imagesavealpha($this->img, true);
+		imagealphablending($this->img, false);
+		imagefill($this->img, 0, 0, $this->colors['transparent_alpha']);
+		
 		// On va chercher tous les lieux qui se trouvent
 		// entre les bornes maximales de la carte
 		$p_min = $this->pixelToPosition(new Point(0, $this->size)); // coin bas gauche (min X et min Y)
@@ -644,10 +662,11 @@ class Carte {
 			// pour faire pointer au centre de la case
 			$pos->x += $this->tile_size/2;
 			$pos->y += $this->tile_size/2;
-		
-			$name_width = imagefontwidth($this->font_size) * strlen($row['nom_lieu']);
-			$name_height = imagefontheight($this->font_size);
 			
+			$bbox = imagettfbbox($this->ttfont_size, 0, "./DejaVuSans.ttf", $row['nom_lieu']);
+			$name_width = $bbox[2] - $bbox[0];
+			$name_height = $bbox[5] - $bbox[3];
+		
 			// dessin du point
 			imagefilledellipse($this->img,
 				$pos->x, $pos->y,
@@ -663,16 +682,16 @@ class Carte {
 			// dessin du fond du nom
 			/*imagefilledrectangle($this->img,
 				$pos->x - $name_width / 2,
-				$pos->y,
+				$pos->y - $name_height  + $this->players_size / 2,
 				$pos->x + $name_width / 2,
-				$pos->y + $name_height,
+				$pos->y + $this->players_size / 2,
 				$this->colors['name_bg']);
 			*/
 			// dessin du nom
-			imagestring($this->img, $this->font_size,
+			imagettftext($this->img, $this->ttfont_size, 0,
 				$pos->x - $name_width / 2,
-				$pos->y,
-				iconv("UTF8", "ISO-8859-1", $row['nom_lieu']), $this->colors['lieu_str']);
+				$pos->y - $name_height + $this->players_size / 2,
+				$this->colors['lieu_str'], "./DejaVuSans.ttf", $row['nom_lieu']);
 		}
 		mysql_free_result($res);
 	}
@@ -768,10 +787,9 @@ class Carte {
 					if ($this->debug) {
 						$this->info();
 					}
+					imagecolortransparent($this->img, $this->colors['transparent']);
 					break;
 				case "joueur":
-					// mise en place du fond
-					imagefilledrectangle($this->img, 0, 0, $this->size, $this->size, $this->colors['transparent']);
 					// dessin des joueurs
 					foreach ($this->players as $p) {
 						$this->drawPlayer($p);
@@ -801,18 +819,19 @@ class Carte {
 					imagefilledrectangle($this->img, 0, 0, $this->size, $this->size, $this->colors['transparent']);
 					// dessin des lieux importants
 					$this->drawLegend();
+					imagecolortransparent($this->img, $this->colors['transparent']);
 					break;
 					
 			}
 			$this->updateRessource();
-			imagecolortransparent($this->img, $this->colors['transparent']);
+			
 			imagepng($this->img, $this->filename);
 			imagedestroy($this->img);
 		}
 		
 		// on va chercher le fichier précédement créé
 		if (file_exists($this->filename)) {
-			header('Content-Disposition: attachment; filename='.basename($this->filename));
+			if (! $this->debug) header('Content-Disposition: attachment; filename='.basename($this->filename));
 			header('Content-type: image/png');
 			header('Content-Transfer-Encoding: binary');
 			header('Content-Length: ' . filesize($this->filename));
