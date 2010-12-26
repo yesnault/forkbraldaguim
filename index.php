@@ -113,6 +113,7 @@ function initOnClick() {
 	if (! window.ActiveXObject) {
 		// show/hide map layer
 		document.getElementById("chk_fond").addEventListener('click', show_hide_layer, false);
+		document.getElementById("chk_brouillard").addEventListener('click', show_hide_layer, false);
 		document.getElementById("chk_joueur").addEventListener('click', show_hide_layer, false);
 		document.getElementById("chk_lieumythique").addEventListener('click', show_hide_layer, false);
 		document.getElementById("chk_lieustandard").addEventListener('click', show_hide_layer, false);
@@ -122,6 +123,7 @@ function initOnClick() {
 	}
 	else {
 		document.getElementById("chk_fond").onclick = show_hide_layer;
+		document.getElementById("chk_brouillard").onclick = show_hide_layer;
 		document.getElementById("chk_joueur").onclick = show_hide_layer;
 		document.getElementById("chk_lieumythique").onclick = show_hide_layer;
 		document.getElementById("chk_lieustandard").onclick = show_hide_layer;
@@ -446,6 +448,7 @@ EOF;
 
 <div id="map_wrapper">
 	<div class="map_item" id="map_fond"><img src="map.php?type=fond&$url_append" /></div>
+	<div class="map_item" id="map_brouillard"><img src="map.php?type=brouillard&$url_append" /></div>
 	<div class="map_item" id="map_lieumythique"><img src="map.php?type=lieumythique&$url_append" /></div>
 	<div class="map_item" id="map_lieustandard"><img src="map.php?type=lieustandard&$url_append" /></div>
 	<div class="map_item" id="map_joueur"><img src="map.php?type=joueur&$url_append" /></div>
@@ -456,6 +459,9 @@ EOF;
 		
 		<br/><input type="checkbox" id="chk_fond" checked="checked" />
 		<label for="chk_fond">Fond de carte</label>
+		
+		<br/><input type="checkbox" id="chk_brouillard" checked="checked" />
+		<label for="chk_brouillard">Brouillard</label>
 		
 		<br/><input type="checkbox" id="chk_joueur" checked="checked" />
 		<label for="chk_joueur">Membres</label>

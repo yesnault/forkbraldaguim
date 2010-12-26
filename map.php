@@ -237,7 +237,7 @@ class Carte {
 			'red'		=> array(255, 0, 0),
 			'blue'		=> array(0, 0, 255),
 			// couleurs générales
-			'name_bg'	=> array(255, 255, 255, 60),
+			'name_bg'	=> array(255, 255, 255, 40),
 			'grid'		=> array(255, 255, 255),
 			'background'	=> array(0, 59, 0),
 			'legendbg'	=> array(59, 159, 59),
@@ -272,6 +272,12 @@ class Carte {
 			// Couleur pour les lieux importants
 			'lieu_point'	=> array(255, 0, 0),
 			'lieu_str'	=> array(0, 0, 0),
+			// Couleur pour le brouillard
+			'fog_never'	=> array(128, 128, 128, 32),
+			'fog_hard'	=> array(128, 128, 128, 48),
+			'fog_medium'	=> array(128, 128, 128, 64),
+			'fog_light'	=> array(128, 128, 128, 80),
+			'fog_clear'	=> array(255, 255, 255, 127),
 		);
 		
 		$this->colors = array();
@@ -526,6 +532,7 @@ class Carte {
 			}
 			else {
 				while ($row = mysql_fetch_assoc($res)) {
+					// la clé du tableau tiles sera 'x;:y'
 					$name = $row['x'].';'.$row['y'];
 					if (! array_key_exists($name, $tiles)) {
 						$tiles[$name] = $row;
@@ -752,6 +759,55 @@ class Carte {
 	}
 	
 	/*
+	Assombrit les zones qui n'ont jamais été visitées ou bien qui n'ont pas
+	été visitées depsui longtemps
+	*/
+	private function drawBrouillard() {
+		date_default_timezone_set(date_default_timezone_get());
+		imagesavealpha($this->img, true);
+		imagealphablending($this->img, false);
+		imagefill($this->img, 0, 0, $this->colors['fog_never']);
+		
+		$now = time();
+		// configuration du brouillard en fonction du temps
+		$fog_hard = 30 * 86400;
+		$fog_medium = 10 * 86400;
+		$fog_light = 2 * 86400;
+		//$fog_never = 
+		
+		$tiles_list = $this->getTiles();
+		foreach ($tiles_list as $name => $tile) {
+			list($x, $y) = explode(';', $name);
+			$p_physique = $this->positionToPixel(new Point($x, $y));
+			
+			list($y, $m, $d) = explode('-', $tile['last_update']);
+			$tile_time = mktime(0, 0, 0, $m, $d, $y);
+			
+			$color = '';
+			// si l'enregistrement est plus vieux que :
+			if ($now - $tile_time > $fog_hard) {
+				$color = $this->colors['fog_hard'];
+			}
+			else if ($now - $tile_time > $fog_medium) {
+				$color = $this->colors['fog_medium'];
+			}
+			else if ($now - $tile_time > $fog_light) {
+				$color = $this->colors['fog_light'];
+			}
+			else {
+				$color = $this->colors['fog_clear'];
+			}
+			
+			imagefilledrectangle($this->img,
+				$p_physique->x,
+				$p_physique->y,
+				$p_physique->x + $this->tile_size,
+				$p_physique->y + $this->tile_size,
+				$color);
+		}
+	}
+	
+	/*
 	Affiche le temps utilisé pour générer l'image.
 	*/
 	private function addTimeUsed($time) {
@@ -794,6 +850,10 @@ class Carte {
 						$this->info();
 					}
 					imagecolortransparent($this->img, $this->colors['transparent']);
+					break;
+				case "brouillard":
+					// brouille les zones non visitées
+					$this->drawBrouillard();
 					break;
 				case "joueur":
 					// dessin des joueurs
