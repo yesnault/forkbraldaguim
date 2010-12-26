@@ -246,23 +246,29 @@ class Carte {
 			'player'	=> array(70, 220, 240),
 			
 			// Couleur pour le type ROUTE
-			'route'		=> array(128, 128, 128),
+			'route'		=> array(180, 180, 180),
+			'echoppe'	=> array(180, 180, 180),
+			'ville'		=> array(180, 180, 180),
 			'ruine'		=> array(80, 80, 80),
-			'balise'	=> array(100, 130, 100),
-			'echoppe'	=> array(128, 128, 128),
-			'ville'		=> array(128, 128, 128),
+			'balise'	=> array(150, 130, 120),
 			'palissade'	=> array(255, 185, 63),
 			// Couleur pour le type ENVIRONNEMENT
-			'plaine'	=> array(128, 255, 128),
-			'eau'		=> array(20, 20, 255),
-			'profonde'	=> array(20, 20, 255),
-			'peuprofonde'	=> array(20, 20, 255),
+			'plaine'	=> array(0, 153, 0),
+			'eau'		=> array(130, 200, 230),
+			'peuprofonde'	=> array(130, 200, 230),
+			'profonde'	=> array(100, 170, 200),
+			'mer'	=> array(0, 0, 139),
+			'lac'	=> array(0, 0, 139),
 			'montagne'	=> array(200, 200, 200),
-			'marais'	=> array(110, 128, 60),
-			'gazon'	=> array(0, 200, 0),
+			'mine'	=> array(200, 200, 200),
+			'caverne'	=> array(200, 200, 200),
+			'marais'	=> array(65, 105, 225),
+			'gazon'	=> array(0, 101, 0),
 			// Couleur pour le type BOSQUET
-			'peupliers'	=> array(50, 200, 50),
-			'hetres'	=> array(50, 200, 50),
+			'peupliers'	=> array(70, 220, 70),
+			'hetres'	=> array(70, 220, 70),
+			'chenes'	=> array(70, 220, 70),
+			'erables'	=> array(70, 220, 70),
 			// Couleur pour les lieux importants
 			'lieu_point'	=> array(255, 0, 0),
 			'lieu_str'	=> array(0, 0, 0),
@@ -613,7 +619,7 @@ class Carte {
 				imagettftext($this->img, $this->ttfont_size, 0,
 					$p1->x + (($p2->x + $this->tile_size - $p1->x) / 2) - ($name_width / 2),
 					$p3->y - $name_height + $this->tile_size,
-					$this->colors['red'], "./DejaVuSans.ttf", $row['nom_ville']);
+					$this->colors['black'], "./DejaVuSans.ttf", $row['nom_ville']);
 			}
 		}
 		mysql_free_result($res);
