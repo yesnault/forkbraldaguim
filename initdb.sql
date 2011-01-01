@@ -7,15 +7,6 @@ CREATE TABLE user(
 	y MEDIUMINT
 ) CHARACTER SET utf8;
 
-CREATE TABLE carte (
-	x MEDIUMINT not null,
-	y MEDIUMINT not null,
-	z MEDIUMINT, type TEXT,
-	id TEXT,
-	last_update DATE,
-	INDEX (x,y)
-) CHARACTER SET utf8;
-
 CREATE TABLE lieu(x MEDIUMINT not null,
 	y MEDIUMINT not null,
 	z MEDIUMINT,

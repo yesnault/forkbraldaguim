@@ -237,7 +237,7 @@ class Carte {
 			'red'		=> array(255, 0, 0),
 			'blue'		=> array(0, 0, 255),
 			// couleurs générales
-			'name_bg'	=> array(255, 255, 255, 40),
+			'name_bg'	=> array(255, 255, 255, 20),
 			'grid'		=> array(255, 255, 255),
 			'background'	=> array(0, 59, 0),
 			'legendbg'	=> array(59, 159, 59),

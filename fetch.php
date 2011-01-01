@@ -205,7 +205,32 @@ class Fetch {
 		}
 		file_put_contents('cache/'.date("YmdHi").'-'.uniqid(), $content);
 	}
-
+	
+	/*
+	Efface la case (x,y,z) dans toutes les tables sauf :
+	  * dans la table passée en paramètre
+	  * les entrées qui ont été mise à jour le jour même
+	Le but est d'effacer les entrées qui sont trop vieille et qui
+	n'apparaissent plus dans la vue.
+	*/
+	private function clean_case($x, $y, $z, $table)
+		$liste_table = array('environnement', 'route', 'palissade', 'bosquet', 'lieu');
+		foreach ($liste_table as $t) {
+			if ($t == $table) {
+				continue;
+			}
+			else {
+				$query = "DELETE FROM %s WHERE x=%s AND y=%s AND z=%s AND last_update != current_date;";
+				$query = sprintf($query,
+					$t,
+					mysql_real_escape_string($x),
+					mysql_real_escape_string($y),
+					mysql_real_escape_string($z));
+				mysql_query($query);
+			}
+		}
+	}
+	
 	/*
 	Insère ou met à jour un element de type environnement
 	ENVIRONNEMENT;x;y;z;nom_systeme_environnement;nom_environnement
@@ -241,6 +266,7 @@ class Fetch {
 				mysql_real_escape_string($line[3]));
 			mysql_query($query);
 		}
+		$this->clean_case($line[1], $line[2], $line[3], 'environnement');
 	}
 
 	/*
@@ -278,6 +304,7 @@ class Fetch {
 				mysql_real_escape_string($line[3]));
 			mysql_query($query);
 		}
+		$this->clean_case($line[1], $line[2], $line[3], 'route');
 	}
 
 	/*
@@ -315,6 +342,7 @@ class Fetch {
 				mysql_real_escape_string($line[3]));
 			mysql_query($query);
 		}
+		$this->clean_case($line[1], $line[2], $line[3], 'palissade');
 	}
 
 	/*
@@ -352,6 +380,7 @@ class Fetch {
 				mysql_real_escape_string($line[3]));
 			mysql_query($query);
 		}
+		$this->clean_case($line[1], $line[2], $line[3], 'bosquet');
 	}
 
 	/*
@@ -391,6 +420,7 @@ class Fetch {
 				mysql_real_escape_string($line[4]));
 			mysql_query($query);
 		}
+		$this->clean_case($line[1], $line[2], $line[3], 'lieu');
 	}
 }
 
