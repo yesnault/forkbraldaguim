@@ -26,6 +26,8 @@ class Fetch {
 	public function __construct() {
 		$this->db = mysql_connect(DB_HOST, DB_USER, DB_PASS) or die('Impossible de se connecter');
 		mysql_select_db(DB_NAME);
+		mysql_set_charset('utf8', $this->db);
+		mysql_query("SET character_set_results = 'utf8', character_set_client = 'utf8', character_set_connection = 'utf8', character_set_database = 'utf8', character_set_server = 'utf8'");
 		
 		//mysql_free_result($res);
 	}
@@ -213,7 +215,7 @@ class Fetch {
 	Le but est d'effacer les entrées qui sont trop vieille et qui
 	n'apparaissent plus dans la vue.
 	*/
-	private function clean_case($x, $y, $z, $table)
+	private function clean_case($x, $y, $z, $table) {
 		$liste_table = array('environnement', 'route', 'palissade', 'bosquet', 'lieu');
 		foreach ($liste_table as $t) {
 			if ($t == $table) {
