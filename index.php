@@ -599,9 +599,10 @@ EOF;
 	*/
 	private function bestiaire() {
 		// liste des monstres
-		$liste_monstres = $this->getListeMonstres();
+		$this->getListeMonstres();
+		$montres_count = count($this->getListeMonstres());
 		$liste = '';
-		foreach ($liste_monstres as $m) {
+		foreach ($this->monstres as $m) {
 			$uem = urlencode(utf8_decode($m));
 			$liste .= '<li><a href="index.php?action=bestiaire&m='.$uem.'">'.$m.'</a></li>';
 		}
@@ -631,6 +632,7 @@ EOF;
 		
 		$content = <<<EOF
 <div id="monstre_liste">
+	Le bestiaires comporte {$montres_count} montres :
 	<ul>{$liste}</ul>
 </div>
 
@@ -897,7 +899,9 @@ a:hover {color: #F0AE21;}
 
 #monstre_liste {
 	float: left;
-	padding: 0 2em 0 0;
+	padding: 0 1em 0 0;
+	margin: 0 1em 0 0;
+	border-right: 1px solid #5D8231;
 }
 #monstre_detail {
 	float: left;
