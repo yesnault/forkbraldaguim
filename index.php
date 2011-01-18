@@ -396,12 +396,12 @@ EOF;
 		$bralduns = $this->getBralduns();
 		$villes = $this->getVilles();
 		
-		// informations de positionnement
+		$zoom = $x = $y = 0;
+		
+		// extraction du zoom
 		$zoom = (array_key_exists('zoom', $_REQUEST) && is_numeric($_REQUEST['zoom'])) ? $_REQUEST['zoom'] : 4;
 		if ($zoom < 1 ) $zoom = 1;
-		$y = (array_key_exists('y', $_REQUEST) && is_numeric($_REQUEST['y'])) ? $_REQUEST['y'] : 0;
-		$x = (array_key_exists('x', $_REQUEST) && is_numeric($_REQUEST['x'])) ? $_REQUEST['x'] : 0;
-		$url_append = "zoom=$zoom&y=$y&x=$x";
+		
 		
 		// pour chaque braldun on affiche :
 		// un lien pour centrer la carte sur sa position,
@@ -410,20 +410,30 @@ EOF;
 		foreach ($bralduns as $braldun) {
 			$update_link = '';
 			// si c'est le joueur connecté, on affiche un lien pour la maj
-			/*if ($_SESSION['bra_num'] == $braldun['braldahim_id']) {
+			// et on retiens sa position pour le centrage par defaut
+			if ($_SESSION['bra_num'] == $braldun['braldahim_id']) {
+				/*
 				$update_link =<<<EOF
 <img id="update_link" src="img/Throbber-small.png" />
 EOF;
-			}*/
+				*/
+				$x = $braldun['x'];
+				$y = $braldun['y'];
+			}
 			$user_pos = $this->getMoveControl($zoom, $braldun['x'], $braldun['y'], "X");
 			$tab_bra .=<<<EOF
 <tr>
-	<td>{$user_pos}	{$braldun['prenom']} {$braldun['nom']} {$update_link}</td>
+	<td>{$user_pos}	<a href="http://jeu.braldahim.com/voir/braldun/?braldun={$braldun['braldahim_id']}&direct=profil" target="_blank">{$braldun['prenom']} {$braldun['nom']}</a> {$update_link}</td>
 	<td>{$braldun['x']}</td>
 	<td>{$braldun['y']}</td>
 </tr>
 EOF;
 		}
+		
+		// extraction de x et y et construction de l'url de positionnement
+		$y = (array_key_exists('y', $_REQUEST) && is_numeric($_REQUEST['y'])) ? $_REQUEST['y'] : $y;
+		$x = (array_key_exists('x', $_REQUEST) && is_numeric($_REQUEST['x'])) ? $_REQUEST['x'] : $x;
+		$url_append = "zoom=$zoom&y=$y&x=$x";
 		
 		// pour chaque ville on affiche :
 		// un lien pour centrer la carte sur sa position,
