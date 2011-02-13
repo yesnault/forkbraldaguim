@@ -1,6 +1,7 @@
 CREATE TABLE user(
 	braldahim_id MEDIUMINT PRIMARY KEY,
 	crypted_password VARCHAR(32),
+	restricted_password TEXT,
 	prenom TEXT,
 	nom TEXT,
 	x MEDIUMINT,

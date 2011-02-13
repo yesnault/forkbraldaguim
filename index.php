@@ -93,6 +93,18 @@ class BraldahimApp {
 				if (!$this->logged) break;
 				$this->bestiaireParse();
 				break;
+			case 'account':
+				if (!$this->logged) break;
+				$this->account();
+				break;
+			case 'account_mdp_submit':
+				if (!$this->logged) break;
+				$this->account_update_mdp();
+				break;
+			case 'account_mdpr_submit':
+				if (!$this->logged) break;
+				$this->account_update_mdpr();
+				break;
 			case 'home':
 			default:
 				$this->home();
@@ -649,7 +661,7 @@ EOF;
 <div id="monstre_detail">
 {$str_monstre}
 </div>
-
+<!--
 <div id="monstre_saisie">
 <p>Collez le r&eacute;sultat de votre identification ici : </p>
 	<form action="index.php" method="POST">
@@ -657,7 +669,7 @@ EOF;
 	<textarea id="desc" name="desc"></textarea><br />
 	<input type="submit" value="Enregistrer" />
 	</form>
-</div>
+</div>-->
 EOF;
 		$this->html_content = $content;
 	}
@@ -824,6 +836,61 @@ EOF;
 		mysql_free_result($res);
 		return $monstre;
 	}
+	
+	/*
+	Affiche les options de gestion de compte
+	*/
+	private function account() {
+		$content =<<<EOF
+<div class="mdp">
+	<p>Changer de mot de passe de connexion (en clair)&nbsp;:</p>
+	<form action="index.php" method="POST">
+	<input type="hidden" name="action" value="account_mdp_submit" />
+	<input type="password" name="mdp" value="" />
+	<input type="submit" value="Mise à jour" />
+	</form>
+</div>
+<div class="mdp">
+	<p>Changer de mot de passe restreint (crypt&eacute;)&nbsp;:</p>
+	<form action="index.php" method="POST">
+	<input type="hidden" name="action" value="account_mdpr_submit" />
+	<input type="password" name="mdpr" value="" />
+	<input type="submit" value="Mise à jour" />
+	</form>
+</div>
+EOF;
+		$this->html_content = $content;
+	}
+	
+	private function account_update_mdp() {
+		$mdp = ((isset($_REQUEST['mdp'])) ? $_REQUEST['mdp'] : null);
+		$mdp = trim($mdp);
+		
+		if (is_null($mdp) || empty($mdp)) {
+			$this->html_message = "Le mot de passe est vide.";
+			$this->account();
+			return;
+		}
+		$query = sprintf("UPDATE user SET crypted_password='%s' WHERE braldahim_id=%s;", mysql_real_escape_string(md5($mdp)), mysql_real_escape_string($_SESSION['bra_num']));
+		mysql_query($query, $this->db);
+		$this->html_message = "Mot de passe mis &agrave; jour.";
+		$this->account();
+	}
+	
+	private function account_update_mdpr() {
+		$mdp = ((isset($_REQUEST['mdpr'])) ? $_REQUEST['mdpr'] : null);
+		$mdp = trim($mdp);
+		
+		if (is_null($mdp) || empty($mdp)) {
+			$this->html_message = "Le mot de passe resteint est vide.";
+			$this->account();
+			return;
+		}
+		$query = sprintf("UPDATE user SET restricted_password='%s' WHERE braldahim_id=%s;", mysql_real_escape_string($mdp), mysql_real_escape_string($_SESSION['bra_num']));
+		mysql_query($query, $this->db);
+		$this->html_message = "Mot de passe restreint mis &agrave; jour. $query";
+		$this->account();
+	}
 }
 
 $app = new BraldahimApp();
@@ -927,6 +994,13 @@ a:hover {color: #F0AE21;}
 	overflow: auto;
 }
 
+.mdp {
+	float: left;
+	width: 300px;
+	border: 1px solid black;
+	padding: .5em 1em;
+	margin: 0 1em 0 0;
+}
 </style>
 
 <title><?php  echo $app->getHtmlTitle(); ?></title>
@@ -942,6 +1016,7 @@ a:hover {color: #F0AE21;}
 		<?php } ?>
 		<li><?php echo $app->getLoginLink(); ?></li>
 		<?php if ($app->logged) {?>
+		<li><a href="index.php?action=account">Gestion du compte</a></li>
 		<li><a href="index.php?action=position">Position</a></li>
 		<li><a href="index.php?action=bestiaire">Bestiaire</a></li>
 		<?php } ?>
