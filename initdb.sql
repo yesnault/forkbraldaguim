@@ -129,6 +129,7 @@ CREATE TABLE fiche_monstre(
 	armure_min MEDIUMINT,
 	armure_max MEDIUMINT,
 	distance MEDIUMINT,
+	last_update DATE,
 	INDEX(nom(10)),
 	PRIMARY KEY (id)
 ) CHARACTER SET utf8;

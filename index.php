@@ -661,7 +661,6 @@ EOF;
 <div id="monstre_detail">
 {$str_monstre}
 </div>
-<!--
 <div id="monstre_saisie">
 <p>Collez le r&eacute;sultat de votre identification ici : </p>
 	<form action="index.php" method="POST">
@@ -669,7 +668,7 @@ EOF;
 	<textarea id="desc" name="desc"></textarea><br />
 	<input type="submit" value="Enregistrer" />
 	</form>
-</div>-->
+</div>
 EOF;
 		$this->html_content = $content;
 	}
@@ -777,9 +776,9 @@ EOF;
 		if (in_array('nom, id', $query_keys)) {
 			$query = "INSERT INTO fiche_monstre(".
 				implode(',', $query_keys).
-				") VALUES(".
+				", last_update) VALUES(".
 				implode(',', $query_values).
-				");";
+				", current_date);";
 			mysql_query($query, $this->db);
 		}
 		// sinon erreur
