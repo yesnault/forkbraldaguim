@@ -233,16 +233,15 @@ EOF;
 	*/
 	private function getInscriptionForm() {
 		$this->html_content =<<<EOF
-<p>Pour vous inscrire, vous avez besoin de votre num&eacute;ro de brald&ucirc;n et 
-de votre mot de passe restreint.
-Vous pouvez obtenir votre mot de passe restreint à l'adresse suivante :
-<a target="_blank" href="http://sp.braldahim.com/md5/">http://sp.braldahim.com/md5/</a>.</p>
+<p>Pour vous inscrire, vous avez besoin de votre num&eacute;ro de brald&ucirc;n et de votre mot de passe.
+<!-- Vous pouvez obtenir votre mot de passe restreint à l'adresse suivante :
+<a target="_blank" href="http://sp.braldahim.com/md5/">http://sp.braldahim.com/md5/</a>. --></p>
 
 <form action="index.php?action=inscription_submit" method="POST">
-	<label for="bra_num">Num&eacute;ro du Brald&ucirc;n :</label>
+	<label for="bra_num">Num&eacute;ro du Brald&ucirc;n&nbsp;:</label>
 	<input id="bra_num" name="bra_num" type="text">
 	<br/>
-	<label for="bra_pw">Mot de passe <b><u>restreint</u></b> :</label>
+	<label for="bra_pw">Mot de passe&nbsp;:</label>
 	<input id="bra_pw" name="bra_pw" type="text">
 	<br/>
 	<input type="submit" value="Inscription">
@@ -315,7 +314,8 @@ EOF;
 			mysql_real_escape_string($bra_num),
 			mysql_real_escape_string($bra_pw));
 		mysql_query($query, $this->db);
-		$this->html_message = "Inscription r&eacute;alis&eacute;e avec succ&egrave;s.";
+		$this->html_message = "Inscription r&eacute;alis&eacute;e avec succ&egrave;s. Veuillez mettre &agrave; jour votre mot de passe <b><u>restreint</u></b>.";
+		$this->account();
 	}
 	
 	/*
@@ -323,7 +323,7 @@ EOF;
 	*/
 	private function getLoginForm() {
 		$this->html_content =<<<EOF
-<p>Pour vous connecter veuillez indiquer votre num&eacute;ro de brald&ucirc;n et votre mot de passe de braldahim.com.</p>
+<p>Pour vous connecter veuillez indiquer votre num&eacute;ro de brald&ucirc;n et votre mot de passe.</p>
 
 <form action="index.php?action=login" method="POST">
 	<label for="bra_num">Num&eacute;ro du Brald&ucirc;n :</label>
