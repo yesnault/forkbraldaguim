@@ -48,8 +48,8 @@ a:hover {color: #F0AE21;}
 	border-color: #5D8231;
 	margin: 0 1em 1em 0;
 }
-.tab_position td, #tab_position th {
-	padding: .5em .3em;
+.tab_position td, .tab_position th {
+	padding: .2em .2em;
 }
 
 
@@ -85,6 +85,16 @@ a:hover {color: #F0AE21;}
 	float: left;
 	padding: 0 2em 0 0;
 	max-width: 600px;
+}
+.monstre_tab_detail {
+	float: left;
+	border-collapse: collapse;
+	border-color: #5D8231;
+	margin: 0 1em 1em 0;
+}
+.monstre_tab_detail td, .monstre_tab_detail th {
+	padding: .2em .2em;
+	text-align: center;
 }
 #monstre_saisie {
 	float: left;

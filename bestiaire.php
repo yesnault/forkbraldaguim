@@ -77,21 +77,94 @@ class Bestiaire extends Application {
 		$m = trim($m);
 		$str_monstre = '';
 		if (! is_null($m) && ! empty($m)) {
-			$monstre = $this->getFicheMonstre($m);
+			$monstre0 = $this->getFicheMonstre($m, 0);
+			$monstre = $this->getFicheMonstre($m, 1);
+			$nb_fiche = $monstre0['count'] + $monstre['count'];
+			$nom = (isset($monstre['nom'])) ? $monstre['nom'] : $monstre0['nom'];
 			$str_monstre =<<<EOF
-Le monstre <b>{$monstre['nom']}</b> ({$monstre['count']} fiches) a les caractéristiques suivantes :
-<ul>
-<li>Niveau : entre {$monstre['niveau_min']} et {$monstre['niveau_max']}</li>
-<li>Point de vie max : entre {$monstre['pv_max_min']} et {$monstre['pv_max_max']}</li>
-<li>Vue : entre {$monstre['vue_min']} et {$monstre['vue_max']}</li>
-<li>Force : entre {$monstre['force_min']} et {$monstre['force_max']} {$monstre['force_unite']}</li>
-<li>Agilité : entre {$monstre['agilite_min']} et {$monstre['agilite_max']} {$monstre['agilite_unite']}</li>
-<li>Sagesse : entre {$monstre['sagesse_min']} et {$monstre['sagesse_max']} {$monstre['sagesse_unite']}</li>
-<li>Vigueur : entre {$monstre['vigueur_min']} et {$monstre['vigueur_max']} {$monstre['vigueur_unite']}</li>
-<li>Régénération : entre {$monstre['regeneration_min']} et {$monstre['regeneration_max']}</li>
-<li>Armure : entre {$monstre['armure_min']} et {$monstre['armure_max']}</li>
-<li>Vous avez effectué cette compétence à une distance de {$monstre['distance']} de la cible.</li>
-</ul>
+Le monstre <b>{$nom}</b> ({$nb_fiche} fiches) a les caractéristiques suivantes :
+<table class="monstre_tab_detail" border="1">
+<tr>
+	<th>&nbsp;</th>
+	<th colspan="2">Actuellement</th>
+	<th colspan="2">Avant le 14/02/2011</th>
+</tr>
+<tr>
+	<th>&nbsp;</th>
+	<th>Min</th>
+	<th>Max</th>
+	<th>Min</th>
+	<th>Max</th>
+</tr>
+<tr>
+	<td>Niveau</td>
+	<td>{$monstre['niveau_min']}</td>
+	<td>{$monstre['niveau_max']}</td>
+	<td>{$monstre0['niveau_min']}</td>
+	<td>{$monstre0['niveau_max']}</td>
+</tr>
+<tr>
+	<td>Point de vie max</td>
+	<td>{$monstre['pv_max_min']}</td>
+	<td>{$monstre['pv_max_max']}</td>
+	<td>{$monstre0['pv_max_min']}</td>
+	<td>{$monstre0['pv_max_max']}</td>
+</tr>
+<tr>
+	<td>Vue </td>
+	<td>{$monstre['vue_min']}</td>
+	<td>{$monstre['vue_max']}</td>
+	<td>{$monstre0['vue_min']}</td>
+	<td>{$monstre0['vue_max']}</td>
+</tr>
+<tr>
+	<td>Force</td>
+	<td>{$monstre['force_min']}</td>
+	<td>{$monstre['force_max']} {$monstre['force_unite']}</td>
+	<td>{$monstre0['force_min']}</td>
+	<td>{$monstre0['force_max']} {$monstre0['force_unite']}</td>
+</tr>
+<tr>
+	<td>Agilit&eacute;</td>
+	<td>{$monstre['agilite_min']}</td>
+	<td>{$monstre['agilite_max']} {$monstre['agilite_unite']}</td>
+	<td>{$monstre0['agilite_min']}</td>
+	<td>{$monstre0['agilite_max']} {$monstre0['agilite_unite']}</td>
+</tr>
+<tr>
+	<td>Sagesse</td>
+	<td>{$monstre['sagesse_min']}</td>
+	<td>{$monstre['sagesse_max']} {$monstre['sagesse_unite']}</td>
+	<td>{$monstre0['sagesse_min']}</td>
+	<td>{$monstre0['sagesse_max']} {$monstre0['sagesse_unite']}</td>
+</tr>
+<tr>
+	<td>Vigueur</td>
+	<td>{$monstre['vigueur_min']}</td>
+	<td>{$monstre['vigueur_max']} {$monstre['vigueur_unite']}</td>
+	<td>{$monstre0['vigueur_min']}</td>
+	<td>{$monstre0['vigueur_max']} {$monstre0['vigueur_unite']}</td>
+</tr>
+<tr>
+	<td>R&eacute;g&eacute;n&eacute;ration</td>
+	<td>{$monstre['regeneration_min']}</td>
+	<td>{$monstre['regeneration_max']}</td>
+	<td>{$monstre0['regeneration_min']}</td>
+	<td>{$monstre0['regeneration_max']}</td>
+</tr>
+<tr>
+	<td>Armure</td>
+	<td>{$monstre['armure_min']}</td>
+	<td>{$monstre['armure_max']}</td>
+	<td>{$monstre0['armure_min']}</td>
+	<td>{$monstre0['armure_max']}</td>
+</tr>
+<tr>
+	<td>Distance de la cible</td>
+	<td colspan="2">{$monstre['distance']}</td>
+	<td colspan="2">{$monstre0['distance']}</td>
+</tr>
+</table>
 EOF;
 		}
 		
@@ -253,8 +326,19 @@ EOF;
 	
 	/*
 	Retourne une fiche "type" pour un monstre
+	On indique la période d'enregistrement des fiches :
+	  * 0 : avant le 2011-02-14
+	  * 1 : apres le 2011-02-14
 	*/
-	private function getFicheMonstre($nom) {
+	private function getFicheMonstre($nom, $period=1) {
+		$time_cond = '1=1';
+		if ($period == 0) {
+			$time_cond = "last_update <= '2011-02-14'";
+		}
+		else if ($period == 1) {
+			$time_cond = "last_update > '2011-02-14'";
+		}
+
 		$query = "SELECT nom,
 			floor(AVG(niveau_min)) as niveau_min, floor(AVG(niveau_max)) as niveau_max,
 			floor(AVG(pv_max_min)) as pv_max_min, floor(AVG(pv_max_max)) as pv_max_max,
@@ -269,6 +353,7 @@ EOF;
 			count(id) as count
 			FROM fiche_monstre
 			WHERE nom='".mysql_real_escape_string(utf8_encode(urldecode($nom)))."'
+			AND $time_cond
 			GROUP BY nom";
 		$res = mysql_query($query, $this->db);
 		$monstre = array();
