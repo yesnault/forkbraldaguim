@@ -155,6 +155,7 @@ EOF;
 		// un lien pour centrer la carte sur sa position,
 		// son nom, sa position
 		$tab_bra = '';
+		$img = '<img src="img/centrer.png" />';
 		foreach ($bralduns as $braldun) {
 			$update_link = '';
 			// si c'est le joueur connecté, on affiche un lien pour la maj
@@ -168,7 +169,7 @@ EOF;
 				$x = $braldun['x'];
 				$y = $braldun['y'];
 			}
-			$user_pos = $this->getMoveControl($zoom, $braldun['x'], $braldun['y'], "X");
+			$user_pos = $this->getMoveControl($zoom, $braldun['x'], $braldun['y'], $img);
 			$tab_bra .=<<<EOF
 <tr>
 	<td>{$user_pos}	<a href="http://jeu.braldahim.com/voir/braldun/?braldun={$braldun['braldahim_id']}&direct=profil" target="_blank">{$braldun['prenom']} {$braldun['nom']}</a> {$update_link}</td>
@@ -188,7 +189,7 @@ EOF;
 		// son nom
 		$tab_ville = '';
 		foreach ($villes as $v) {
-			$v_pos = $this->getMoveControl($zoom, $v['x'], $v['y'], "X");
+			$v_pos = $this->getMoveControl($zoom, $v['x'], $v['y'], $img);
 			$tab_ville .=<<<EOF
 <tr>
 	<td>{$v_pos} {$v['nom_ville']}</td>

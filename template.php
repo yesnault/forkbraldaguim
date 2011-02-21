@@ -51,7 +51,9 @@ a:hover {color: #F0AE21;}
 .tab_position td, .tab_position th {
 	padding: .2em .2em;
 }
-
+.tab_position img {
+	border: none;
+}
 
 #map_wrapper {
 	clear: both;
