@@ -27,7 +27,6 @@ class Position extends Application {
 	
 	public function __construct() {
 		parent::__construct();
-		$this->actionParse();
 	}
 
 	/*

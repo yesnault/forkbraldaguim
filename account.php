@@ -27,7 +27,6 @@ class Account extends Application {
 	
 	public function __construct() {
 		parent::__construct();
-		$this->actionParse();
 	}
 
 	/*
@@ -35,11 +34,9 @@ class Account extends Application {
 	On appelle la méthode 'qui_va_bien' en fonction de l'action.
 	*/
 	public function actionParse() {
-		$this->action = 'home';
 		if (isset($_REQUEST['action'])) {
 			$this->action = $_REQUEST['action'];
 		}
-		
 		switch($this->action) {
 			case 'login_form':
 				if ($this->logged) break;
@@ -224,9 +221,11 @@ EOF;
 	
 		$query = sprintf("INSERT INTO user(braldahim_id, crypted_password) VALUES(%s, '%s');",
 			mysql_real_escape_string($bra_num),
-			mysql_real_escape_string($bra_pw));
+			mysql_real_escape_string(md5($bra_pw)));
 		mysql_query($query, $this->db);
 		$this->html_message = "Inscription r&eacute;alis&eacute;e avec succ&egrave;s. Veuillez mettre &agrave; jour votre mot de passe <b><u>restreint</u></b>.";
+		$_SESSION['bra_num'] = $bra_num;
+		$this->logged = true;
 		$this->account();
 	}
 	
@@ -239,7 +238,8 @@ EOF;
 <!-- Vous pouvez obtenir votre mot de passe restreint à l'adresse suivante :
 <a target="_blank" href="http://sp.braldahim.com/md5/">http://sp.braldahim.com/md5/</a>. --></p>
 
-<form action="account.php?action=inscription_submit" method="POST">
+<form action="account.php" method="POST">
+	<input type="hidden" name="action" value="inscription_submit" />
 	<label for="bra_num">Num&eacute;ro du Brald&ucirc;n&nbsp;:</label>
 	<input id="bra_num" name="bra_num" type="text">
 	<br/>
@@ -258,7 +258,7 @@ EOF;
 		$content =<<<EOF
 <div class="mdp">
 	<p>Changer de mot de passe de connexion (en clair)&nbsp;:</p>
-	<form action="index.php" method="POST">
+	<form action="account.php" method="POST">
 	<input type="hidden" name="action" value="account_mdp_submit" />
 	<input type="password" name="mdp" value="" />
 	<input type="submit" value="Mise à jour" />
@@ -266,7 +266,7 @@ EOF;
 </div>
 <div class="mdp">
 	<p>Changer de mot de passe restreint (crypt&eacute;)&nbsp;:</p>
-	<form action="index.php" method="POST">
+	<form action="account.php" method="POST">
 	<input type="hidden" name="action" value="account_mdpr_submit" />
 	<input type="password" name="mdpr" value="" />
 	<input type="submit" value="Mise à jour" />
