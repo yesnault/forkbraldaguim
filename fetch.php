@@ -99,6 +99,7 @@ class Fetch {
 		
 		if (preg_match("/^ERREUR-/", $content[0]) == 1) {
 			// erreur lors de l'appel du script (cf : http://sp.braldahim.com/)
+			echo "[".date("YmdHi")."] ".$content[0];
 			return;
 		}
 		$keys = explode(';', $content[1]);
@@ -140,7 +141,7 @@ class Fetch {
 	CADAVRE;x;y;z; id_monstre;nom_type_monstre;$c_taille
 	CHARRETTE;x;y;z; id_charrette;nom_type_materiel
 	ECHOPPE;x;y;z;id_echoppe;nom_echoppe;nom_systeme_metier;nom_metier;id_braldun
-	CHAMP;x;y;z;id_champ;id_braldun
+	--CHAMP;x;y;z;id_champ;id_braldun
 	CREVASSE;x;y;z;id_crevasse
 	ELEMENT;x;y;z;Peau;quantite_peau_element
 	ELEMENT;x;y;z;Cuir;quantite_cuir_element 
@@ -204,6 +205,10 @@ class Fetch {
 				$this->update_bosquet($part);
 				continue;
 			}
+			if ($part[0] == 'CHAMP') {
+				$this->update_champ($part);
+				continue;
+			}
 		}
 		file_put_contents('cache/'.date("YmdHi").'-'.uniqid(), $content);
 	}
@@ -216,7 +221,7 @@ class Fetch {
 	n'apparaissent plus dans la vue.
 	*/
 	private function clean_case($x, $y, $z, $table) {
-		$liste_table = array('environnement', 'route', 'palissade', 'bosquet', 'lieu');
+		$liste_table = array('environnement', 'route', 'palissade', 'bosquet', 'lieu', 'champ');
 		foreach ($liste_table as $t) {
 			if ($t == $table) {
 				continue;
@@ -348,7 +353,7 @@ class Fetch {
 	}
 
 	/*
-	Insère ou met à jour un element de type palissade
+	Insère ou met à jour un element de type bosquet
 	BOSQUET;x;y;z;id_bosquet;nom_systeme_type_bosquet
 	*/
 	private function update_bosquet($line) {
@@ -368,7 +373,6 @@ class Fetch {
 				mysql_real_escape_string($line[4]),
 				mysql_real_escape_string($line[5]));
 			mysql_query($query);
-			
 		}
 		else {
 			// update
@@ -383,6 +387,43 @@ class Fetch {
 			mysql_query($query);
 		}
 		$this->clean_case($line[1], $line[2], $line[3], 'bosquet');
+	}
+
+	/*
+	Insère ou met à jour un element de type champs
+	CHAMP;x;y;z;id_champ;id_braldun
+	*/
+	private function update_champ($line) {
+		$query = "SELECT x FROM champ WHERE x=%s AND y=%s AND z=%s;";
+		$query = sprintf($query,
+			mysql_real_escape_string($line[1]),
+			mysql_real_escape_string($line[2]),
+			mysql_real_escape_string($line[3]));
+		$res = mysql_query($query);
+		if (mysql_num_rows($res) == 0) {
+			// insert
+			$query = "INSERT INTO champ(x, y, z, id_champ, id_braldun, last_update) VALUES(%s, %s, %s, '%s', %s, current_date);";
+			$query = sprintf($query,
+				mysql_real_escape_string($line[1]),
+				mysql_real_escape_string($line[2]),
+				mysql_real_escape_string($line[3]),
+				mysql_real_escape_string($line[4]),
+				mysql_real_escape_string($line[5]));
+			mysql_query($query);
+		}
+		else {
+			// update
+			$query = "UPDATE champ SET id_bosquet='%s', id_braldun=%s, last_update=current_date ";
+			$query .= " WHERE x=%s AND y=%s AND z=%s ;";
+			$query = sprintf($query,
+				mysql_real_escape_string($line[4]),
+				mysql_real_escape_string($line[5]),
+				mysql_real_escape_string($line[1]),
+				mysql_real_escape_string($line[2]),
+				mysql_real_escape_string($line[3]));
+			mysql_query($query);
+		}
+		$this->clean_case($line[1], $line[2], $line[3], 'champ');
 	}
 
 	/*

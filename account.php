@@ -182,11 +182,11 @@ EOF;
 			$this->getInscriptionForm();
 			return;
 		}
-		if (strlen($bra_pw) != 32) {
+		/*if (strlen($bra_pw) != 32) {
 			$this->html_message = "Le champs 'Mot de passe restreint' doit avoir 32 caract&egrave;res.";
 			$this->getInscriptionForm();
 			return;
-		}
+		}*/
 		// teste si le braldun est membre de la communauté
 		// on charge le fichie csv en provenance de braldahim.com
 		// id_braldun;prenom_braldun;nom_braldun;niveau_braldun;sexe_braldun;nb_ko_braldun;nb_braldun_ko_braldun;nb_plaque_braldun;nb_braldun_plaquage_braldun;nb_monstre_kill_braldun;id_fk_mere_braldun;id_fk_pere_braldun;id_fk_communaute_braldun;id_fk_rang_communaute_braldun;url_blason_braldun;url_avatar_braldun;est_pnj_braldun
@@ -207,7 +207,7 @@ EOF;
 		}
 		unset($content);
 		if ($communaute_id != COMMUNAUTE) {
-			$this->html_message = "Le brald&ucirc;n {$bra_num} ne fait pas partie des Permiers Brald&ucirc;ns.".$communaute_id;
+			$this->html_message = "Le brald&ucirc;n {$bra_num} ne fait pas partie des Permiers Brald&ucirc;ns.";
 			$this->getInscriptionForm();
 			return;
 		}
@@ -239,12 +239,12 @@ EOF;
 <!-- Vous pouvez obtenir votre mot de passe restreint à l'adresse suivante :
 <a target="_blank" href="http://sp.braldahim.com/md5/">http://sp.braldahim.com/md5/</a>. --></p>
 
-<form action="index.php?action=inscription_submit" method="POST">
+<form action="account.php?action=inscription_submit" method="POST">
 	<label for="bra_num">Num&eacute;ro du Brald&ucirc;n&nbsp;:</label>
 	<input id="bra_num" name="bra_num" type="text">
 	<br/>
 	<label for="bra_pw">Mot de passe&nbsp;:</label>
-	<input id="bra_pw" name="bra_pw" type="text">
+	<input id="bra_pw" name="bra_pw" type="password">
 	<br/>
 	<input type="submit" value="Inscription">
 </form>
