@@ -133,3 +133,15 @@ CREATE TABLE fiche_monstre(
 	INDEX(nom(10)),
 	PRIMARY KEY (id)
 ) CHARACTER SET utf8;
+
+CREATE TABLE champ(
+	x MEDIUMINT not null,
+	y MEDIUMINT not null,
+	z MEDIUMINT,
+	id_champ TEXT,
+	id_braldun MEDIUMINT,
+	last_update DATE,
+	INDEX (x),
+	INDEX (y)
+) CHARACTER SET utf8;
+

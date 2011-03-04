@@ -269,6 +269,8 @@ class Carte {
 			'hetres'	=> array(70, 220, 70),
 			'chenes'	=> array(70, 220, 70),
 			'erables'	=> array(70, 220, 70),
+			// Couleur pour le type champ
+			'champ'		=> array(150, 100, 50),
 			// Couleur pour les lieux importants
 			'lieu_point'	=> array(255, 0, 0),
 			'lieu_str'	=> array(0, 0, 0),
@@ -487,6 +489,9 @@ class Carte {
 			$p_physique = $this->positionToPixel(new Point($x, $y));
 			$color = '';
 			switch($tile['type']) {
+				case 'champ':
+					$color = $this->colors['champ'];
+					break;
 				case 'palissade':
 					$color = $this->colors['palissade'];
 					break;
@@ -522,7 +527,7 @@ class Carte {
 		$tiles = array();;
 		// on va essayer toutes les tables dans un ordre précis
 		// et on s'arrête dès qu'on a une info pertinente
-		$table_list = array('palissade', 'route', 'bosquet', 'environnement');
+		$table_list = array('champ', 'palissade', 'route', 'bosquet', 'environnement');
 		foreach ($table_list as $table) {
 			$query = "SELECT * FROM {$table} WHERE x BETWEEN {$x_min} AND {$x_max} AND y BETWEEN {$y_min} AND {$y_max}";
 			$res = mysql_query($query);
@@ -717,8 +722,8 @@ class Carte {
 		$y = 100;
 		$h = imagefontheight($this->font_size);
 		
-		imagefilledrectangle($this->img, $x, $y, $x+150, $y+250, $this->colors['legendbg']);
-		imagerectangle($this->img, $x, $y, $x+150, $y+250, $this->colors['black']);
+		imagefilledrectangle($this->img, $x, $y, $x+150, $y+300, $this->colors['legendbg']);
+		imagerectangle($this->img, $x, $y, $x+150, $y+300, $this->colors['black']);
 		imagestring($this->img, $this->font_size, $x+10, $y+$h, 'Legende', $this->colors['black']);
 		$x += 30;
 		$y += 50;
@@ -751,6 +756,11 @@ class Carte {
 		imagefilledrectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['palissade']);
 		imagerectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['black']);
 		imagestring($this->img, $this->font_size, $x+$h+10, $y, 'Palissade', $this->colors['black']);
+		$y += 2*$h;
+		
+		imagefilledrectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['champ']);
+		imagerectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['black']);
+		imagestring($this->img, $this->font_size, $x+$h+10, $y, 'Champ', $this->colors['black']);
 		$y += 2*$h;
 		
 		imagefilledrectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['ruine']);
