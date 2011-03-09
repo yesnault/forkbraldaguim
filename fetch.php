@@ -113,7 +113,7 @@ class Fetch {
 			if ($keys[$i] == 'y') {$braldhun['y'] = $value[$i];continue;}
 		}
 		$this->update_braldhun($braldhun);
-		file_put_contents('cache/'.$braldhun['idBraldun'].'-'.date("YmdHi"), $content);
+		#file_put_contents('cache/'.$braldhun['idBraldun'].'-'.date("YmdHi"), $content);
 	}
 
 	/*
@@ -165,7 +165,7 @@ class Fetch {
 	BRALDUN;x;y;z;id_braldun;est_ko_braldun;est_intangible_braldun;est_soule_braldun;soule_camp_braldun;id_fk_soule_match_braldun
 	--LIEU;x;y;z;id_lieu;nom_lieu;nom_type_lieu;nom_systeme_type_lieu
 	MONSTRE;x;y;z;id_monstre;nom_type_monstre;m_taille;niveau_monstre
-	NID;x;y;z;id_nid;nom_nid_type_monstre
+	--NID;x;y;z;id_nid;nom_nid_type_monstre
 	--PALISSADE;x;y;z;id_palissade;est_destructible_palissade
 	BUISSON;x;y;z;id_buisson;nom_type_buisson
 	--BOSQUET;x;y;z;id_bosquet;nom_systeme_type_bosquet
@@ -209,8 +209,12 @@ class Fetch {
 				$this->update_champ($part);
 				continue;
 			}
+			if ($part[0] == 'NID') {
+				$this->update_nid($part);
+				continue;
+			}
 		}
-		file_put_contents('cache/'.date("YmdHi").'-'.uniqid(), $content);
+		#file_put_contents('cache/'.date("YmdHi").'-'.uniqid(), $content);
 	}
 	
 	/*
@@ -221,7 +225,7 @@ class Fetch {
 	n'apparaissent plus dans la vue.
 	*/
 	private function clean_case($x, $y, $z, $table) {
-		$liste_table = array('environnement', 'route', 'palissade', 'bosquet', 'lieu', 'champ');
+		$liste_table = array('environnement', 'route', 'palissade', 'bosquet', 'lieu', 'champ', 'nid');
 		foreach ($liste_table as $t) {
 			if ($t == $table) {
 				continue;
@@ -464,6 +468,43 @@ class Fetch {
 			mysql_query($query);
 		}
 		$this->clean_case($line[1], $line[2], $line[3], 'lieu');
+	}
+
+	/*
+	Insère ou met à jour un element de type NID
+	LIEU;x;y;z;id_lieu;nom_lieu;nom_type_lieu;nom_systeme_type_lieu
+	NID;x;y;z;id_nid;nom_nid_type_monstre
+	*/
+	private function update_nid($line) {
+		$query = "SELECT x FROM nid WHERE x=%s AND y=%s AND id_nid='%s';";
+		$query = sprintf($query,
+			mysql_real_escape_string($line[1]),
+			mysql_real_escape_string($line[2]),
+			mysql_real_escape_string($line[4]));
+		$res = mysql_query($query);
+		if (mysql_num_rows($res) == 0) {
+			// insert
+			$query = "INSERT INTO nid(x, y, z, id_nid, nom_nid, last_update) VALUES(%s, %s, %s, '%s', '%s', current_date);";
+			$query = sprintf($query,
+				mysql_real_escape_string($line[1]),
+				mysql_real_escape_string($line[2]),
+				mysql_real_escape_string($line[3]),
+				mysql_real_escape_string($line[4]),
+				mysql_real_escape_string($line[5]));
+			mysql_query($query);
+		}
+		else {
+			// update
+			$query = "UPDATE lieu SET nom_nid='%s', last_update=current_date ";
+			$query .= "WHERE x=%s AND y=%s AND id_nid='%s';";
+			$query = sprintf($query,
+				mysql_real_escape_string($line[5]),
+				mysql_real_escape_string($line[1]),
+				mysql_real_escape_string($line[2]),
+				mysql_real_escape_string($line[4]));
+			mysql_query($query);
+		}
+		$this->clean_case($line[1], $line[2], $line[3], 'nid');
 	}
 }
 
