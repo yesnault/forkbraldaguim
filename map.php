@@ -271,6 +271,8 @@ class Carte {
 			'erables'	=> array(70, 220, 70),
 			// Couleur pour le type champ
 			'champ'		=> array(150, 100, 50),
+			// Couleur pour le type champ
+			'nid'		=> array(150, 10, 10),
 			// Couleur pour les lieux importants
 			'lieu_point'	=> array(255, 0, 0),
 			'lieu_str'	=> array(0, 0, 0),
@@ -489,6 +491,9 @@ class Carte {
 			$p_physique = $this->positionToPixel(new Point($x, $y));
 			$color = '';
 			switch($tile['type']) {
+				case 'nid':
+					$color = $this->colors['nid'];
+					break;
 				case 'champ':
 					$color = $this->colors['champ'];
 					break;
@@ -761,6 +766,11 @@ class Carte {
 		imagefilledrectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['champ']);
 		imagerectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['black']);
 		imagestring($this->img, $this->font_size, $x+$h+10, $y, 'Champ', $this->colors['black']);
+		$y += 2*$h;
+		
+		imagefilledrectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['nid']);
+		imagerectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['black']);
+		imagestring($this->img, $this->font_size, $x+$h+10, $y, 'Nid', $this->colors['black']);
 		$y += 2*$h;
 		
 		imagefilledrectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['ruine']);

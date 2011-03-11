@@ -43,11 +43,11 @@ class Fetch {
 				continue;
 			}
 			$url = "http://sp.braldahim.com/scripts/profil/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=2";
-			//$url = "http://www.guim.info/braldahim/toto.php?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['crypted_password']}&version=1";
+			#$url = "http://www.guim.info/braldahim/cache/282-201103091200";
 			$this->fetch_position($url);
 			
 			$url = "http://sp.braldahim.com/scripts/vue/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=2";
-			//$url = "http://www.guim.info/braldahim/toto.php?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['crypted_password']}&version=1";
+			#$url = "http://www.guim.info/braldahim/toto.php?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['crypted_password']}&version=1";
 			$this->fetch_vue($url);
 		}
 	}
@@ -64,11 +64,9 @@ class Fetch {
 				continue;
 			}
 			$url = "http://sp.braldahim.com/scripts/profil/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=1";
-			//$url = "http://www.guim.info/braldahim/toto.php?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['crypted_password']}&version=1";
 			$this->fetch_position($url);
 			
 			$url = "http://sp.braldahim.com/scripts/vue/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=2";
-			//$url = "http://www.guim.info/braldahim/toto.php?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['crypted_password']}&version=1";
 			$this->fetch_vue($url);
 		}
 	}
@@ -78,58 +76,96 @@ class Fetch {
 	Va chercher le contenu de l'url, le traite et le stock en db
 	*/
 	private function fetch_position($url) {
-		$braldhun = array();
+		$braldun = array();
+		$profil = array();
 		$content = file($url);
 		// content[0] = info sur le script
 		// content[1] = entete
 		// content[2] = valeur
-		// en tete : idBraldun;prenom;nom;x;y;z;paRestant;DLA;DureeProchainTour;PvRestant;bmPVmax;bbdf;nivAgilite;nivForce;nivVigueur;nivSagesse;bmAgilite;bmForce;bmVigueur;bmSagesse;bmBddfAgilite;bmBddfForce;bmBddfVigueur;bmBddfSagesse;bmVue;regeneration;bmRegeneration;pxPerso;pxCommun;pi;niveau;poidsTransportable;poidsTransporte;armureNaturelle;armureEquipement;bmAttaque;bmDegat;bmDefense;nbKo;nbKill;nbKoBraldun;estEngage;estEngageProchainTour;estIntangible;nbPlaquagesSubis;nbPlaquagesEffectues 
-		/* idBraldun;prenom;nom;x;y;z;paRestant;DLA;DureeProchainTour;
-			dateDebutTour;dateFinTour;dateFinLatence;
-			dateDebutCumul;dureeCourantTour;dureeBmTour;
-			PvRestant;bmPVmax;bbdf;
-			nivAgilite;nivForce;nivVigueur;nivSagesse;
-			bmAgilite;bmForce;bmVigueur;bmSagesse;
-			bmBddfAgilite;bmBddfForce;bmBddfVigueur;bmBddfSagesse;
-			bmVue;regeneration;bmRegeneration;
-			pxPerso;pxCommun;pi;niveau;poidsTransportable;poidsTransporte;armureNaturelle;
-			armureEquipement;bmAttaque;bmDegat;bmDefense;nbKo;nbKill;nbKoBraldun;
-			estEngage;estEngageProchainTour;estIntangible;nbPlaquagesSubis;nbPlaquagesEffectues
-		*/
-		
+		// en tete : idBraldun;prenom;nom;x;y;z;paRestant;DLA;DureeProchainTour;dateDebutTour;dateFinTour;dateFinLatence;dateDebutCumul;dureeCourantTour;dureeBmTour;PvRestant;bmPVmax;bbdf;nivAgilite;nivForce;nivVigueur;nivSagesse;bmAgilite;bmForce;bmVigueur;bmSagesse;bmBddfAgilite;bmBddfForce;bmBddfVigueur;bmBddfSagesse;bmVue;regeneration;bmRegeneration;pxPerso;pxCommun;pi;niveau;poidsTransportable;poidsTransporte;armureNaturelle;armureEquipement;bmAttaque;bmDegat;bmDefense;nbKo;nbKill;nbKoBraldun;estEngage;estEngageProchainTour;estIntangible;nbPlaquagesSubis;nbPlaquagesEffectues
+		//282;Bulrog;Polpeur;-23;18;0;0;2011-03-01 03:11:09;23:20:00;2011-02-28 03:51:09;2011-03-01 03:11:09;2011-02-28 09:41:09;2011-02-28 15:31:09;23:20:00;0;90;0;79;7;6;5;4;0;0;0;0;0;0;0;0;0;2;0;15;0;57;10;15;10.11;4;0;0;0;0;10;14;0;oui;non;non;0;0
+		$not_integer = array('prenom', 'nom', 'DLA', 'DureeProchainTour', 'dateDebutTour',
+			'dateFinTour', 'dateFinLatence', 'dateDebutCumul', 'dureeCourantTour', 'dureeBmTour');
+		$boolean = array('estEngage', 'estEngageProchainTour', 'estIntangible');
+
 		if (preg_match("/^ERREUR-/", $content[0]) == 1) {
 			// erreur lors de l'appel du script (cf : http://sp.braldahim.com/)
 			echo "[".date("YmdHi")."] ".$content[0];
 			return;
 		}
-		$keys = explode(';', $content[1]);
-		$value = explode(';', $content[2]);
+		$keys = explode(';', trim($content[1]));
+		$value = explode(';', trim($content[2]));
 		$max = count($keys);
 		for ($i=0; $i<$max; $i++) {
-			if ($keys[$i] == 'idBraldun') {$braldhun['idBraldun'] = $value[$i];continue;}
-			if ($keys[$i] == 'prenom') {$braldhun['prenom'] = $value[$i];continue;}
-			if ($keys[$i] == 'nom') {$braldhun['nom'] = $value[$i];continue;}
-			if ($keys[$i] == 'x') {$braldhun['x'] = $value[$i];continue;}
-			if ($keys[$i] == 'y') {$braldhun['y'] = $value[$i];continue;}
+			if (in_array($keys[$i], $not_integer)) {
+				$profil[strtolower($keys[$i])] = "'".mysql_real_escape_string($value[$i])."'";
+			}
+			else if (in_array($keys[$i], $boolean)) {
+				$profil[strtolower($keys[$i])] = ($value[$i] == 'oui') ? 1 : 0;
+			}
+			else {
+				$profil[strtolower($keys[$i])] = $value[$i];
+			}
+
+			if ($keys[$i] == 'idBraldun') {$braldun['idBraldun'] = $value[$i];continue;}
+			if ($keys[$i] == 'prenom') {$braldun['prenom'] = $value[$i];continue;}
+			if ($keys[$i] == 'nom') {$braldun['nom'] = $value[$i];continue;}
+			if ($keys[$i] == 'x') {$braldun['x'] = $value[$i];continue;}
+			if ($keys[$i] == 'y') {$braldun['y'] = $value[$i];continue;}
 		}
-		$this->update_braldhun($braldhun);
-		#file_put_contents('cache/'.$braldhun['idBraldun'].'-'.date("YmdHi"), $content);
+		$this->update_braldun($braldun);
+		#file_put_contents('cache/'.$braldun['idBraldun'].'-'.date("YmdHi"), $content);
+
+		// update le profil (table avec plus de details)
+		$this->update_profil($profil);
 	}
 
 	/*
-	Met à jour la db avec le braldhun concerné
+	Met à jour la db avec le braldun concerné
 	*/
-	private function update_braldhun($braldhun) {
-		// on passe le flag 'updated' à true pour que la génération de la carte ait lieu
+	private function update_braldun($braldun) {
+		// on passe le flag 'dirty' à true pour que la génération de la carte ait lieu
 		$query = sprintf("UPDATE user SET prenom='%s', nom='%s', x=%s, y=%s, updated=true WHERE braldahim_id=%s;",
-			mysql_real_escape_string($braldhun['prenom']),
-			mysql_real_escape_string($braldhun['nom']),
-			mysql_real_escape_string($braldhun['x']),
-			mysql_real_escape_string($braldhun['y']),
-			mysql_real_escape_string($braldhun['idBraldun']));
+			mysql_real_escape_string($braldun['prenom']),
+			mysql_real_escape_string($braldun['nom']),
+			mysql_real_escape_string($braldun['x']),
+			mysql_real_escape_string($braldun['y']),
+			mysql_real_escape_string($braldun['idBraldun']));
 		mysql_query($query);
 		$query = "UPDATE ressource SET dirty=true;";
 		mysql_query($query);
+	}
+
+	/*
+	Met à jour la db avec le braldun concerné : profil detaillé
+	*/
+	private function update_profil($profil) {
+		if (! array_key_exists('idbraldun', $profil)) {
+			return;
+		}
+		$query = "SELECT idBraldun FROM profil WHERE idBraldun=%s;";
+		$query = sprintf($query, mysql_real_escape_string($profil['idbraldun']));
+		$res = mysql_query($query);
+		if (mysql_num_rows($res) == 0) {
+			// insert
+			$query = "INSERT INTO profil(".
+				implode(',', array_keys($profil)).
+				", last_update) VALUES(".
+				implode(',', $profil).
+				", current_date);";
+			mysql_query($query);
+		}
+		else {
+			// update
+			$query = "UPDATE profil SET ";
+			$lst = array();
+			foreach ($profil as $k => $v) {
+				$lst[] = "$k=$v";
+			}
+			$query .= implode(',', $lst);
+			$query .= " WHERE idBraldun={$profil['idbraldun']} ;";
+			mysql_query($query);
+		}
 	}
 
 	/*
