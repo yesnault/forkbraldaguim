@@ -114,6 +114,30 @@ a:hover {color: #F0AE21;}
 	padding: .5em 1em;
 	margin: 0 1em 0 0;
 }
+.profil td {
+	text-align: left;
+	font-size: 80%;
+	vertical-align: top;
+}
+.profil td.p_nom {
+	font-size: 90%;
+	font-weight: bold;
+	background-color: #DF920D;
+}
+.profil td.tab {
+	padding: 0;
+	margin: 0;
+}
+.profil table {
+	border: 1px solid #5D8231;
+	border-collapse: collapse;
+	width: 100%;
+	padding: -0.2em;
+}
+.profil table td, .profil table th {
+	font-size: 100%;
+	border: 1px solid #5D8231;
+}
 </style>
 
 <title><?php  echo $app->getHtmlTitle(); ?></title>
@@ -132,6 +156,7 @@ a:hover {color: #F0AE21;}
 		<li><a href="account.php?action=account">Gestion du compte</a></li>
 		<li><a href="position.php?action=position">Position</a></li>
 		<li><a href="bestiaire.php?action=bestiaire">Bestiaire</a></li>
+		<li><a href="profil.php?action=allprofils">Profils</a></li>
 		<?php } ?>
 </ul>
 </div>

@@ -309,7 +309,10 @@ EOF;
 			return $this->bralduns;
 		}
 		$this->bralduns = array();
-		$query = "SELECT braldahim_id, prenom, nom, x, y FROM user ORDER BY braldahim_id ASC;";
+		$query = "SELECT braldahim_id, prenom, nom, x, y
+		FROM user
+		WHERE restricted_password IS NOT NULL
+		ORDER BY braldahim_id ASC;";
 		$res = mysql_query($query, $this->db);
 		while ($row = mysql_fetch_assoc($res)) {
 			$tmp = array();

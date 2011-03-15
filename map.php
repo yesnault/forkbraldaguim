@@ -333,7 +333,12 @@ class Carte {
 	Recupere les joueurs de la communauté
 	*/
 	private function getPlayers() {
-		$query = "SELECT braldahim_id, prenom, nom, x, y FROM user WHERE x IS NOT NULL AND y IS NOT NULL ORDER BY braldahim_id ASC;";
+		$query = "SELECT braldahim_id, prenom, nom, x, y
+		FROM user
+		WHERE x IS NOT NULL
+		AND y IS NOT NULL
+		AND restricted_password IS NOT NULL
+		ORDER BY braldahim_id ASC;";
 		$res = mysql_query($query);
 		while ($row = mysql_fetch_assoc($res)) {
 			$this->players[] = new Player(
