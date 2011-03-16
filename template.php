@@ -114,10 +114,20 @@ a:hover {color: #F0AE21;}
 	padding: .5em 1em;
 	margin: 0 1em 0 0;
 }
+.profil {
+	border-collapse: collapse;
+	border-color: #5D8231;
+	margin: 0 1em 1em 0;
+}
 .profil td {
 	text-align: left;
 	font-size: 80%;
 	vertical-align: top;
+	padding: .2em .5em;
+}
+.profil th {
+	text-align: center;
+	font-size: 100%;
 }
 .profil td.p_nom {
 	font-size: 90%;
@@ -137,6 +147,25 @@ a:hover {color: #F0AE21;}
 .profil table td, .profil table th {
 	font-size: 100%;
 	border: 1px solid #5D8231;
+}
+.profil table.bar {
+	border: none;
+	width: 100%;
+}
+.profil table.bar td {
+	border: none;
+	vertical-align: center;
+}
+.profil table.bar td.titre {
+	text-align: right;
+}
+.profil span.bar {
+	display: block;
+	width: 100px;
+	height: 5px;
+	background: url(img/progress_bar.png) red no-repeat;
+	border: 1px solid black;
+	margin: .2em 0 0 0;
 }
 </style>
 

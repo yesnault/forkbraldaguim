@@ -57,24 +57,26 @@ class Profil extends Application {
 	private function showAllProfils() {
 		// liste des profils
 		$this->getAllProfils();
+
+		// now_max-now_min=86400
+		$now = time();
+		$now_min = strtotime("-12 hours");
+		$now_max = strtotime("+12 hours");
 		
 		$str =<<<EOF
-<table class="monstre_tab_detail profil" border="1">
+<table class="profil" border="1">
 <tr>
 	<th>Informations Tour</th>
-	<th>Sante</th>
+	<th>Sante<br/>Poids<br/>Experience</th>
 	<th>Caracteristiques</th>
-	<th>Experience</th>
-	<th>Poids</th>
-	<th>Armure</th>
-	<th>Combat</th>
+	<th>Armure<br/>Combat</th>
 	<th>Palmares</th>
 	<th>Soule</th>
 </tr>
 EOF;
 		// https://github.com/braldahim/braldahim/blob/master/braldahim/application/views/scripts/interface/profil.phtml
 		foreach ($this->profils as $profil) {
-			$px_max = ($profil['niveau'] + 2) * 5;
+			$px_max = ($profil['niveau'] + 2) * 5 - 5;
 			$pv_max = $profil['nivVigueur'] * 10 + 40;
 
 			$agi_des = ($profil['nivAgilite'] + 3).'&nbsp;D6';
@@ -89,28 +91,53 @@ EOF;
 			$sag_des = ($profil['nivSagesse'] + 3).'&nbsp;D6';
 			$sag_bm = $profil['bmSagesse'] + $profil['bmBddfSagesse'];
 
-		/*
-	<td>{$profil['DLA']}</td>
-	<td>{$profil['dateDebutTour']}</td>
-	<td>{$profil['dateFinTour']}</td>
-	<td>{$profil['dateFinLatence']}</td>
-	<td>{$profil['dateDebutCumul']}</td>
-*/
+			$pv_pos = 100 - ($profil['PvRestant']/$pv_max)* 100;
+			$bdf_pos = 100 - $profil['bbdf'];
+			$px_pos = 100 - ($profil['pxPerso']/$px_max)* 100;
+
+			#$latence_start = (strtotime($profil['dateDebutTour']) - $now_min) / 864;
+			#$latence_start = $now_min - (strtotime($profil['dateDebutTour']) / $now_max );
+			# strtotime($profil['DLA'])
 
 			$str .=<<<EOF
 <tr>
-	<td colspan="9" class="p_nom">{$profil['prenom']} {$profil['nom']}&nbsp;({$profil['idBraldun']})</td>
+	<td colspan="2" class="p_nom">{$profil['prenom']} {$profil['nom']}&nbsp;({$profil['idBraldun']})</td>
+	<td colspan="4">
+		<table class="bar">
+		<tr>
+			<td class="titre">PV</td>
+			<td><span class="bar" style="background-position: -{$pv_pos}px 0px"></span></td>
+			<td class="titre">BdF</td>
+			<td><span class="bar" style="background-position: -{$bdf_pos}px 0px"></span></td>
+			<td class="titre">PX</td>
+			<td><span class="bar" style="background-position: -{$px_pos}px 0px"></span></td>
+		</tr>
+		</table>
+	</td>
 </tr>
 <tr>
 	<td>
+	PA Restant&nbsp;:&nbsp;{$profil['paRestant']}<br/>
 	Durée de ce tour&nbsp;:&nbsp;{$profil['dureeCourantTour']}<br/>
 	Durée du prochain&nbsp;:&nbsp;{$profil['DureeProchainTour']} {$profil['dureeBmTour']}<br/>
+	Début&nbsp;:&nbsp;{$profil['dateDebutTour']}<br/>
+	R&eacute;veil&nbsp;:&nbsp;{$profil['dateFinLatence']}<br/>
+	Activit&eacute;&nbsp;:&nbsp;{$profil['dateDebutCumul']}<br/>
+	Fin&nbsp;:&nbsp;{$profil['dateFinTour']}<br/>
+	DLA&nbsp;:&nbsp;{$profil['DLA']}<br/>
 	MAJ du profil&nbsp;:&nbsp;{$profil['last_update']}
 	</td>
 
 	<td>
 	PV&nbsp;:&nbsp;{$profil['PvRestant']}&nbsp;/&nbsp;{$pv_max}&nbsp;+&nbsp;{$profil['bmPVmax']}<br/>
-	Bdf&nbsp;:&nbsp;{$profil['bbdf']}%
+	Bdf&nbsp;:&nbsp;{$profil['bbdf']}%<br/>
+	<br/>
+	Poids&nbsp:&nbsp;{$profil['poidsTransporte']}&nbsp;/&nbsp;{$profil['poidsTransportable']}<br/>
+	<br/>
+	Niveau&nbsp;:&nbsp;{$profil['niveau']}<br/>
+	PX Perso&nbsp;:&nbsp;{$profil['pxPerso']}&nbsp;/&nbsp;{$px_max}<br/>
+	PX Commun&nbsp;:&nbsp;{$profil['pxCommun']}<br/>
+	PI&nbsp;:&nbsp;{$profil['pi']}
 	</td>
 
 	<td class="tab">
@@ -161,25 +188,13 @@ EOF;
 	</td>
 
 	<td>
-	Niveau&nbsp;:&nbsp;{$profil['niveau']}<br/>
-	PX Perso&nbsp;:&nbsp;{$profil['pxPerso']}&nbsp;/&nbsp;{$px_max}<br/>
-	PX Commun&nbsp;:&nbsp;{$profil['pxCommun']}<br/>
-	PI&nbsp;:&nbsp;{$profil['pi']}
-	</td>
-
-	<td>
-	{$profil['poidsTransporte']}&nbsp;/&nbsp;{$profil['poidsTransportable']}
-	</td>
-	
-	<td>
 	Arm. naturelle&nbsp;:&nbsp;{$profil['armureNaturelle']}<br/>
 	Arm. Equipement&nbsp;:&nbsp;{$profil['armureEquipement']}<br/>
-	</td>
-
-	<td>
+	<br/>
 	Attaque BM&nbsp;:&nbsp;{$profil['bmAttaque']}<br/>
 	Defense BM&nbsp;:&nbsp;{$profil['bmDefense']}<br/>
 	Degats BM&nbsp;:&nbsp;{$profil['bmDegat']}<br/>
+	<br/>
 	Engag&eacute; (ce tour)&nbsp;:&nbsp;{$profil['estEngage']}<br/>
 	Engag&eacute; (prochain tour)&nbsp;:&nbsp;{$profil['estEngage']}<br/>
 	Intangible&nbsp;:&nbsp;{$profil['estIntangible']}<br/>

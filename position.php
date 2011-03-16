@@ -146,7 +146,7 @@ EOF;
 		$zoom = $x = $y = 0;
 		
 		// extraction du zoom
-		$zoom = (array_key_exists('zoom', $_REQUEST) && is_numeric($_REQUEST['zoom'])) ? $_REQUEST['zoom'] : 4;
+		$zoom = (array_key_exists('zoom', $_REQUEST) && is_numeric($_REQUEST['zoom'])) ? $_REQUEST['zoom'] : DEF_ZOOM;
 		if ($zoom < 1 ) $zoom = 1;
 		
 		

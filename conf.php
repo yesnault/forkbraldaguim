@@ -18,4 +18,7 @@ if (! defined('DB_NAME')) define('DB_NAME', 'braldahim_db');
 if (! defined('DB_USER')) define('DB_USER', 'braldahim_user');
 if (! defined('DB_PASS')) define('DB_PASS', 'braldahim_pass');
 
+// niveau de zoom par defaut
+if (! defined('DEF_ZOOM')) define('DEF_ZOOM', 3);
+
 ?>

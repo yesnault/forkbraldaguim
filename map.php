@@ -125,7 +125,7 @@ class Carte {
 		$this->ttfont_size = 8;
 		$this->players = array();
 		
-		$this->zoom = 4;
+		$this->zoom = DEF_ZOOM;
 		if ($user_zoom != null && is_numeric($user_zoom) && 0 < $user_zoom && $user_zoom < 100) {
 			$this->zoom = floor($user_zoom);
 		}
