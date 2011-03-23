@@ -49,6 +49,10 @@ class Fetch {
 			$url = "http://sp.braldahim.com/scripts/vue/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=2";
 			#$url = "http://www.guim.info/braldahim/toto.php?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['crypted_password']}&version=1";
 			$this->fetch_vue($url);
+
+			$url = "http://sp.braldahim.com/scripts/competences/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=1";
+			#$url =  "http://www.guim.info/braldahim/toto";
+			$this->fetch_competence($url);
 		}
 	}
 	
@@ -163,7 +167,7 @@ class Fetch {
 				$lst[] = "$k=$v";
 			}
 			$query .= implode(',', $lst);
-			$query .= " WHERE idBraldun={$profil['idbraldun']} ;";
+			$query .= ",last_update=current_date WHERE idBraldun={$profil['idbraldun']} ;";
 			mysql_query($query);
 		}
 	}
@@ -541,6 +545,68 @@ class Fetch {
 			mysql_query($query);
 		}
 		$this->clean_case($line[1], $line[2], $line[3], 'nid');
+	}
+
+	/*
+	MAJ des competences du joueur
+	Va chercher le contenu de l'url, le traite et le stock en db
+	*/
+	private function fetch_competence($url) {
+		$content = file($url);
+		// content[0] = info sur le script
+		// content[1] = entete
+		// content[2] = valeur
+
+		//TYPE:statique;NB_APPELS:1;MAX_AUTORISE:14
+		//idBraldun;typeCompetence;idCompetence;nom;nom_systeme;maitrise;id_fk_metier_competence
+		//282;metier;10;Dépiauter;depiauter;84;2
+		//282;metier;11;Débusquer;debusquer;70;2
+		//282;commun;17;Identification des runes;identifierrune;25;
+		//282;commun;36;Connaissance des monstres;connaissancemonstres;57; 
+
+		if (preg_match("/^ERREUR-/", $content[0]) == 1) {
+			// erreur lors de l'appel du script (cf : http://sp.braldahim.com/)
+			echo "[".date("YmdHi")."] ".$content[0];
+			return;
+		}
+		for ($i=2; $i<count($content); $i++) {
+			$line = trim($content[$i]);
+			if (strlen($line) == 0) {
+				continue;
+			}
+			$line = explode(';', $line);
+			$query = "SELECT idBraldun FROM competence WHERE idBraldun=%s AND idCompetence=%s;";
+			$query = sprintf($query,
+				mysql_real_escape_string($line[0]),
+				mysql_real_escape_string($line[2]));
+			$res = mysql_query($query);
+			if (mysql_num_rows($res) == 0) {
+				if (empty($line[6])) {
+					$line[6] = 'NULL';
+				}
+				// insert
+				$query = "INSERT INTO competence(idBraldun, typeCompetence, idCompetence, nom, nom_systeme, maitrise, idMetier, last_update) VALUES(%s, '%s', %s, '%s', '%s', %s, %s, current_date);";
+				$query = sprintf($query,
+					mysql_real_escape_string($line[0]),
+					mysql_real_escape_string($line[1]),
+					mysql_real_escape_string($line[2]),
+					mysql_real_escape_string($line[3]),
+					mysql_real_escape_string($line[4]),
+					mysql_real_escape_string($line[5]),
+					mysql_real_escape_string($line[6]));
+				mysql_query($query);
+			}
+			else {
+				// update
+				$query = "UPDATE competence SET maitrise=%s, last_update=current_date ";
+				$query .= "WHERE idBraldun=%s AND idCompetence=%s;";
+				$query = sprintf($query,
+					mysql_real_escape_string($line[5]),
+					mysql_real_escape_string($line[0]),
+					mysql_real_escape_string($line[2]));
+				mysql_query($query);
+			}
+		}
 	}
 }
 

@@ -201,3 +201,16 @@ CREATE TABLE profil(
 	last_update DATE
 ) CHARACTER SET utf8;
 
+CREATE TABLE competence (
+	idBraldun MEDIUMINT,
+	typeCompetence TEXT,
+	idCompetence MEDIUMINT,
+	nom TEXT,
+	nom_systeme TEXT,
+	maitrise MEDIUMINT,
+	idMetier MEDIUMINT,
+	last_update DATE,
+	INDEX (idBraldun),
+	INDEX (idCompetence)
+) CHARACTER SET utf8;
+

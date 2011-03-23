@@ -35,6 +35,14 @@ a:hover {color: #F0AE21;}
 	text-align: center;
 }
 
+.clear_that {
+	clear: both;
+}
+#footer {
+	margin: 2em 1em;
+	border-top: 1px solid gray;
+	font-size: small;
+}
 #position {
 	margin: 1em 0 0 0;
 }
@@ -50,6 +58,7 @@ a:hover {color: #F0AE21;}
 }
 .tab_position td, .tab_position th {
 	padding: .2em .2em;
+	border: 1px solid #5D8231;
 }
 .tab_position img {
 	border: none;
@@ -97,6 +106,7 @@ a:hover {color: #F0AE21;}
 .monstre_tab_detail td, .monstre_tab_detail th {
 	padding: .2em .2em;
 	text-align: center;
+	border: 1px solid #5D8231;
 }
 #monstre_saisie {
 	float: left;
@@ -124,14 +134,17 @@ a:hover {color: #F0AE21;}
 	font-size: 80%;
 	vertical-align: top;
 	padding: .2em .5em;
+	border: 1px solid #5D8231;
 }
 .profil th {
 	text-align: center;
 	font-size: 100%;
+	border: 1px solid #5D8231;
 }
 .profil td.p_nom {
 	font-size: 90%;
 	font-weight: bold;
+	vertical-align: middle;
 	background-color: #DF920D;
 }
 .profil td.tab {
@@ -142,11 +155,9 @@ a:hover {color: #F0AE21;}
 	border: 1px solid #5D8231;
 	border-collapse: collapse;
 	width: 100%;
-	padding: -0.2em;
 }
 .profil table td, .profil table th {
 	font-size: 100%;
-	border: 1px solid #5D8231;
 }
 .profil table.bar {
 	border: none;
@@ -154,7 +165,7 @@ a:hover {color: #F0AE21;}
 }
 .profil table.bar td {
 	border: none;
-	vertical-align: center;
+	vertical-align: middle;
 }
 .profil table.bar td.titre {
 	text-align: right;
@@ -197,6 +208,10 @@ a:hover {color: #F0AE21;}
 	<div id="content">
 		<?php  echo $app->getHtmlContent(); ?>
 	</div>
+	<div class="clear_that"></div>
+</div>
+<div id="footer">
+Code source disponible sur : <a href="http://www.guim.info/dokuwiki/dev/braldaguim">Braldaguim</a>
 </div>
 </body>
 </html>
