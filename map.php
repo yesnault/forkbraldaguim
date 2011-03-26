@@ -24,6 +24,19 @@ if (! isset($_SESSION['bra_num'])) exit();
 
 require_once("conf.php");
 
+/*
+Trie les joueurs sur leur position
+*/
+ function sort_player($a, $b) {
+	if ($a->position->x == $b->position->x) {
+		if ($a->position->y == $b->position->y) {
+			return 0;
+		}
+		return ($a->position->y < $b->position->y) ? -1 : 1;
+	}
+	return ($a->position->x < $b->position->x) ? -1 : 1;
+}
+	
 $carte = null;
 $zoom = null;
 $type = null;
@@ -349,7 +362,7 @@ class Carte {
 		}
 		mysql_free_result($res);
 	}
-	
+
 	/*
 	Calcul les coordonnées du centre du repere de la carte
 	Calcul egalement l'echelle de la carte (min, max)
@@ -391,8 +404,10 @@ class Carte {
 	
 	/*
 	Dessine un joueur : un point plus son nom
+	$p : objet Player
+	$prev_count : nombre de joueurs avec la meme position
 	*/
-	private function drawPlayer($p) {
+	private function drawPlayer($p, $prev_count=0) {
 		// Pour obtenir un fond transparent et des polices antialiasées
 		// il faut supprimer l'alphablending et activé la transparence du png
 		// avec imagesavealpha
@@ -423,19 +438,21 @@ class Carte {
 			$pos->x, $pos->y,
 			$this->players_size, $this->players_size,
 			$this->colors['black']);
+
+		$delta_y = $prev_count * $name_height;
 		
 		// dessin du fond du nom
 		imagefilledrectangle($this->img,
 			$pos->x - $name_width / 2,
-			$pos->y - $name_height  + $this->players_size / 2,
+			$pos->y - $name_height + $this->players_size / 2 - $delta_y,
 			$pos->x + $name_width / 2,
-			$pos->y + $this->players_size / 2,
+			$pos->y + $this->players_size / 2 - $delta_y,
 			$this->colors['name_bg']);
 		
 		// dessin du nom	
 		imagettftext($this->img, $this->ttfont_size, 0,
 			$pos->x - $name_width / 2,
-			$pos->y - $name_height + $this->players_size / 2,
+			$pos->y - $name_height + $this->players_size / 2 - $delta_y,
 			$this->colors['red'], "./DejaVuSans.ttf", $name);
 	}
 	
@@ -882,9 +899,21 @@ class Carte {
 					break;
 				case "joueur":
 					// dessin des joueurs
-					foreach ($this->players as $p) {
-						$this->drawPlayer($p);
+					$prev_pos = null; // position du joueur precedent
+					$prev_count = 0; // nombre de joueurs avec la meme position
+					// lo'rdre n'est pas celui x,y, mais id_bral => il faut faire un recherche ou retrier
+					$sorted_players = $this->players;
+					usort($sorted_players, "sort_player");
+					foreach ($sorted_players as $p) {
+						if ($prev_pos != null && $prev_pos->equals($p->position)) {
+							$prev_count++;
+						}
+						else {
+							$prev_count = 0;
+						}
+						$this->drawPlayer($p, $prev_count);
 						$this->updateUser($p->id);
+						$prev_pos = $p->position;
 					}
 					break;
 				case "lieu":

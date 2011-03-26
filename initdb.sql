@@ -5,7 +5,8 @@ CREATE TABLE user(
 	prenom TEXT,
 	nom TEXT,
 	x MEDIUMINT,
-	y MEDIUMINT
+	y MEDIUMINT,
+	last_login TIMESTAMP
 ) CHARACTER SET utf8;
 
 CREATE TABLE lieu(x MEDIUMINT not null,

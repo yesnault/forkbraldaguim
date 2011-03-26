@@ -129,6 +129,8 @@ EOF;
 		$res = mysql_query($query, $this->db);
 		if (mysql_num_rows($res) != 0) {
 			// authentification ok
+			$query = sprintf("UPDATE user SET last_login=now() WHERE braldahim_id=$bra_num");
+			mysql_query($query, $this->db);
 			$_SESSION['bra_num'] = $bra_num;
 			$this->html_message = "Authentification r&eacute;ussie.";
 			$this->logged = true;

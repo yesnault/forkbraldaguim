@@ -131,7 +131,8 @@ EOF;
 	PA Restant&nbsp;:&nbsp;{$profil['paRestant']}<br/>
 	Durée de ce tour&nbsp;:&nbsp;{$profil['dureeCourantTour']}<br/>
 	Durée du prochain&nbsp;:&nbsp;{$profil['DureeProchainTour']} {$profil['dureeBmTour']}<br/>
-	MAJ du profil&nbsp;:&nbsp;{$profil['last_update']}
+	MAJ du profil&nbsp;:&nbsp;{$profil['last_update']}<br/>
+	Derni&egrave;re cnx&nbsp;:&nbsp;{$profil['last_login']}
 	</td>
 
 	<td>
@@ -281,8 +282,9 @@ EOF;
 			return $this->profils;
 		}
 		$this->profils = array();
-		$query = "SELECT *
-			FROM profil
+		$query = "SELECT p.*, date_format(u.last_login, '%Y-%m-%d') as last_login
+			FROM profil p, user u
+			WHERE u.braldahim_id = p.idBraldun
 			ORDER BY idBraldun ASC;";
 		$res = mysql_query($query, $this->db);
 		while ($row = mysql_fetch_assoc($res)) {
@@ -419,7 +421,7 @@ EOF;
 	Affiche une barre verticale suivi du texte
 	*/
 	private function draw_text($img, $text, $x, $c, $h) {
-		imagerectangle($img, $x, 0, $x, $h, $c0);
+		imagerectangle($img, $x, 0, $x, $h, $c);
 		if ($x > 0) {
 			imagettftext($img, 8, 0, $x+2, 12, $c, "./DejaVuSans.ttf", $text);
 		}
