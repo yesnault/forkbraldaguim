@@ -513,9 +513,6 @@ class Carte {
 			$p_physique = $this->positionToPixel(new Point($x, $y));
 			$color = '';
 			switch($tile['type']) {
-				case 'nid':
-					$color = $this->colors['nid'];
-					break;
 				case 'champ':
 					$color = $this->colors['champ'];
 					break;
@@ -702,41 +699,7 @@ class Carte {
 		
 		$res = mysql_query($query);
 		while ($row = mysql_fetch_assoc($res)) {
-			// coordonnées du centre
-			$pos = $this->positionToPixel(new Point($row['x'], $row['y']));
-			// pour faire pointer au centre de la case
-			$pos->x += $this->tile_size/2;
-			$pos->y += $this->tile_size/2;
-			
-			$bbox = imagettfbbox($this->ttfont_size, 0, "./DejaVuSans.ttf", $row['nom_lieu']);
-			$name_width = $bbox[2] - $bbox[0];
-			$name_height = $bbox[5] - $bbox[3];
-		
-			// dessin du point
-			imagefilledellipse($this->img,
-				$pos->x, $pos->y,
-				$this->players_size, $this->players_size,
-				$this->colors['lieu_point']);
-			
-			// dessin du contour du point
-			imageellipse($this->img,
-				$pos->x, $pos->y,
-				$this->players_size, $this->players_size,
-				$this->colors['black']);
-			
-			// dessin du fond du nom
-			/*imagefilledrectangle($this->img,
-				$pos->x - $name_width / 2,
-				$pos->y - $name_height  + $this->players_size / 2,
-				$pos->x + $name_width / 2,
-				$pos->y + $this->players_size / 2,
-				$this->colors['name_bg']);
-			*/
-			// dessin du nom
-			imagettftext($this->img, $this->ttfont_size, 0,
-				$pos->x - $name_width / 2,
-				$pos->y - $name_height + $this->players_size / 2,
-				$this->colors['lieu_str'], "./DejaVuSans.ttf", $row['nom_lieu']);
+			$this->drawPointText(new Point($row['x'], $row['y']), $row['nom_lieu'], $this->colors['lieu_point'], false);
 		}
 		mysql_free_result($res);
 	}
@@ -850,6 +813,76 @@ class Carte {
 	}
 	
 	/*
+	Dessine les nids
+	*/
+	private function drawNid() {
+		// On va chercher tous les objets qui se trouvent
+		// entre les bornes maximales de la carte
+		$p_min = $this->pixelToPosition(new Point(0, $this->size)); // coin bas gauche (min X et min Y)
+		$p_max = $this->pixelToPosition(new Point($this->size, 0)); // coin haut droite (max X et max Y)
+		$query = "SELECT x, y, nom_nid
+			FROM nid
+			WHERE x BETWEEN {$p_min->x} AND {$p_max->x}
+			AND y BETWEEN {$p_min->y} AND {$p_max->y};";
+		$res = mysql_query($query);
+		while ($row = mysql_fetch_assoc($res)) {
+			$this->drawPointText(new Point($row['x'], $row['y']), $row['nom_nid'], $this->colors['nid'], false);
+		}
+		mysql_free_result($res);
+	}
+
+	/*
+	Dessine un point et un texte
+	*/
+	private function drawPointText($position, $text, $color, $useBg=false) {
+		// Pour obtenir un fond transparent et des polices antialiasées
+		// il faut supprimer l'alphablending et activer la transparence du png
+		// avec imagesavealpha
+		imagesavealpha($this->img, true);
+		imagealphablending($this->img, false);
+		imagefill($this->img, 0, 0, $this->colors['transparent_alpha']);
+		
+		// coordonnées du centre
+		$pos = $this->positionToPixel($position);
+		// pour faire pointer au centre de la case
+		$pos->x += $this->tile_size/2;
+		$pos->y += $this->tile_size/2;
+		
+		// bounding box
+		$bbox = imagettfbbox($this->ttfont_size, 0, "./DejaVuSans.ttf", $text);
+		$text_width = $bbox[2] - $bbox[0];
+		$text_height = $bbox[5] - $bbox[3];
+		
+		// dessin du point
+		imagefilledellipse($this->img,
+			$pos->x, $pos->y,
+			$this->players_size, $this->players_size,
+			$color);
+		
+		// dessin du contour du point
+		imageellipse($this->img,
+			$pos->x, $pos->y,
+			$this->players_size, $this->players_size,
+			$this->colors['black']);
+		
+		// dessin du fond du text
+		if ($useBg) {
+			imagefilledrectangle($this->img,
+				$pos->x - $text_width / 2,
+				$pos->y - $text_height + $this->players_size / 2,
+				$pos->x + $text_width / 2,
+				$pos->y + $this->players_size / 2,
+				$this->colors['name_bg']);
+		}
+		
+		// dessin du text
+		imagettftext($this->img, $this->ttfont_size, 0,
+			$pos->x - $text_width / 2,
+			$pos->y - $text_height + $this->players_size / 2,
+			$this->colors['lieu_str'], "./DejaVuSans.ttf", $text);
+	}
+
+	/*
 	Affiche le temps utilisé pour générer l'image.
 	*/
 	private function addTimeUsed($time) {
@@ -896,6 +929,10 @@ class Carte {
 				case "brouillard":
 					// brouille les zones non visitées
 					$this->drawBrouillard();
+					break;
+				case "nid":
+					// brouille les zones non visitées
+					$this->drawNid();
 					break;
 				case "joueur":
 					// dessin des joueurs

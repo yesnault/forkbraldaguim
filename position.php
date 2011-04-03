@@ -64,6 +64,7 @@ function initOnClick() {
 		document.getElementById("chk_joueur").addEventListener('click', show_hide_layer, false);
 		document.getElementById("chk_lieumythique").addEventListener('click', show_hide_layer, false);
 		document.getElementById("chk_lieustandard").addEventListener('click', show_hide_layer, false);
+		document.getElementById("chk_nid").addEventListener('click', show_hide_layer, false);
 		document.getElementById("chk_legende").addEventListener('click', show_hide_layer, false);
 		// refresh player's position
 		//document.getElementById("update_link").addEventListener('click', fetch_position, false);	
@@ -74,6 +75,7 @@ function initOnClick() {
 		document.getElementById("chk_joueur").onclick = show_hide_layer;
 		document.getElementById("chk_lieumythique").onclick = show_hide_layer;
 		document.getElementById("chk_lieustandard").onclick = show_hide_layer;
+		document.getElementById("chk_nid").onclick = show_hide_layer;
 		document.getElementById("chk_legende").onclick = show_hide_layer;
 		//document.getElementById("update_link").onclick = fetch_position;
 	}
@@ -218,6 +220,7 @@ EOF;
 	<div class="map_item" id="map_brouillard"><img src="map.php?type=brouillard&$url_append" /></div>
 	<div class="map_item" id="map_lieumythique"><img src="map.php?type=lieumythique&$url_append" /></div>
 	<div class="map_item" id="map_lieustandard"><img src="map.php?type=lieustandard&$url_append" /></div>
+	<div class="map_item" id="map_nid"><img src="map.php?type=nid&$url_append" /></div>
 	<div class="map_item" id="map_joueur"><img src="map.php?type=joueur&$url_append" /></div>
 	<div class="map_item" id="map_legende"><img src="map.php?type=legende&$url_append" /></div>
 	
@@ -239,6 +242,9 @@ EOF;
 		<br/><input type="checkbox" id="chk_lieustandard" />
 		<label for="chk_lieustandard">Lieux standard</label>
 		
+		<br/><input type="checkbox" id="chk_nid" checked="checked" />
+		<label for="chk_nid">Nids</label>
+
 		<br/><input type="checkbox" id="chk_legende" />
 		<label for="chk_legende">Legende</label>
 		<br />

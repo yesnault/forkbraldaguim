@@ -254,7 +254,7 @@ class Fetch {
 				continue;
 			}
 		}
-		#file_put_contents('cache/'.date("YmdHi").'-'.uniqid(), $content);
+		file_put_contents('cache/'.date("YmdHi").'-'.uniqid(), $content);
 	}
 	
 	/*
