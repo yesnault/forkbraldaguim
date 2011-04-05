@@ -27,7 +27,7 @@ require_once("conf.php");
 /*
 Trie les joueurs sur leur position
 */
- function sort_player($a, $b) {
+function sort_player($a, $b) {
 	if ($a->position->x == $b->position->x) {
 		if ($a->position->y == $b->position->y) {
 			return 0;

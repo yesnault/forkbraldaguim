@@ -33,7 +33,7 @@ class Fetch {
 	}
 	
 	public function fetchAllPlayers() {
-		$query = "SELECT braldahim_id, restricted_password FROM user;";
+		$query = "SELECT braldahim_id, restricted_password, last_event FROM user;";
 		$res = mysql_query($query);
 		
 		if (! $res) die('Impossible de lancer une requete');
@@ -53,6 +53,10 @@ class Fetch {
 			$url = "http://sp.braldahim.com/scripts/competences/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=1";
 			#$url =  "http://www.guim.info/braldahim/toto";
 			$this->fetch_competence($url);
+
+			$url = "http://sp.braldahim.com/scripts/evenements/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=2";
+			#$url =  "http://www.guim.info/braldahim/toto";
+			$this->fetch_evenements($url, $row['braldahim_id'], $row['last_event']);
 		}
 	}
 	
@@ -604,6 +608,169 @@ class Fetch {
 					mysql_real_escape_string($line[5]),
 					mysql_real_escape_string($line[0]),
 					mysql_real_escape_string($line[2]));
+				mysql_query($query);
+			}
+		}
+	}
+
+	/*
+	MAJ des evenements du joueur
+	Va chercher le contenu de l'url, le traite et le stock en db
+	*/
+	private function fetch_evenements($url, $braldun, $last_event) {
+		$content = file($url);
+		// content[0] = info sur le script
+		// content[1] = entete
+		// content[X] = valeur
+
+		//TYPE:dynamique;NB_APPELS:6;MAX_AUTORISE:24
+		//idBraldun;idEvenement;type;date;details;detailsbot
+		//282;401406;Déplacement;2011-04-04 09:20:10;<!-- DEBUT_BRALDUN:282-- FIN_A -->Bulrog Polpeur (282)<!-- FIN --> a marché;Influence sur la balance de faim : -1 %<br><br>Cela vous a co&ucirct&eacute 1 PA<br>D&eacuteplacement r&eacuteussi jusqu'en: <br>x=-24, y=8 <br>Type de terrain de d&eacutepart : Plaine
+
+		if (preg_match("/^ERREUR-/", $content[0]) == 1) {
+			// erreur lors de l'appel du script (cf : http://sp.braldahim.com/)
+			echo "[".date("YmdHi")."] ".$content[0];
+			return;
+		}
+
+		$last = null;
+		for ($i=2; $i<count($content); $i++) {
+			$line = trim($content[$i]);
+			if (strlen($line) == 0) {
+				continue;
+			}
+			if (preg_match("/([^;]*);([^;]*);([^;]*);([^;]*);([^;]*);(.*)/", $line, $m) == 1) {
+				if ($last == null) {
+					$last = $m[2];
+				}
+				// on ne "rejoue" pas les anciens evt
+				if ($last < $last_event) {
+					break;
+				}
+				if ($m[3] == 'Compétence') {
+					$this->bestiaireParse($m[6], $m[4]);
+				}
+			}
+		}
+		$query = "UPDATE user SET last_event='$last' WHERE braldahim_id=$braldun;";
+		mysql_query($query);
+	}
+
+	/*
+	Insère en base le resultat d'une identifiation
+	$desc : resultat de l'identification
+	$date : date de l'identification (les desc change au cours du temps,
+	donc on ne conserve pas les trops vieilles identifications)
+	*/
+	private function bestiaireParse($desc, $date) {
+		$desc = trim($desc);
+
+		if (is_null($desc) || empty($desc)) {
+			return;
+		}
+
+		$date = (int)(str_replace('-', '', substr($date, 0, 10)));
+		// date de la dernière RAZ des monstres
+		if ($date < 20110214) {
+			return;
+		}
+		$lines = explode("<br>", $desc);
+		$monstre = array();
+		$query_keys = array();
+		$query_values = array();
+		foreach ($lines as $str) {
+			if (preg_match("/Le monstre ([^\(]*) \((\d+)\) a les caract.*/", $str, $match) == 1) {
+				$monstre['nom'] = trim($match[1]);
+				$monstre['id'] = trim($match[2]);
+				$query_keys[] = 'nom, id';
+				$query_values[] = "'".mysql_real_escape_string($match[1])."',".$match[2];
+				continue;
+			}
+			if (preg_match("/Niveau : entre (\d+) et (\d+)/", $str, $match) == 1) {
+				$monstre['niveau_min'] = trim($match[1]);
+				$monstre['niveau_max'] = trim($match[2]);
+				$query_keys[] = 'niveau_min, niveau_max';
+				$query_values[] = $match[1].", ".$match[2];
+				continue;
+			}
+			if (preg_match("/Point de vie max : entre (\d+) et (\d+)/", $str, $match) == 1) {
+				$monstre['pv_max_min'] = trim($match[1]);
+				$monstre['pv_max_max'] = trim($match[2]);
+				$query_keys[] = 'pv_max_min, pv_max_max';
+				$query_values[] = $match[1].", ".$match[2];
+				continue;
+			}
+			if (preg_match("/Vue : entre (\d+) et (\d+)/", $str, $match) == 1) {
+				$monstre['vue_min'] = trim($match[1]);
+				$monstre['vue_max'] = trim($match[2]);
+				$query_keys[] = 'vue_min, vue_max';
+				$query_values[] = $match[1].", ".$match[2];
+				continue;
+			}
+			if (preg_match("/Force : entre (\d+) et (\d+) (D\d+)/", $str, $match) == 1) {
+				$monstre['force_min'] = trim($match[1]);
+				$monstre['force_max'] = trim($match[2]);
+				$monstre['force_unite'] = trim($match[3]);
+				$query_keys[] = 'force_min, force_max, force_unite';
+				$query_values[] = $match[1].", ".$match[2].", '".mysql_real_escape_string($match[3])."'";
+				continue;
+			}
+			if (preg_match("/Agilit.+ : entre (\d+) et (\d+) (D\d+)/", $str, $match) == 1) {
+				$monstre['agilite_min'] = trim($match[1]);
+				$monstre['agilite_max'] = trim($match[2]);
+				$monstre['agilite_unite'] = trim($match[3]);
+				$query_keys[] = 'agilite_min, agilite_max, agilite_unite';
+				$query_values[] = $match[1].", ".$match[2].", '".mysql_real_escape_string($match[3])."'";
+				continue;
+			}
+			if (preg_match("/Sagesse : entre (\d+) et (\d+) (D\d+)/", $str, $match) == 1) {
+				$monstre['sagesse_min'] = trim($match[1]);
+				$monstre['sagesse_max'] = trim($match[2]);
+				$monstre['sagesse_unite'] = trim($match[3]);
+				$query_keys[] = 'sagesse_min, sagesse_max, sagesse_unite';
+				$query_values[] = $match[1].", ".$match[2].", '".mysql_real_escape_string($match[3])."'";
+				continue;
+			}
+			if (preg_match("/Vigueur : entre (\d+) et (\d+) (D\d+)/", $str, $match) == 1) {
+				$monstre['vigueur_min'] = trim($match[1]);
+				$monstre['vigueur_max'] = trim($match[2]);
+				$monstre['vigueur_unite'] = trim($match[3]);
+				$query_keys[] = 'vigueur_min, vigueur_max, vigueur_unite';
+				$query_values[] = $match[1].", ".$match[2].", '".mysql_real_escape_string($match[3])."'";
+				continue;
+			}
+			if (preg_match("/R.+g.+n.+ration : entre (\d+) et (\d+)/", $str, $match) == 1) {
+				$monstre['regeneration_min'] = trim($match[1]);
+				$monstre['regeneration_max'] = trim($match[2]);
+				$query_keys[] = 'regeneration_min, regeneration_max';
+				$query_values[] = $match[1].", ".$match[2];
+				continue;
+			}
+			if (preg_match("/Armure : entre (\d+) et (\d+)/", $str, $match) == 1) {
+				$monstre['armure_min'] = trim($match[1]);
+				$monstre['armure_max'] = trim($match[2]);
+				$query_keys[] = 'armure_min, armure_max';
+				$query_values[] = $match[1].", ".$match[2];
+				continue;
+			}
+			if (preg_match("/Vous avez .* une distance de (\d+) de la cible/", $str, $match) == 1) {
+				$monstre['distance'] = trim($match[1]);
+				$query_keys[] = 'distance';
+				$query_values[] = $match[1];
+				continue;
+			}
+		}
+		// si on a un nom on insère
+		if (in_array('nom, id', $query_keys)) {
+			$query = "SELECT id FROM fiche_monstre WHERE id={$monstre['id']};";
+			$res = mysql_query($query);
+			if (mysql_num_rows($res) == 0) {
+				mysql_free_result($res);
+				$query = "INSERT INTO fiche_monstre(".
+					implode(',', $query_keys).
+					", last_update) VALUES(".
+					implode(',', $query_values).
+					", current_date);";
 				mysql_query($query);
 			}
 		}

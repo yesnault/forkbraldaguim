@@ -348,7 +348,7 @@ EOF;
 
 		// latence
 		$lat_end = $cum_start = -1;
-		$t = strtotime($p['dateFinLatence']);
+		$t = strtotime($p['dateFinLatence']) + $p['dureeBmTour']*60;
 		if ($now_min < $t && $t < $now_max) {
 			$lat_end = ($t - $now_min) / $div;
 		}

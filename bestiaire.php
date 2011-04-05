@@ -46,7 +46,8 @@ class Bestiaire extends Application {
 				break;
 			case 'bestiaire_submit':
 				if (!$this->logged) break;
-				$this->bestiaireParse();
+				$this->bestiaire();
+				//$this->bestiaireParse();
 				break;
 			case 'home':
 			default:
@@ -176,6 +177,8 @@ EOF;
 <div id="monstre_detail">
 {$str_monstre}
 </div>
+EOF;
+/*
 <div id="monstre_saisie">
 <p>Collez le r&eacute;sultat de votre identification ici : </p>
 	<form action="bestiaire.php" method="POST">
@@ -184,7 +187,7 @@ EOF;
 	<input type="submit" value="Enregistrer" />
 	</form>
 </div>
-EOF;
+*/
 		$this->html_content = $content;
 	}
 	

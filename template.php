@@ -178,6 +178,22 @@ a:hover {color: #F0AE21;}
 	border: 1px solid black;
 	margin: .2em 0 0 0;
 }
+
+/* simulateur */
+.colonne {
+	float: left;
+}
+.colonne table {
+	border: 1px solid #5D8231;
+	border-collapse: collapse;
+	width: 100%;
+}
+.colonne td {
+	text-align: center;
+}
+.colonne input[type="text"] {
+	width: 30px;
+}
 </style>
 
 <title><?php  echo $app->getHtmlTitle(); ?></title>
@@ -197,6 +213,7 @@ a:hover {color: #F0AE21;}
 		<li><a href="position.php?action=position">Position</a></li>
 		<li><a href="bestiaire.php?action=bestiaire">Bestiaire</a></li>
 		<li><a href="profil.php?action=allprofils">Profils</a></li>
+		<li><a href="simulateur.php?action=simulation">Simulateur</a></li>
 		<?php } ?>
 </ul>
 </div>
