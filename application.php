@@ -38,7 +38,7 @@ class Application {
 		mysql_select_db(DB_NAME);
 		mysql_set_charset('utf8', $this->db);
 		mysql_query("SET character_set_results = 'utf8', character_set_client = 'utf8', character_set_connection = 'utf8', character_set_database = 'utf8', character_set_server = 'utf8'");
-		$this->html_title = 'Les premiers Brald&ucirc;ns';
+		$this->html_title = COMMUNAUTE_NOM;
 		$this->html_script = '';
 		$this->logged = isset($_SESSION['bra_num']);
 		$this->actionParse();
@@ -97,8 +97,9 @@ class Application {
 	Action 'home', on affiche un message d'accueil
 	*/
 	public function home() {
+		$com = COMMUNAUTE_NOM;
 		$this->html_content = <<<EOF
-<p>Bienvenue sur la page de positionnement de la communaut&eacute; <b>Les premiers brald&ucirc;ns</b>.</p>
+<p>Bienvenue sur la page de positionnement de la communaut&eacute; <b>{$com}</b>.</p>
 <p>Pour vous inscrire, utilisez le lien <a href="index.php?action=inscription">Inscription</a>.</p>
 <p>Vous pourrez ensuite conna&icirc;tre la position des brald&ucirc;ns de la communaut&eacute;.</p>
 <p>La mise à jour des positions &agrave; lieu <u>toutes les 6 heures</u>.</p>

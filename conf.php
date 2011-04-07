@@ -11,6 +11,7 @@ if (! defined('CSV_DIR')) define('CSV_DIR', '/var/www/braldahim/csv');
 if (! defined('FILE_bralduns_csv')) define('FILE_bralduns_csv', CSV_DIR.'/bralduns.csv');
 // numero identifiant la communauté
 if (! defined('COMMUNAUTE')) define('COMMUNAUTE', 1);
+if (! defined('COMMUNAUTE_NOM')) define('COMMUNAUTE_NOM', 'Les premiers Bralduns');
 
 // base de données
 if (! defined('DB_HOST')) define('DB_HOST', 'localhost');
