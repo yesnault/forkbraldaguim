@@ -816,6 +816,13 @@ class Carte {
 	Dessine les nids
 	*/
 	private function drawNid() {
+		// Pour obtenir un fond transparent et des polices antialiasées
+		// il faut supprimer l'alphablending et activer la transparence du png
+		// avec imagesavealpha
+		imagesavealpha($this->img, true);
+		imagealphablending($this->img, false);
+		imagefill($this->img, 0, 0, $this->colors['transparent_alpha']);
+		
 		// On va chercher tous les objets qui se trouvent
 		// entre les bornes maximales de la carte
 		$p_min = $this->pixelToPosition(new Point(0, $this->size)); // coin bas gauche (min X et min Y)
@@ -835,13 +842,6 @@ class Carte {
 	Dessine un point et un texte
 	*/
 	private function drawPointText($position, $text, $color, $useBg=false) {
-		// Pour obtenir un fond transparent et des polices antialiasées
-		// il faut supprimer l'alphablending et activer la transparence du png
-		// avec imagesavealpha
-		imagesavealpha($this->img, true);
-		imagealphablending($this->img, false);
-		imagefill($this->img, 0, 0, $this->colors['transparent_alpha']);
-		
 		// coordonnées du centre
 		$pos = $this->positionToPixel($position);
 		// pour faire pointer au centre de la case
@@ -931,7 +931,6 @@ class Carte {
 					$this->drawBrouillard();
 					break;
 				case "nid":
-					// brouille les zones non visitées
 					$this->drawNid();
 					break;
 				case "joueur":

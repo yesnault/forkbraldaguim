@@ -87,6 +87,11 @@ class Fetch {
 		$braldun = array();
 		$profil = array();
 		$content = file($url);
+		if (count($content) == 0) {
+			echo "Erreur : le fichier est vide\n";
+			return;
+		}
+
 		// content[0] = info sur le script
 		// content[1] = entete
 		// content[2] = valeur
@@ -221,6 +226,10 @@ class Fetch {
 		$vue = array();
 		$content = file($url);
 		// pour le format voir : http://sp.braldahim.com/
+		if (count($content) == 0) {
+			echo "Erreur : le fichier est vide\n";
+			return;
+		}
 		
 		foreach ($content as $line) {
 			if (preg_match("/^ERREUR-/", $line) == 1) {
@@ -557,6 +566,10 @@ class Fetch {
 	*/
 	private function fetch_competence($url) {
 		$content = file($url);
+		if (count($content) == 0) {
+			echo "Erreur : le fichier est vide\n";
+			return;
+		}
 		// content[0] = info sur le script
 		// content[1] = entete
 		// content[2] = valeur
@@ -619,6 +632,10 @@ class Fetch {
 	*/
 	private function fetch_evenements($url, $braldun, $last_event) {
 		$content = file($url);
+		if (count($content) == 0) {
+			echo "Erreur : le fichier est vide\n";
+			return;
+		}
 		// content[0] = info sur le script
 		// content[1] = entete
 		// content[X] = valeur

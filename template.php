@@ -85,6 +85,19 @@ a:hover {color: #F0AE21;}
 	left: 520px;
 	margin: 10px 10px;
 }
+#map_control td {
+	width: 31px;
+}
+#map_control img {
+	border: none;
+}
+td.map_zoom {
+	height: 20px;
+}
+.map_zoom a {
+	display: block;
+	height:100%;
+}
 
 #monstre_liste {
 	float: left;

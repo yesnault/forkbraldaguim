@@ -205,12 +205,20 @@ EOF;
 		// construction des formulaires de zoom/deplacement
 		$move_delta = pow(2, $zoom+1); // le decallage est dependant du zoom
 		
+		/*
 		$ctrl_zoom_p = $this->getMoveControl($zoom-1, $x, $y, "zoom +");
 		$ctrl_zoom_m = $this->getMoveControl($zoom+1, $x, $y, "zoom -");
 		$ctrl_haut = $this->getMoveControl($zoom, $x, $y+$move_delta, "Haut");
 		$ctrl_bas = $this->getMoveControl($zoom, $x, $y-$move_delta, "Bas");
 		$ctrl_gauche = $this->getMoveControl($zoom, $x-$move_delta, $y, "Gauche");
 		$ctrl_droite = $this->getMoveControl($zoom, $x+$move_delta, $y, "Droite");
+		*/
+		$ctrl_zoom_p = $this->getMoveControl($zoom-1, $x, $y, '<img src="img/zoomplus.png" />');
+		$ctrl_zoom_m = $this->getMoveControl($zoom+1, $x, $y, '<img src="img/zoommoins.png"/>');
+		$ctrl_haut = $this->getMoveControl($zoom, $x, $y+$move_delta, '<img src="img/boussoleN.png" />');
+		$ctrl_bas = $this->getMoveControl($zoom, $x, $y-$move_delta, '<img src="img/boussoleS.png" />');
+		$ctrl_gauche = $this->getMoveControl($zoom, $x-$move_delta, $y, '<img src="img/boussoleO.png" />');
+		$ctrl_droite = $this->getMoveControl($zoom, $x+$move_delta, $y, '<img src="img/boussoleE.png" />');
 		
 		// construction de l'affichage de la page
 		$content =<<<EOF
@@ -227,7 +235,7 @@ EOF;
 	<div id="map_info">
 		<p>Affichage des informations :</p>
 		
-		<br/><input type="checkbox" id="chk_fond" checked="checked" />
+		<input type="checkbox" id="chk_fond" checked="checked" />
 		<label for="chk_fond">Fond de carte</label>
 		
 		<br/><input type="checkbox" id="chk_brouillard" checked="checked" />
@@ -248,10 +256,10 @@ EOF;
 		<br/><input type="checkbox" id="chk_legende" />
 		<label for="chk_legende">Legende</label>
 		<br />
-		<table>
-			<tr><td>$ctrl_zoom_m</td><td>$ctrl_zoom_p</td></tr>
+		<table id="map_control">
+			<tr><td class="map_zoom">$ctrl_zoom_m</td><td colspan="2" class="map_zoom">$ctrl_zoom_p</td></tr>
 			<tr><td></td><td>$ctrl_haut</td><td></td></tr>
-			<tr><td>$ctrl_gauche</td><td></td><td>$ctrl_droite</td></tr>
+			<tr><td>$ctrl_gauche</td><td><img src="img/boussoleC.png" /></td><td>$ctrl_droite</td></tr>
 			<tr><td></td><td>$ctrl_bas</td><td></td></tr>
 		</table>
 	</div>
