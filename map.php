@@ -17,12 +17,11 @@
     along with braldaguim.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-error_reporting(E_ALL);
-
 session_start();
 if (! isset($_SESSION['bra_num'])) exit();
 
 require_once("conf.php");
+error_reporting(E_ALL ^ E_NOTICE);
 
 /*
 Trie les joueurs sur leur position

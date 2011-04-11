@@ -17,8 +17,6 @@
     along with braldaguim.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-error_reporting(E_ALL);
-
 session_start();
 
 require("application.php");

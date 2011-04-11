@@ -17,11 +17,10 @@
     along with braldaguim.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-error_reporting(E_ALL);
-
 if (! isset($_SESSION)) session_start();
 
 require("conf.php");
+error_reporting(E_ALL ^ E_NOTICE);
 
 class Application {
 	protected $html_title;

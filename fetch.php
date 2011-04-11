@@ -810,5 +810,7 @@ else {
 	$fetch->fetchOnePlayer($_SESSION['bra_num']);*/
 	//sleep(1);
 	echo "ok";
+// mettre un timer pour éviter que l'utilisateur mette à jour trop souvent
+// par exemple bloquer pour 1h la maj en se basant sur last_updated
 }
 ?>
