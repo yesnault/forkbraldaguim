@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="210mm"
+   height="297mm"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.48.0 r9654"
+   sodipodi:docname="boussole.svg">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.35"
+     inkscape:cx="719.28858"
+     inkscape:cy="1070.1603"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="true"
+     showguides="true"
+     inkscape:guide-bbox="true"
+     inkscape:window-width="1098"
+     inkscape:window-height="669"
+     inkscape:window-x="224"
+     inkscape:window-y="86"
+     inkscape:window-maximized="0" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Calque 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <g
+       id="g3801"
+       inkscape:export-filename="C:\Users\mguilbau\Desktop\perso\bral\boussoleN.png"
+       inkscape:export-xdpi="14.97"
+       inkscape:export-ydpi="14.97">
+      <path
+         sodipodi:nodetypes="cccc"
+         inkscape:connector-curvature="0"
+         id="path2987"
+         d="M 300,52.362183 200,252.36218 c 80,-40 120,-40 200,0 z"
+         style="fill:#bd6c18;stroke:#000000;stroke-width:1px;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1;fill-opacity:1" />
+      <path
+         inkscape:connector-curvature="0"
+         id="path3773"
+         d="m 297.1875,107.5 c -17.04886,33.55367 -34.12457,67.45229 -50.46875,101.125 29.17017,-8.44425 60.94249,-10.95372 90.8125,-4.25 5.36442,0.89696 11.08339,3.31645 15.96875,4.09375 -1.54843,-5.3252 -5.90444,-9.8526 -7.62994,-15.3064 -15.40974,-30.37945 -30.44793,-60.94512 -45.74506,-91.3811 -0.97917,1.90625 -1.95833,3.8125 -2.9375,5.71875 z"
+         style="fill:#9e6426;fill-opacity:1;stroke:#000000;stroke-width:1px;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1" />
+    </g>
+    <g
+       id="g3805"
+       transform="matrix(-1,0,0,-1,600,704.72436)"
+       inkscape:export-filename="C:\Users\mguilbau\Desktop\perso\bral\boussoleS.png"
+       inkscape:export-xdpi="14.97"
+       inkscape:export-ydpi="14.97">
+      <path
+         style="fill:#bd6c18;fill-opacity:1;stroke:#000000;stroke-width:1px;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+         d="M 300,52.362183 200,252.36218 c 80,-40 120,-40 200,0 z"
+         id="path3807"
+         inkscape:connector-curvature="0"
+         sodipodi:nodetypes="cccc" />
+      <path
+         style="fill:#9e6426;fill-opacity:1;stroke:#000000;stroke-width:1px;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+         d="m 297.1875,107.5 c -17.04886,33.55367 -34.12457,67.45229 -50.46875,101.125 29.17017,-8.44425 60.94249,-10.95372 90.8125,-4.25 5.36442,0.89696 11.08339,3.31645 15.96875,4.09375 -1.54843,-5.3252 -5.90444,-9.8526 -7.62994,-15.3064 -15.40974,-30.37945 -30.44793,-60.94512 -45.74506,-91.3811 -0.97917,1.90625 -1.95833,3.8125 -2.9375,5.71875 z"
+         id="path3809"
+         inkscape:connector-curvature="0" />
+    </g>
+    <g
+       transform="matrix(0,-1,1,0,-52.36218,652.36218)"
+       id="g3811"
+       inkscape:export-filename="C:\Users\mguilbau\Desktop\perso\bral\boussoleO.png"
+       inkscape:export-xdpi="14.97"
+       inkscape:export-ydpi="14.97">
+      <path
+         sodipodi:nodetypes="cccc"
+         inkscape:connector-curvature="0"
+         id="path3813"
+         d="M 300,52.362183 200,252.36218 c 80,-40 120,-40 200,0 z"
+         style="fill:#bd6c18;fill-opacity:1;stroke:#000000;stroke-width:1px;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1" />
+      <path
+         inkscape:connector-curvature="0"
+         id="path3815"
+         d="m 297.1875,107.5 c -17.04886,33.55367 -34.12457,67.45229 -50.46875,101.125 29.17017,-8.44425 60.94249,-10.95372 90.8125,-4.25 5.36442,0.89696 11.08339,3.31645 15.96875,4.09375 -1.54843,-5.3252 -5.90444,-9.8526 -7.62994,-15.3064 -15.40974,-30.37945 -30.44793,-60.94512 -45.74506,-91.3811 -0.97917,1.90625 -1.95833,3.8125 -2.9375,5.71875 z"
+         style="fill:#9e6426;fill-opacity:1;stroke:#000000;stroke-width:1px;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1" />
+    </g>
+    <g
+       id="g3817"
+       transform="matrix(0,1,-1,0,652.36218,52.362183)"
+       inkscape:export-filename="C:\Users\mguilbau\Desktop\perso\bral\boussoleE.png"
+       inkscape:export-xdpi="14.97"
+       inkscape:export-ydpi="14.97">
+      <path
+         style="fill:#bd6c18;fill-opacity:1;stroke:#000000;stroke-width:1px;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+         d="M 300,52.362183 200,252.36218 c 80,-40 120,-40 200,0 z"
+         id="path3819"
+         inkscape:connector-curvature="0"
+         sodipodi:nodetypes="cccc" />
+      <path
+         style="fill:#9e6426;fill-opacity:1;stroke:#000000;stroke-width:1px;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+         d="m 297.1875,107.5 c -17.04886,33.55367 -34.12457,67.45229 -50.46875,101.125 29.17017,-8.44425 60.94249,-10.95372 90.8125,-4.25 5.36442,0.89696 11.08339,3.31645 15.96875,4.09375 -1.54843,-5.3252 -5.90444,-9.8526 -7.62994,-15.3064 -15.40974,-30.37945 -30.44793,-60.94512 -45.74506,-91.3811 -0.97917,1.90625 -1.95833,3.8125 -2.9375,5.71875 z"
+         id="path3821"
+         inkscape:connector-curvature="0" />
+    </g>
+    <g
+       id="g3855"
+       inkscape:export-filename="C:\Users\mguilbau\Desktop\perso\bral\boussoleC.png"
+       inkscape:export-xdpi="14"
+       inkscape:export-ydpi="14">
+      <path
+         inkscape:export-ydpi="14.97"
+         inkscape:export-xdpi="14.97"
+         inkscape:export-filename="C:\Users\mguilbau\Desktop\perso\bral\boussole.png"
+         transform="matrix(1.1129032,0,0,1.1290323,20.184328,-126.11125)"
+         sodipodi:open="true"
+         sodipodi:end="6.5449847"
+         sodipodi:start="0.26205283"
+         d="m 336.97619,446.7364 a 88.571426,88.571426 0 1 1 0.006,-0.0217"
+         sodipodi:ry="88.571426"
+         sodipodi:rx="88.571426"
+         sodipodi:cy="423.79074"
+         sodipodi:cx="251.42857"
+         id="path2985"
+         style="fill:#bd6c18;fill-opacity:1;fill-rule:nonzero;stroke:#0000ff;stroke-width:0.62716537999999999;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+         sodipodi:type="arc" />
+      <path
+         inkscape:export-ydpi="14.97"
+         inkscape:export-xdpi="14.97"
+         inkscape:export-filename="C:\Users\mguilbau\Desktop\perso\bral\boussoleC.png"
+         inkscape:connector-curvature="0"
+         id="path3823"
+         d="m 299.09375,280.625 c -43.71608,-0.85972 -80.06588,47.26037 -67.65625,89.09375 8.56039,36.61274 49.55385,63.60576 86.34375,52.1875 35.32452,-9.02783 60.05383,-48.12022 51.3125,-83.9375 -6.26924,-32.07299 -36.49757,-59.2033 -70,-57.34375 z"
+         style="fill:#9e6426;fill-opacity:1;fill-rule:nonzero;stroke:#0000ff;stroke-width:0.70301396000000005;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />
+    </g>
+    <g
+       id="g4086"
+       inkscape:export-filename="C:\Users\mguilbau\Desktop\perso\bral\zoommoins.png"
+       inkscape:export-xdpi="3.1400001"
+       inkscape:export-ydpi="3.1400001">
+      <path
+         inkscape:connector-curvature="0"
+         id="path4070"
+         d="m 1394.875,22.84375 c -70.5385,2.211168 -141.2444,-2.50773 -211.6875,2.34375 -7.4651,1.766083 -11.0304,9.974624 -14.4063,16.21875 -6.5191,16.860184 -7.568,35.999033 -3.4687,53.625 2.8172,10.79247 8.4699,22.46303 18.625,27.6875 17.8265,4.12166 36.3629,-1.43701 54.4686,0.88171 56.0701,-0.81152 112.4857,3.08085 168.3127,-2.44421 15.0694,-11.45089 17.2874,-32.246744 17.8262,-49.906096 -0.1465,-17.678897 -5.5252,-37.836139 -21.5762,-47.593904 -2.6036,-0.756929 -5.3796,-0.902544 -8.0938,-0.8125 z"
+         style="fill:#9e6426;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1.227;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />
+      <path
+         inkscape:connector-curvature="0"
+         id="rect4054"
+         d="M 1264.5938,9 C 1191.7444,10.167379 1118.7789,7.716825 1046,10.3125 c -18.471,6.795498 -26.4001,27.479432 -29.5312,45.375 -4.9236,27.088434 0.4445,58.36864 21.6874,77.28125 15.3391,9.53763 34.0608,2.92034 50.9688,4.74457 61.5092,-0.3732 123.126,1.37518 184.5625,-1.15082 19.4909,-7.58618 27.005,-29.77695 29.7813,-48.875 3.7831,-26.432427 -1.8261,-56.876431 -23.5313,-74.34375 -4.5502,-2.923495 -9.854,-4.6298841 -15.3437,-4.34375 z"
+         style="fill:#9e6426;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1.127;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />
+      <rect
+         rx="51.132702"
+         ry="78.275558"
+         y="-4.7806749"
+         x="852.85712"
+         height="156.55112"
+         width="317.65048"
+         id="rect4006"
+         style="fill:#9e6426;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1.127;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />
+      <path
+         inkscape:connector-curvature="0"
+         id="path4038"
+         d="m 898.47012,1.90625 c -23.62044,1.7556192 -42.62258,47.443308 -35.53166,87.592997 5.38339,37.467663 30.65792,62.433133 51.35722,47.719503 19.1964,-11.60543 31.59198,-52.049909 24.58179,-86.388371 C 933.66118,21.397991 916.70517,-0.60165268 899.01949,1.875 l -0.54937,0.03125 z"
+         style="fill:#110b04;fill-opacity:1;fill-rule:nonzero;stroke:#0000ff;stroke-width:0.47229236;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />
+    </g>
+  </g>
+</svg>
