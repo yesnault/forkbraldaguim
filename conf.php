@@ -6,7 +6,7 @@ if (file_exists(dirname(__FILE__)."/conf.local.php")) {
 }
 
 // repertoire contenant les fichiers csv
-if (! defined('CSV_DIR')) define('CSV_DIR', '/var/www/braldahim/csv');
+if (! defined('CSV_DIR')) define('CSV_DIR', dirname(__FILE__).'/csv');
 // nom du fichier contenant la liste des bralduns
 if (! defined('FILE_bralduns_csv')) define('FILE_bralduns_csv', CSV_DIR.'/bralduns.csv');
 // numero identifiant la communauté
