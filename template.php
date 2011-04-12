@@ -97,6 +97,7 @@ td.map_zoom {
 .map_zoom a {
 	display: block;
 	height:100%;
+	text-align: center;
 }
 
 #monstre_liste {

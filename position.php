@@ -210,7 +210,7 @@ EOF;
 		<label for="chk_legende">Legende</label>
 		<br />
 		<table id="map_control">
-			<tr><td class="map_zoom">$ctrl_zoom_m</td><td colspan="2" class="map_zoom">$ctrl_zoom_p</td></tr>
+			<tr><td class="map_zoom">$ctrl_zoom_m</td><td></td><td class="map_zoom">$ctrl_zoom_p</td></tr>
 			<tr><td></td><td>$ctrl_haut</td><td></td></tr>
 			<tr><td>$ctrl_gauche</td><td><img src="img/boussoleC.png" /></td><td>$ctrl_droite</td></tr>
 			<tr><td></td><td>$ctrl_bas</td><td></td></tr>

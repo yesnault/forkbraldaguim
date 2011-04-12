@@ -25,4 +25,7 @@ if (! defined('DEF_ZOOM')) define('DEF_ZOOM', 3);
 // temps d'attente entre 2 update
 if (! defined('UPDATE_DELAY')) define('UPDATE_DELAY', 6200);
 
+// conserver les fichiers telechargés
+if (! defined('KEEP_SCRIPT_FILE')) define('KEEP_SCRIPT_FILE', 'no');
+
 ?>

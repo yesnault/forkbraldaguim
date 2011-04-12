@@ -273,7 +273,9 @@ class Fetch {
 				continue;
 			}
 		}
-		file_put_contents('cache/'.date("YmdHi").'-'.uniqid(), $content);
+		if (KEEP_SCRIPT_FILE == "yes") {
+			file_put_contents('cache/'.date("YmdHi").'-'.uniqid(), $content);
+		}
 	}
 	
 	/*
