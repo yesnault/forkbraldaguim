@@ -23,14 +23,14 @@ $files = array(
 );
 
 foreach ($files as $f) {
-	file_put_contents("csv/$f", file_get_contents("http://public.braldahim.com/$f"));
+	file_put_contents(dirname(__FILE__)."/csv/$f", file_get_contents("http://public.braldahim.com/$f"));
 }
 
 /*
 zones.csv
 id_zone	id_fk_environnement_zone	nom_systeme_environnement	x_min_zone	x_max_zone	y_min_zone	y_max_zone
 */
-$content = file('csv/zones.csv');
+$content = file(dirname(__FILE__).'/csv/zones.csv');
 if (count($content) != 0) {
 	mysql_query("TRUNCATE zone;");
 	$query_start = "INSERT INTO zone VALUES(";
@@ -45,7 +45,7 @@ if (count($content) != 0) {
 villes.csv
 id_ville	nom_ville	est_capitale_ville	x_min_ville	y_min_ville	x_max_ville	y_max_ville	id_region	nom_region
 */
-$content = file('csv/villes.csv');
+$content = file(dirname(__FILE__).'/csv/villes.csv');
 if (count($content) != 0) {
 	mysql_query("TRUNCATE ville;");
 	$query_start = "INSERT INTO ville VALUES(";

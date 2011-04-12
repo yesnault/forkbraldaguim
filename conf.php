@@ -22,4 +22,7 @@ if (! defined('DB_PASS')) define('DB_PASS', 'braldahim_pass');
 // niveau de zoom par defaut
 if (! defined('DEF_ZOOM')) define('DEF_ZOOM', 3);
 
+// temps d'attente entre 2 update
+if (! defined('UPDATE_DELAY')) define('UPDATE_DELAY', 6200);
+
 ?>

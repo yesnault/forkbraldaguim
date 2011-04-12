@@ -297,7 +297,7 @@ EOF;
 	<p>Votre dernière mise à jour a eu lieu le : {$p['last_update']}</p>
 EOF;
 			// si on a le droit de mettre a jour
-			if ($p['diff'] > 6200) {
+			if ($p['diff'] > UPDATE_DELAY) {
 				$content .=<<<EOF
 	<form action="account.php" method="POST">
 	<input type="hidden" name="action" value="fetch_me" />
@@ -353,5 +353,4 @@ EOF;
 $app = new Account();
 include("template.php");
 ?>
-
 
