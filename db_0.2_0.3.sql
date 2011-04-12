@@ -1,0 +1,1 @@
+ALTER TABLE profil MODIFY last_update TIMESTAMP DEFAULT 0;

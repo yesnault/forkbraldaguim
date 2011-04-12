@@ -64,8 +64,6 @@ function initOnClick() {
 		document.getElementById("chk_lieustandard").addEventListener('click', show_hide_layer, false);
 		document.getElementById("chk_nid").addEventListener('click', show_hide_layer, false);
 		document.getElementById("chk_legende").addEventListener('click', show_hide_layer, false);
-		// refresh player's position
-		//document.getElementById("update_link").addEventListener('click', fetch_position, false);	
 	}
 	else {
 		document.getElementById("chk_fond").onclick = show_hide_layer;
@@ -75,7 +73,6 @@ function initOnClick() {
 		document.getElementById("chk_lieustandard").onclick = show_hide_layer;
 		document.getElementById("chk_nid").onclick = show_hide_layer;
 		document.getElementById("chk_legende").onclick = show_hide_layer;
-		//document.getElementById("update_link").onclick = fetch_position;
 	}
 	
 }
@@ -99,35 +96,6 @@ function calcDistance() {
 	var dy = pos2[1]-pos1[1];
 	var hyp = Math.floor(Math.sqrt(Math.pow(dx,2) + Math.pow(dy,2)));
 	dr.innerHTML = dx+" cases horizontales et "+dy+" cases verticales, soit un déplacement de "+hyp+" cases.";
-}
-function getHTTPObject() {
-	if (window.XMLHttpRequest) {
-		return new XMLHttpRequest();
-	}
-	else if (window.ActiveXObject) {
-		return new ActiveXObject("Microsoft.XMLHTTP");
-	}
-	else {
-		return null;
-	}
-}
-function fetch_position() {
-	httpObject = getHTTPObject();
-	if (httpObject == null) return;
-	httpObject.open("GET", "fetch.php", true);
-	httpObject.send(null);
-	httpObject.onreadystatechange = updatePositionIcon;
-	document.getElementById('update_link').src = 'img/Throbber-small.gif';
-}
-function updatePositionIcon() {
-	if (httpObject.readyState == 4) {
-		if (httpObject.responseText == 'ok') {
-			document.getElementById('update_link').src = 'img/Throbber-small.png';
-		}
-		else {
-			document.getElementById('update_link').src = 'img/error.png';
-		}
-	}
 }
 EOF;
 		return $this->html_script.$str;
@@ -160,11 +128,6 @@ EOF;
 			// si c'est le joueur connecté, on affiche un lien pour la maj
 			// et on retiens sa position pour le centrage par defaut
 			if ($_SESSION['bra_num'] == $braldun['braldahim_id']) {
-				/*
-				$update_link =<<<EOF
-<img id="update_link" src="img/Throbber-small.png" />
-EOF;
-				*/
 				$x = $braldun['x'];
 				$y = $braldun['y'];
 			}
@@ -203,14 +166,6 @@ EOF;
 		// construction des formulaires de zoom/deplacement
 		$move_delta = pow(2, $zoom+1); // le decallage est dependant du zoom
 		
-		/*
-		$ctrl_zoom_p = $this->getMoveControl($zoom-1, $x, $y, "zoom +");
-		$ctrl_zoom_m = $this->getMoveControl($zoom+1, $x, $y, "zoom -");
-		$ctrl_haut = $this->getMoveControl($zoom, $x, $y+$move_delta, "Haut");
-		$ctrl_bas = $this->getMoveControl($zoom, $x, $y-$move_delta, "Bas");
-		$ctrl_gauche = $this->getMoveControl($zoom, $x-$move_delta, $y, "Gauche");
-		$ctrl_droite = $this->getMoveControl($zoom, $x+$move_delta, $y, "Droite");
-		*/
 		$ctrl_zoom_p = $this->getMoveControl($zoom-1, $x, $y, '<img src="img/zoomplus.png" />');
 		$ctrl_zoom_m = $this->getMoveControl($zoom+1, $x, $y, '<img src="img/zoommoins.png"/>');
 		$ctrl_haut = $this->getMoveControl($zoom, $x, $y+$move_delta, '<img src="img/boussoleN.png" />');

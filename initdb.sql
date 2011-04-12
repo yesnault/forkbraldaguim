@@ -200,7 +200,7 @@ CREATE TABLE profil(
 	estIntangible TINYINT(1),
 	nbPlaquagesSubis MEDIUMINT,
 	nbPlaquagesEffectues MEDIUMINT,
-	last_update DATE
+	last_update TIMESTAMP
 ) CHARACTER SET utf8;
 
 CREATE TABLE competence (

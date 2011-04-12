@@ -71,11 +71,17 @@ class Fetch {
 			if (is_null($row['restricted_password']) || $row['restricted_password'] == 'NULL') {
 				continue;
 			}
-			$url = "http://sp.braldahim.com/scripts/profil/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=1";
+			$url = "http://sp.braldahim.com/scripts/profil/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=2";
 			$this->fetch_position($url);
 			
 			$url = "http://sp.braldahim.com/scripts/vue/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=2";
 			$this->fetch_vue($url);
+
+			$url = "http://sp.braldahim.com/scripts/competences/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=1";
+			$this->fetch_competence($url);
+
+			$url = "http://sp.braldahim.com/scripts/evenements/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=2";
+			$this->fetch_evenements($url, $row['braldahim_id'], $row['last_event']);
 		}
 	}
 	
@@ -165,7 +171,7 @@ class Fetch {
 				implode(',', array_keys($profil)).
 				", last_update) VALUES(".
 				implode(',', $profil).
-				", current_date);";
+				", current_timestamp);";
 			mysql_query($query);
 		}
 		else {
@@ -176,7 +182,7 @@ class Fetch {
 				$lst[] = "$k=$v";
 			}
 			$query .= implode(',', $lst);
-			$query .= ",last_update=current_date WHERE idBraldun={$profil['idbraldun']} ;";
+			$query .= ",last_update=current_timestamp WHERE idBraldun={$profil['idbraldun']} ;";
 			mysql_query($query);
 		}
 	}
@@ -792,25 +798,5 @@ class Fetch {
 			}
 		}
 	}
-}
-
-// si on est en mode CLI, alors on met à jour tous les joueurs
-if ( isset($_SERVER['argc']) && $_SERVER['argc'] >= 1 ) {
-	$fetch = new Fetch();
-	$fetch->fetchAllPlayers();
-}
-// si on est en mode WEB, on ne met à jour que le joueur demandé
-else {
-	session_start();
-	if (! isset($_SESSION['bra_num'])) {
-		echo "not connected";
-		exit;
-	}
-	/*$fetch = new Fetch();
-	$fetch->fetchOnePlayer($_SESSION['bra_num']);*/
-	//sleep(1);
-	echo "ok";
-// mettre un timer pour éviter que l'utilisateur mette à jour trop souvent
-// par exemple bloquer pour 1h la maj en se basant sur last_updated
 }
 ?>

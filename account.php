@@ -20,6 +20,7 @@
 session_start();
 
 require("application.php");
+require("fetch.php");
 
 class Account extends Application {
 	
@@ -68,7 +69,10 @@ class Account extends Application {
 				if (!$this->logged) break;
 				$this->account_update_mdpr();
 				break;
-
+			case 'fetch_me':
+				if (!$this->logged) break;
+				$this->fetch_me();
+				break;
 			case 'home':
 			default:
 				$this->home();
@@ -255,6 +259,18 @@ EOF;
 	Affiche les options de gestion de compte
 	*/
 	private function account() {
+		$p = null;
+		$query = "SELECT idbraldun, last_update, time_to_sec(current_timestamp - last_update) as diff
+			FROM profil WHERE idBraldun = {$_SESSION['bra_num']};";
+		$res = mysql_query($query, $this->db);
+		if (mysql_num_rows($res) == 1) {
+			$p = mysql_fetch_assoc($res);
+		}
+		mysql_free_result($res);
+		if ($p == null) {
+			$this->html_message = "Impossible de trouver votre brald&ucirc;n.";
+		}
+			
 		$content =<<<EOF
 <div class="mdp">
 	<p>Changer de mot de passe de connexion (en clair)&nbsp;:</p>
@@ -273,6 +289,27 @@ EOF;
 	</form>
 </div>
 EOF;
+		// si on a un joueur
+		if ($p) {
+			$content .=<<<EOF
+<div class="mdp">
+	<p>Pour mettre à jour les informations de votre brald&ucirc;n (position, identification de monstres, caract&eacute;ristique, ...), vous pouvez cliquer sur le bouton suivant.</p>
+	<p>Votre dernière mise à jour a eu lieu le : {$p['last_update']}</p>
+EOF;
+			// si on a le droit de mettre a jour
+			if ($p['diff'] > 6200) {
+				$content .=<<<EOF
+	<form action="account.php" method="POST">
+	<input type="hidden" name="action" value="fetch_me" />
+	<input type="submit" value="Mise à jour" />
+	</form>
+EOF;
+			}
+			else {
+				$content .= "<p>Votre derni&egrave;re mise &agrave; jour est r&eacute;cente, pas besoin de mettre &agrave; jour.</p>";
+			}
+			$content .= "</div>";
+		}
 		$this->html_content = $content;
 	}
 
@@ -302,10 +339,16 @@ EOF;
 		}
 		$query = sprintf("UPDATE user SET restricted_password='%s' WHERE braldahim_id=%s;", mysql_real_escape_string($mdp), mysql_real_escape_string($_SESSION['bra_num']));
 		mysql_query($query, $this->db);
-		$this->html_message = "Mot de passe restreint mis &agrave; jour. $query";
+		$this->html_message = "Mot de passe restreint mis &agrave; jour.";
 		$this->account();
 	}
 
+	private function fetch_me() {
+		$fetch = new Fetch();
+		$fetch->fetchOnePlayer($_SESSION['bra_num']);
+		$this->html_message = "Les informations de votre brald&ucirc;n ont &eacute;t&eacute; mise &agrave; jour.";
+		$this->account();
+	}
 }
 $app = new Account();
 include("template.php");
