@@ -17,7 +17,7 @@
     along with braldaguim.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-session_start();
+if (! isset($_SESSION)) session_start();
 
 require("application.php");
 require("fetch.php");
@@ -208,7 +208,7 @@ EOF;
 		}
 		unset($content);
 		if ($communaute_id != COMMUNAUTE) {
-			$this->html_message = "Le brald&ucirc;n {$bra_num} ne fait pas partie des Permiers Brald&ucirc;ns.";
+			$this->html_message = "Le brald&ucirc;n {$bra_num} ne fait pas partie de la communaut&eacute; ".COMMUNAUTE_NOM.".";
 			$this->getInscriptionForm();
 			return;
 		}
@@ -260,7 +260,7 @@ EOF;
 	*/
 	private function account() {
 		$p = null;
-		$query = "SELECT idbraldun, last_update, time_to_sec(current_timestamp - last_update) as diff
+		$query = "SELECT idBraldun, last_update, time_to_sec(current_timestamp - last_update) as diff
 			FROM profil WHERE idBraldun = {$_SESSION['bra_num']};";
 		$res = mysql_query($query, $this->db);
 		if (mysql_num_rows($res) == 1) {
@@ -270,7 +270,7 @@ EOF;
 		if ($p == null) {
 			$this->html_message = "Impossible de trouver votre brald&ucirc;n.";
 		}
-			
+		
 		$content =<<<EOF
 <div class="mdp">
 	<p>Changer de mot de passe de connexion (en clair)&nbsp;:</p>
@@ -289,27 +289,25 @@ EOF;
 	</form>
 </div>
 EOF;
-		// si on a un joueur
-		if ($p) {
-			$content .=<<<EOF
+
+		$content .=<<<EOF
 <div class="mdp">
 	<p>Pour mettre à jour les informations de votre brald&ucirc;n (position, identification de monstres, caract&eacute;ristique, ...), vous pouvez cliquer sur le bouton suivant.</p>
 	<p>Votre dernière mise à jour a eu lieu le : {$p['last_update']}</p>
 EOF;
-			// si on a le droit de mettre a jour
-			if ($p['diff'] > UPDATE_DELAY) {
-				$content .=<<<EOF
+		// si on a le droit de mettre a jour
+		if ($p == null || $p['diff'] > UPDATE_DELAY) {
+			$content .=<<<EOF
 	<form action="account.php" method="POST">
 	<input type="hidden" name="action" value="fetch_me" />
 	<input type="submit" value="Mise à jour" />
 	</form>
 EOF;
-			}
-			else {
-				$content .= "<p>Votre derni&egrave;re mise &agrave; jour est r&eacute;cente, pas besoin de mettre &agrave; jour.</p>";
-			}
-			$content .= "</div>";
 		}
+		else {
+			$content .= "<p>Votre derni&egrave;re mise &agrave; jour est r&eacute;cente, pas besoin de mettre &agrave; jour.</p>";
+		}
+		$content .= "</div>";
 		$this->html_content = $content;
 	}
 

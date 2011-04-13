@@ -17,7 +17,7 @@
     along with braldaguim.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-session_start();
+if (! isset($_SESSION)) session_start();
 
 require("application.php");
 
