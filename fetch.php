@@ -21,7 +21,7 @@ require_once(dirname(__FILE__)."/conf.php");
 
 class Fetch {
 	
-	private $db;
+	protected $db;
 	
 	public function __construct() {
 		$this->db = mysql_connect(DB_HOST, DB_USER, DB_PASS) or die('Impossible de se connecter');
@@ -89,7 +89,7 @@ class Fetch {
 	MAJ de la position du joueur
 	Va chercher le contenu de l'url, le traite et le stock en db
 	*/
-	private function fetch_position($url) {
+	protected function fetch_position($url) {
 		$braldun = array();
 		$profil = array();
 		$content = file($url);
@@ -142,7 +142,7 @@ class Fetch {
 	/*
 	Met à jour la db avec le braldun concerné
 	*/
-	private function update_braldun($braldun) {
+	protected function update_braldun($braldun) {
 		// on passe le flag 'dirty' à true pour que la génération de la carte ait lieu
 		$query = sprintf("UPDATE user SET prenom='%s', nom='%s', x=%s, y=%s, updated=true WHERE braldahim_id=%s;",
 			mysql_real_escape_string($braldun['prenom']),
@@ -158,7 +158,7 @@ class Fetch {
 	/*
 	Met à jour la db avec le braldun concerné : profil detaillé
 	*/
-	private function update_profil($profil) {
+	protected function update_profil($profil) {
 		if (! array_key_exists('idbraldun', $profil)) {
 			return;
 		}
@@ -228,7 +228,7 @@ class Fetch {
 	BALLON_SOULE;x;y;z;present
 
 	*/
-	private function fetch_vue($url) {
+	protected function fetch_vue($url) {
 		$vue = array();
 		$content = file($url);
 		// pour le format voir : http://sp.braldahim.com/
@@ -285,7 +285,7 @@ class Fetch {
 	Le but est d'effacer les entrées qui sont trop vieille et qui
 	n'apparaissent plus dans la vue.
 	*/
-	private function clean_case($x, $y, $z, $table) {
+	protected function clean_case($x, $y, $z, $table) {
 		$liste_table = array('environnement', 'route', 'palissade', 'bosquet', 'lieu', 'champ', 'nid');
 		foreach ($liste_table as $t) {
 			if ($t == $table) {
@@ -307,7 +307,7 @@ class Fetch {
 	Insère ou met à jour un element de type environnement
 	ENVIRONNEMENT;x;y;z;nom_systeme_environnement;nom_environnement
 	*/
-	private function update_environnement($line) {
+	protected function update_environnement($line) {
 		$query = "SELECT x FROM environnement WHERE x=%s AND y=%s AND z=%s;";
 		$query = sprintf($query,
 			mysql_real_escape_string($line[1]),
@@ -345,7 +345,7 @@ class Fetch {
 	Insère ou met à jour un element de type route
 	ROUTE;x;y;z;id_route;type_route
 	*/
-	private function update_route($line) {
+	protected function update_route($line) {
 		$query = "SELECT x FROM route WHERE x=%s AND y=%s AND z=%s;";
 		$query = sprintf($query,
 			mysql_real_escape_string($line[1]),
@@ -383,7 +383,7 @@ class Fetch {
 	Insère ou met à jour un element de type palissade
 	PALISSADE;x;y;z;id_palissade;est_destructible_palissade
 	*/
-	private function update_palissade($line) {
+	protected function update_palissade($line) {
 		$query = "SELECT x FROM palissade WHERE x=%s AND y=%s AND z=%s;";
 		$query = sprintf($query,
 			mysql_real_escape_string($line[1]),
@@ -421,7 +421,7 @@ class Fetch {
 	Insère ou met à jour un element de type bosquet
 	BOSQUET;x;y;z;id_bosquet;nom_systeme_type_bosquet
 	*/
-	private function update_bosquet($line) {
+	protected function update_bosquet($line) {
 		$query = "SELECT x FROM bosquet WHERE x=%s AND y=%s AND z=%s;";
 		$query = sprintf($query,
 			mysql_real_escape_string($line[1]),
@@ -458,7 +458,7 @@ class Fetch {
 	Insère ou met à jour un element de type champs
 	CHAMP;x;y;z;id_champ;id_braldun
 	*/
-	private function update_champ($line) {
+	protected function update_champ($line) {
 		$query = "SELECT x FROM champ WHERE x=%s AND y=%s AND z=%s;";
 		$query = sprintf($query,
 			mysql_real_escape_string($line[1]),
@@ -495,7 +495,7 @@ class Fetch {
 	Insère ou met à jour un element de type LIEU
 	LIEU;x;y;z;id_lieu;nom_lieu;nom_type_lieu;nom_systeme_type_lieu
 	*/
-	private function update_lieu($line) {
+	protected function update_lieu($line) {
 		$query = "SELECT x FROM lieu WHERE x=%s AND y=%s AND id_lieu='%s';";
 		$query = sprintf($query,
 			mysql_real_escape_string($line[1]),
@@ -536,7 +536,7 @@ class Fetch {
 	LIEU;x;y;z;id_lieu;nom_lieu;nom_type_lieu;nom_systeme_type_lieu
 	NID;x;y;z;id_nid;nom_nid_type_monstre
 	*/
-	private function update_nid($line) {
+	protected function update_nid($line) {
 		$query = "SELECT x FROM nid WHERE x=%s AND y=%s AND id_nid='%s';";
 		$query = sprintf($query,
 			mysql_real_escape_string($line[1]),
@@ -572,7 +572,7 @@ class Fetch {
 	MAJ des competences du joueur
 	Va chercher le contenu de l'url, le traite et le stock en db
 	*/
-	private function fetch_competence($url) {
+	protected function fetch_competence($url) {
 		$content = file($url);
 		if (count($content) == 0) {
 			echo "Erreur : le fichier est vide\n";
@@ -638,7 +638,7 @@ class Fetch {
 	MAJ des evenements du joueur
 	Va chercher le contenu de l'url, le traite et le stock en db
 	*/
-	private function fetch_evenements($url, $braldun, $last_event) {
+	protected function fetch_evenements($url, $braldun, $last_event) {
 		$content = file($url);
 		if (count($content) == 0) {
 			echo "Erreur : le fichier est vide\n";
@@ -679,6 +679,9 @@ class Fetch {
 		}
 		$query = "UPDATE user SET last_event='$last' WHERE braldahim_id=$braldun;";
 		mysql_query($query);
+		if (KEEP_SCRIPT_FILE == "yes") {
+			file_put_contents('cache/evt-'.$braldun.'-'.date("YmdHi"), $content);
+		}
 	}
 
 	/*
@@ -687,7 +690,7 @@ class Fetch {
 	$date : date de l'identification (les desc change au cours du temps,
 	donc on ne conserve pas les trops vieilles identifications)
 	*/
-	private function bestiaireParse($desc, $date) {
+	protected function bestiaireParse($desc, $date) {
 		$desc = trim($desc);
 
 		if (is_null($desc) || empty($desc)) {
