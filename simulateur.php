@@ -54,7 +54,7 @@ class Simulateur extends Application {
 	private function getCurrentProfil() {
 		$p = null;
 		$query = "SELECT *
-			FROM profil p
+			FROM ".DB_PREFIX."profil p
 			WHERE p.idBraldun = {$_SESSION['bra_num']};";
 		$res = mysql_query($query, $this->db);
 		if (mysql_num_rows($res) == 1) {
@@ -70,7 +70,7 @@ class Simulateur extends Application {
 	private function getCurrentCompetences() {
 		$p = array();
 		$query = "SELECT nom_systeme
-			FROM competence
+			FROM ".DB_PREFIX."competence
 			WHERE idBraldun = {$_SESSION['bra_num']}
 			AND typeCompetence = 'commun';";
 		$res = mysql_query($query, $this->db);

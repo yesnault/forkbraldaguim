@@ -216,3 +216,13 @@ CREATE TABLE competence (
 	INDEX (idCompetence)
 ) CHARACTER SET utf8;
 
+CREATE TABLE nid (
+	x MEDIUMINT,
+	y MEDIUMINT,
+	z MEDIUMINT,
+	id_nid TEXT,
+	nom_nid TEXT,
+	last_update DATE
+);
+
+

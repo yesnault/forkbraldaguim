@@ -32,8 +32,8 @@ id_zone	id_fk_environnement_zone	nom_systeme_environnement	x_min_zone	x_max_zone
 */
 $content = file(dirname(__FILE__).'/csv/zones.csv');
 if (count($content) != 0) {
-	mysql_query("TRUNCATE zone;");
-	$query_start = "INSERT INTO zone VALUES(";
+	mysql_query("TRUNCATE ".DB_PREFIX."zone;");
+	$query_start = "INSERT INTO ".DB_PREFIX."zone VALUES(";
 	for ($i=1; $i<count($content); $i++) {
 		$v = explode(';', trim($content[$i]));
 		$query = $query_start."{$v[0]}, {$v[1]}, '{$v[2]}', {$v[3]}, {$v[4]}, {$v[5]}, {$v[6]});";
@@ -47,8 +47,8 @@ id_ville	nom_ville	est_capitale_ville	x_min_ville	y_min_ville	x_max_ville	y_max_
 */
 $content = file(dirname(__FILE__).'/csv/villes.csv');
 if (count($content) != 0) {
-	mysql_query("TRUNCATE ville;");
-	$query_start = "INSERT INTO ville VALUES(";
+	mysql_query("TRUNCATE ".DB_PREFIX."ville;");
+	$query_start = "INSERT INTO ".DB_PREFIX."ville VALUES(";
 	for ($i=1; $i<count($content); $i++) {
 		$v = explode(';', trim($content[$i]));
 		$query = $query_start."{$v[0]}, '{$v[1]}', '{$v[2]}', {$v[3]}, {$v[4]}, {$v[5]}, {$v[6]}, {$v[7]}, '{$v[8]}');";

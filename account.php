@@ -125,13 +125,13 @@ EOF;
 			$this->getLoginForm();
 			return;
 		}
-		$query = sprintf("SELECT braldahim_id FROM user WHERE braldahim_id=%s AND crypted_password='%s';",
+		$query = sprintf("SELECT braldahim_id FROM ".DB_PREFIX."user WHERE braldahim_id=%s AND crypted_password='%s';",
 			mysql_real_escape_string($bra_num),
 			mysql_real_escape_string(md5($bra_pw)));
 		$res = mysql_query($query, $this->db);
 		if (mysql_num_rows($res) != 0) {
 			// authentification ok
-			$query = sprintf("UPDATE user SET last_login=now() WHERE braldahim_id=$bra_num");
+			$query = sprintf("UPDATE ".DB_PREFIX."user SET last_login=now() WHERE braldahim_id=$bra_num");
 			mysql_query($query, $this->db);
 			$_SESSION['bra_num'] = $bra_num;
 			$this->html_message = "Authentification r&eacute;ussie.";
@@ -213,7 +213,7 @@ EOF;
 			return;
 		}
 	
-		$query = sprintf("SELECT braldahim_id FROM user WHERE braldahim_id=%s;", mysql_real_escape_string($bra_num));
+		$query = sprintf("SELECT braldahim_id FROM ".DB_PREFIX."user WHERE braldahim_id=%s;", mysql_real_escape_string($bra_num));
 		$res = mysql_query($query, $this->db);
 		if (mysql_num_rows($res) != 0) {
 			$this->html_message = "Un brald&ucirc;n existe d&eacute;j&agrave; avec cet identifiant.";
@@ -223,7 +223,7 @@ EOF;
 		}
 		mysql_free_result($res);
 	
-		$query = sprintf("INSERT INTO user(braldahim_id, crypted_password) VALUES(%s, '%s');",
+		$query = sprintf("INSERT INTO ".DB_PREFIX."user(braldahim_id, crypted_password) VALUES(%s, '%s');",
 			mysql_real_escape_string($bra_num),
 			mysql_real_escape_string(md5($bra_pw)));
 		mysql_query($query, $this->db);
@@ -261,7 +261,7 @@ EOF;
 	private function account() {
 		$p = null;
 		$query = "SELECT idBraldun, last_update, time_to_sec(current_timestamp - last_update) as diff
-			FROM profil WHERE idBraldun = {$_SESSION['bra_num']};";
+			FROM ".DB_PREFIX."profil WHERE idBraldun = {$_SESSION['bra_num']};";
 		$res = mysql_query($query, $this->db);
 		if (mysql_num_rows($res) == 1) {
 			$p = mysql_fetch_assoc($res);
@@ -320,7 +320,7 @@ EOF;
 			$this->account();
 			return;
 		}
-		$query = sprintf("UPDATE user SET crypted_password='%s' WHERE braldahim_id=%s;", mysql_real_escape_string(md5($mdp)), mysql_real_escape_string($_SESSION['bra_num']));
+		$query = sprintf("UPDATE ".DB_PREFIX."user SET crypted_password='%s' WHERE braldahim_id=%s;", mysql_real_escape_string(md5($mdp)), mysql_real_escape_string($_SESSION['bra_num']));
 		mysql_query($query, $this->db);
 		$this->html_message = "Mot de passe mis &agrave; jour.";
 		$this->account();
@@ -335,7 +335,7 @@ EOF;
 			$this->account();
 			return;
 		}
-		$query = sprintf("UPDATE user SET restricted_password='%s' WHERE braldahim_id=%s;", mysql_real_escape_string($mdp), mysql_real_escape_string($_SESSION['bra_num']));
+		$query = sprintf("UPDATE ".DB_PREFIX."user SET restricted_password='%s' WHERE braldahim_id=%s;", mysql_real_escape_string($mdp), mysql_real_escape_string($_SESSION['bra_num']));
 		mysql_query($query, $this->db);
 		$this->html_message = "Mot de passe restreint mis &agrave; jour.";
 		$this->account();

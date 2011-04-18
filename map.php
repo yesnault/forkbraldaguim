@@ -196,7 +196,7 @@ class Carte {
 		}
 		
 		// des joueurs ont été mis à jour
-		$query = "SELECT count(*) FROM user WHERE updated=true;";
+		$query = "SELECT count(*) FROM ".DB_PREFIX."user WHERE updated=true;";
 		$res = mysql_query($query);
 		$this->use_cache = false;
 		if ($row = mysql_fetch_row($res)) {
@@ -208,7 +208,7 @@ class Carte {
 		}
 		
 		// des ressources ont été mise à jour
-		$query = sprintf("SELECT dirty FROM ressource WHERE type='%s';",
+		$query = sprintf("SELECT dirty FROM ".DB_PREFIX."ressource WHERE type='%s';",
 			mysql_real_escape_string($this->type));
 		$res = mysql_query($query);
 		$this->use_cache = false;
@@ -229,7 +229,7 @@ class Carte {
 	Change la valeur du champ dirty dans la table ressource pour le type en cours
 	*/
 	private function updateRessource() {
-		$query = sprintf("UPDATE ressource SET dirty=false WHERE type='%s';",
+		$query = sprintf("UPDATE ".DB_PREFIX."ressource SET dirty=false WHERE type='%s';",
 			mysql_real_escape_string($this->type));
 		mysql_query($query);
 	}
@@ -238,7 +238,7 @@ class Carte {
 	Change la valeur du champ updated dans la table user
 	*/
 	private function updateUser($id) {
-		$query = sprintf("UPDATE user SET updated=false WHERE braldahim_id=%s;",
+		$query = sprintf("UPDATE ".DB_PREFIX."user SET updated=false WHERE braldahim_id=%s;",
 			mysql_real_escape_string($id));
 		mysql_query($query);
 	}
@@ -346,7 +346,7 @@ class Carte {
 	*/
 	private function getPlayers() {
 		$query = "SELECT braldahim_id, prenom, nom, x, y
-		FROM user
+		FROM ".DB_PREFIX."user
 		WHERE x IS NOT NULL
 		AND y IS NOT NULL
 		AND restricted_password IS NOT NULL
@@ -552,7 +552,7 @@ class Carte {
 		// et on s'arrête dès qu'on a une info pertinente
 		$table_list = array('champ', 'palissade', 'route', 'bosquet', 'environnement');
 		foreach ($table_list as $table) {
-			$query = "SELECT * FROM {$table} WHERE x BETWEEN {$x_min} AND {$x_max} AND y BETWEEN {$y_min} AND {$y_max}";
+			$query = "SELECT * FROM ".DB_PREFIX."{$table} WHERE x BETWEEN {$x_min} AND {$x_max} AND y BETWEEN {$y_min} AND {$y_max}";
 			$res = mysql_query($query);
 			if (mysql_num_rows($res) == 0) {
 				mysql_free_result($res);
@@ -600,7 +600,7 @@ class Carte {
 		$query = "SELECT nom_systeme_environnement,
 			x_min_zone, y_min_zone,
 			x_max_zone, y_max_zone
-			FROM zone";
+			FROM ".DB_PREFIX."zone";
 		$res = mysql_query($query);
 		if (mysql_num_rows($res) == 0) {
 			mysql_free_result($res);
@@ -622,7 +622,7 @@ class Carte {
 		$query = "SELECT nom_ville,
 			x_min_ville, y_min_ville,
 			x_max_ville, y_max_ville
-			FROM ville";
+			FROM ".DB_PREFIX."ville";
 		$res = mysql_query($query);
 		if (mysql_num_rows($res) != 0) {
 			while ($row = mysql_fetch_assoc($res)) {
@@ -688,7 +688,7 @@ class Carte {
 		$p_min = $this->pixelToPosition(new Point(0, $this->size)); // coin bas gauche (min X et min Y)
 		$p_max = $this->pixelToPosition(new Point($this->size, 0)); // coin haut droite (max X et max Y)
 		$query = "SELECT x, y, nom_lieu
-			FROM lieu
+			FROM ".DB_PREFIX."lieu
 			WHERE x BETWEEN {$p_min->x} AND {$p_max->x}
 			AND y BETWEEN {$p_min->y} AND {$p_max->y}";
 		if ($where != null && $where != '') {
@@ -827,7 +827,7 @@ class Carte {
 		$p_min = $this->pixelToPosition(new Point(0, $this->size)); // coin bas gauche (min X et min Y)
 		$p_max = $this->pixelToPosition(new Point($this->size, 0)); // coin haut droite (max X et max Y)
 		$query = "SELECT x, y, nom_nid
-			FROM nid
+			FROM ".DB_PREFIX."nid
 			WHERE x BETWEEN {$p_min->x} AND {$p_max->x}
 			AND y BETWEEN {$p_min->y} AND {$p_max->y};";
 		$res = mysql_query($query);

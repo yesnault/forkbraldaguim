@@ -33,7 +33,7 @@ class Fetch {
 	}
 	
 	public function fetchAllPlayers() {
-		$query = "SELECT braldahim_id, restricted_password, last_event FROM user;";
+		$query = "SELECT braldahim_id, restricted_password, last_event FROM ".DB_PREFIX."user;";
 		$res = mysql_query($query);
 		
 		if (! $res) die('Impossible de lancer une requete');
@@ -61,7 +61,7 @@ class Fetch {
 	}
 	
 	public function fetchOnePlayer($id) {
-		$query = sprintf("SELECT braldahim_id, restricted_password FROM user WHERE braldahim_id=%s;",
+		$query = sprintf("SELECT braldahim_id, restricted_password FROM ".DB_PREFIX."user WHERE braldahim_id=%s;",
 			mysql_real_escape_string($id));
 		$res = mysql_query($query);
 		
@@ -144,14 +144,14 @@ class Fetch {
 	*/
 	protected function update_braldun($braldun) {
 		// on passe le flag 'dirty' à true pour que la génération de la carte ait lieu
-		$query = sprintf("UPDATE user SET prenom='%s', nom='%s', x=%s, y=%s, updated=true WHERE braldahim_id=%s;",
+		$query = sprintf("UPDATE ".DB_PREFIX."user SET prenom='%s', nom='%s', x=%s, y=%s, updated=true WHERE braldahim_id=%s;",
 			mysql_real_escape_string($braldun['prenom']),
 			mysql_real_escape_string($braldun['nom']),
 			mysql_real_escape_string($braldun['x']),
 			mysql_real_escape_string($braldun['y']),
 			mysql_real_escape_string($braldun['idBraldun']));
 		mysql_query($query);
-		$query = "UPDATE ressource SET dirty=true;";
+		$query = "UPDATE ".DB_PREFIX."ressource SET dirty=true;";
 		mysql_query($query);
 	}
 
@@ -162,12 +162,12 @@ class Fetch {
 		if (! array_key_exists('idbraldun', $profil)) {
 			return;
 		}
-		$query = "SELECT idBraldun FROM profil WHERE idBraldun=%s;";
+		$query = "SELECT idBraldun FROM ".DB_PREFIX."profil WHERE idBraldun=%s;";
 		$query = sprintf($query, mysql_real_escape_string($profil['idbraldun']));
 		$res = mysql_query($query);
 		if (mysql_num_rows($res) == 0) {
 			// insert
-			$query = "INSERT INTO profil(".
+			$query = "INSERT INTO ".DB_PREFIX."profil(".
 				implode(',', array_keys($profil)).
 				", last_update) VALUES(".
 				implode(',', $profil).
@@ -176,7 +176,7 @@ class Fetch {
 		}
 		else {
 			// update
-			$query = "UPDATE profil SET ";
+			$query = "UPDATE ".DB_PREFIX."profil SET ";
 			$lst = array();
 			foreach ($profil as $k => $v) {
 				$lst[] = "$k=$v";
@@ -292,7 +292,7 @@ class Fetch {
 				continue;
 			}
 			else {
-				$query = "DELETE FROM %s WHERE x=%s AND y=%s AND z=%s AND last_update != current_date;";
+				$query = "DELETE FROM ".DB_PREFIX."%s WHERE x=%s AND y=%s AND z=%s AND last_update != current_date;";
 				$query = sprintf($query,
 					$t,
 					mysql_real_escape_string($x),
@@ -308,7 +308,7 @@ class Fetch {
 	ENVIRONNEMENT;x;y;z;nom_systeme_environnement;nom_environnement
 	*/
 	protected function update_environnement($line) {
-		$query = "SELECT x FROM environnement WHERE x=%s AND y=%s AND z=%s;";
+		$query = "SELECT x FROM ".DB_PREFIX."environnement WHERE x=%s AND y=%s AND z=%s;";
 		$query = sprintf($query,
 			mysql_real_escape_string($line[1]),
 			mysql_real_escape_string($line[2]),
@@ -316,7 +316,7 @@ class Fetch {
 		$res = mysql_query($query);
 		if (mysql_num_rows($res) == 0) {
 			// insert
-			$query = "INSERT INTO environnement(x, y, z, nom_systeme_environnement, nom_environnement, last_update) VALUES(%s, %s, %s, '%s', '%s', current_date);";
+			$query = "INSERT INTO ".DB_PREFIX."environnement(x, y, z, nom_systeme_environnement, nom_environnement, last_update) VALUES(%s, %s, %s, '%s', '%s', current_date);";
 			$query = sprintf($query,
 				mysql_real_escape_string($line[1]),
 				mysql_real_escape_string($line[2]),
@@ -328,7 +328,7 @@ class Fetch {
 		}
 		else {
 			// update
-			$query = "UPDATE environnement SET nom_systeme_environnement='%s', nom_environnement='%s', last_update=current_date ";
+			$query = "UPDATE ".DB_PREFIX."environnement SET nom_systeme_environnement='%s', nom_environnement='%s', last_update=current_date ";
 			$query .= " WHERE x=%s AND y=%s AND z=%s ;";
 			$query = sprintf($query,
 				mysql_real_escape_string($line[4]),
@@ -346,7 +346,7 @@ class Fetch {
 	ROUTE;x;y;z;id_route;type_route
 	*/
 	protected function update_route($line) {
-		$query = "SELECT x FROM route WHERE x=%s AND y=%s AND z=%s;";
+		$query = "SELECT x FROM ".DB_PREFIX."route WHERE x=%s AND y=%s AND z=%s;";
 		$query = sprintf($query,
 			mysql_real_escape_string($line[1]),
 			mysql_real_escape_string($line[2]),
@@ -354,7 +354,7 @@ class Fetch {
 		$res = mysql_query($query);
 		if (mysql_num_rows($res) == 0) {
 			// insert
-			$query = "INSERT INTO route(x, y, z, id_route, type_route, last_update) VALUES(%s, %s, %s, '%s', '%s', current_date);";
+			$query = "INSERT INTO ".DB_PREFIX."route(x, y, z, id_route, type_route, last_update) VALUES(%s, %s, %s, '%s', '%s', current_date);";
 			$query = sprintf($query,
 				mysql_real_escape_string($line[1]),
 				mysql_real_escape_string($line[2]),
@@ -366,7 +366,7 @@ class Fetch {
 		}
 		else {
 			// update
-			$query = "UPDATE route SET id_route='%s', type_route='%s', last_update=current_date ";
+			$query = "UPDATE ".DB_PREFIX."route SET id_route='%s', type_route='%s', last_update=current_date ";
 			$query .= " WHERE x=%s AND y=%s AND z=%s ;";
 			$query = sprintf($query,
 				mysql_real_escape_string($line[4]),
@@ -384,7 +384,7 @@ class Fetch {
 	PALISSADE;x;y;z;id_palissade;est_destructible_palissade
 	*/
 	protected function update_palissade($line) {
-		$query = "SELECT x FROM palissade WHERE x=%s AND y=%s AND z=%s;";
+		$query = "SELECT x FROM ".DB_PREFIX."palissade WHERE x=%s AND y=%s AND z=%s;";
 		$query = sprintf($query,
 			mysql_real_escape_string($line[1]),
 			mysql_real_escape_string($line[2]),
@@ -392,7 +392,7 @@ class Fetch {
 		$res = mysql_query($query);
 		if (mysql_num_rows($res) == 0) {
 			// insert
-			$query = "INSERT INTO palissade(x, y, z, id_palissade, est_destructible_palissade, last_update) VALUES(%s, %s, %s, '%s', '%s', current_date);";
+			$query = "INSERT INTO ".DB_PREFIX."palissade(x, y, z, id_palissade, est_destructible_palissade, last_update) VALUES(%s, %s, %s, '%s', '%s', current_date);";
 			$query = sprintf($query,
 				mysql_real_escape_string($line[1]),
 				mysql_real_escape_string($line[2]),
@@ -404,7 +404,7 @@ class Fetch {
 		}
 		else {
 			// update
-			$query = "UPDATE palissade SET id_palissade='%s', est_destructible_palissade='%s', last_update=current_date ";
+			$query = "UPDATE ".DB_PREFIX."palissade SET id_palissade='%s', est_destructible_palissade='%s', last_update=current_date ";
 			$query .= " WHERE x=%s AND y=%s AND z=%s ;";
 			$query = sprintf($query,
 				mysql_real_escape_string($line[4]),
@@ -422,7 +422,7 @@ class Fetch {
 	BOSQUET;x;y;z;id_bosquet;nom_systeme_type_bosquet
 	*/
 	protected function update_bosquet($line) {
-		$query = "SELECT x FROM bosquet WHERE x=%s AND y=%s AND z=%s;";
+		$query = "SELECT x FROM ".DB_PREFIX."bosquet WHERE x=%s AND y=%s AND z=%s;";
 		$query = sprintf($query,
 			mysql_real_escape_string($line[1]),
 			mysql_real_escape_string($line[2]),
@@ -430,7 +430,7 @@ class Fetch {
 		$res = mysql_query($query);
 		if (mysql_num_rows($res) == 0) {
 			// insert
-			$query = "INSERT INTO bosquet(x, y, z, id_bosquet, nom_systeme_type_bosquet, last_update) VALUES(%s, %s, %s, '%s', '%s', current_date);";
+			$query = "INSERT INTO ".DB_PREFIX."bosquet(x, y, z, id_bosquet, nom_systeme_type_bosquet, last_update) VALUES(%s, %s, %s, '%s', '%s', current_date);";
 			$query = sprintf($query,
 				mysql_real_escape_string($line[1]),
 				mysql_real_escape_string($line[2]),
@@ -441,7 +441,7 @@ class Fetch {
 		}
 		else {
 			// update
-			$query = "UPDATE bosquet SET id_bosquet='%s', nom_systeme_type_bosquet='%s', last_update=current_date ";
+			$query = "UPDATE ".DB_PREFIX."bosquet SET id_bosquet='%s', nom_systeme_type_bosquet='%s', last_update=current_date ";
 			$query .= " WHERE x=%s AND y=%s AND z=%s ;";
 			$query = sprintf($query,
 				mysql_real_escape_string($line[4]),
@@ -459,7 +459,7 @@ class Fetch {
 	CHAMP;x;y;z;id_champ;id_braldun
 	*/
 	protected function update_champ($line) {
-		$query = "SELECT x FROM champ WHERE x=%s AND y=%s AND z=%s;";
+		$query = "SELECT x FROM ".DB_PREFIX."champ WHERE x=%s AND y=%s AND z=%s;";
 		$query = sprintf($query,
 			mysql_real_escape_string($line[1]),
 			mysql_real_escape_string($line[2]),
@@ -467,7 +467,7 @@ class Fetch {
 		$res = mysql_query($query);
 		if (mysql_num_rows($res) == 0) {
 			// insert
-			$query = "INSERT INTO champ(x, y, z, id_champ, id_braldun, last_update) VALUES(%s, %s, %s, '%s', %s, current_date);";
+			$query = "INSERT INTO ".DB_PREFIX."champ(x, y, z, id_champ, id_braldun, last_update) VALUES(%s, %s, %s, '%s', %s, current_date);";
 			$query = sprintf($query,
 				mysql_real_escape_string($line[1]),
 				mysql_real_escape_string($line[2]),
@@ -478,7 +478,7 @@ class Fetch {
 		}
 		else {
 			// update
-			$query = "UPDATE champ SET id_bosquet='%s', id_braldun=%s, last_update=current_date ";
+			$query = "UPDATE ".DB_PREFIX."champ SET id_bosquet='%s', id_braldun=%s, last_update=current_date ";
 			$query .= " WHERE x=%s AND y=%s AND z=%s ;";
 			$query = sprintf($query,
 				mysql_real_escape_string($line[4]),
@@ -496,7 +496,7 @@ class Fetch {
 	LIEU;x;y;z;id_lieu;nom_lieu;nom_type_lieu;nom_systeme_type_lieu
 	*/
 	protected function update_lieu($line) {
-		$query = "SELECT x FROM lieu WHERE x=%s AND y=%s AND id_lieu='%s';";
+		$query = "SELECT x FROM ".DB_PREFIX."lieu WHERE x=%s AND y=%s AND id_lieu='%s';";
 		$query = sprintf($query,
 			mysql_real_escape_string($line[1]),
 			mysql_real_escape_string($line[2]),
@@ -504,7 +504,7 @@ class Fetch {
 		$res = mysql_query($query);
 		if (mysql_num_rows($res) == 0) {
 			// insert
-			$query = "INSERT INTO lieu(x, y, z, id_lieu, nom_lieu, nom_type_lieu, nom_systeme_type_lieu, last_update) VALUES(%s, %s, %s, '%s', '%s', '%s', '%s', current_date);";
+			$query = "INSERT INTO ".DB_PREFIX."lieu(x, y, z, id_lieu, nom_lieu, nom_type_lieu, nom_systeme_type_lieu, last_update) VALUES(%s, %s, %s, '%s', '%s', '%s', '%s', current_date);";
 			$query = sprintf($query,
 				mysql_real_escape_string($line[1]),
 				mysql_real_escape_string($line[2]),
@@ -517,7 +517,7 @@ class Fetch {
 		}
 		else {
 			// update
-			$query = "UPDATE lieu SET nom_lieu='%s', nom_type_lieu='%s', nom_systeme_type_lieu='%s', last_update=current_date ";
+			$query = "UPDATE ".DB_PREFIX."lieu SET nom_lieu='%s', nom_type_lieu='%s', nom_systeme_type_lieu='%s', last_update=current_date ";
 			$query .= "WHERE x=%s AND y=%s AND id_lieu='%s';";
 			$query = sprintf($query,
 				mysql_real_escape_string($line[5]),
@@ -537,7 +537,7 @@ class Fetch {
 	NID;x;y;z;id_nid;nom_nid_type_monstre
 	*/
 	protected function update_nid($line) {
-		$query = "SELECT x FROM nid WHERE x=%s AND y=%s AND id_nid='%s';";
+		$query = "SELECT x FROM ".DB_PREFIX."nid WHERE x=%s AND y=%s AND id_nid='%s';";
 		$query = sprintf($query,
 			mysql_real_escape_string($line[1]),
 			mysql_real_escape_string($line[2]),
@@ -545,7 +545,7 @@ class Fetch {
 		$res = mysql_query($query);
 		if (mysql_num_rows($res) == 0) {
 			// insert
-			$query = "INSERT INTO nid(x, y, z, id_nid, nom_nid, last_update) VALUES(%s, %s, %s, '%s', '%s', current_date);";
+			$query = "INSERT INTO ".DB_PREFIX."nid(x, y, z, id_nid, nom_nid, last_update) VALUES(%s, %s, %s, '%s', '%s', current_date);";
 			$query = sprintf($query,
 				mysql_real_escape_string($line[1]),
 				mysql_real_escape_string($line[2]),
@@ -556,7 +556,7 @@ class Fetch {
 		}
 		else {
 			// update
-			$query = "UPDATE lieu SET nom_nid='%s', last_update=current_date ";
+			$query = "UPDATE ".DB_PREFIX."nid SET nom_nid='%s', last_update=current_date ";
 			$query .= "WHERE x=%s AND y=%s AND id_nid='%s';";
 			$query = sprintf($query,
 				mysql_real_escape_string($line[5]),
@@ -600,7 +600,7 @@ class Fetch {
 				continue;
 			}
 			$line = explode(';', $line);
-			$query = "SELECT idBraldun FROM competence WHERE idBraldun=%s AND idCompetence=%s;";
+			$query = "SELECT idBraldun FROM ".DB_PREFIX."competence WHERE idBraldun=%s AND idCompetence=%s;";
 			$query = sprintf($query,
 				mysql_real_escape_string($line[0]),
 				mysql_real_escape_string($line[2]));
@@ -610,7 +610,7 @@ class Fetch {
 					$line[6] = 'NULL';
 				}
 				// insert
-				$query = "INSERT INTO competence(idBraldun, typeCompetence, idCompetence, nom, nom_systeme, maitrise, idMetier, last_update) VALUES(%s, '%s', %s, '%s', '%s', %s, %s, current_date);";
+				$query = "INSERT INTO ".DB_PREFIX."competence(idBraldun, typeCompetence, idCompetence, nom, nom_systeme, maitrise, idMetier, last_update) VALUES(%s, '%s', %s, '%s', '%s', %s, %s, current_date);";
 				$query = sprintf($query,
 					mysql_real_escape_string($line[0]),
 					mysql_real_escape_string($line[1]),
@@ -623,7 +623,7 @@ class Fetch {
 			}
 			else {
 				// update
-				$query = "UPDATE competence SET maitrise=%s, last_update=current_date ";
+				$query = "UPDATE ".DB_PREFIX."competence SET maitrise=%s, last_update=current_date ";
 				$query .= "WHERE idBraldun=%s AND idCompetence=%s;";
 				$query = sprintf($query,
 					mysql_real_escape_string($line[5]),
@@ -677,7 +677,7 @@ class Fetch {
 				}
 			}
 		}
-		$query = "UPDATE user SET last_event='$last' WHERE braldahim_id=$braldun;";
+		$query = "UPDATE ".DB_PREFIX."user SET last_event='$last' WHERE braldahim_id=$braldun;";
 		mysql_query($query);
 		if (KEEP_SCRIPT_FILE == "yes") {
 			file_put_contents('cache/evt-'.$braldun.'-'.date("YmdHi"), $content);
@@ -790,11 +790,11 @@ class Fetch {
 		}
 		// si on a un nom on insère
 		if (in_array('nom, id', $query_keys)) {
-			$query = "SELECT id FROM fiche_monstre WHERE id={$monstre['id']};";
+			$query = "SELECT id FROM ".DB_PREFIX."fiche_monstre WHERE id={$monstre['id']};";
 			$res = mysql_query($query);
 			if (mysql_num_rows($res) == 0) {
 				mysql_free_result($res);
-				$query = "INSERT INTO fiche_monstre(".
+				$query = "INSERT INTO ".DB_PREFIX."fiche_monstre(".
 					implode(',', $query_keys).
 					", last_update) VALUES(".
 					implode(',', $query_values).

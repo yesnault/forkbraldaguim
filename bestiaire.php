@@ -290,7 +290,7 @@ EOF;
 		}
 		// si on a un nom on insère
 		if (in_array('nom, id', $query_keys)) {
-			$query = "INSERT INTO fiche_monstre(".
+			$query = "INSERT INTO ".DB_PREFIX."fiche_monstre(".
 				implode(',', $query_keys).
 				", last_update) VALUES(".
 				implode(',', $query_values).
@@ -313,7 +313,7 @@ EOF;
 		}
 		$this->monstres = array();
 		$query = "SELECT distinct nom
-			FROM fiche_monstre
+			FROM ".DB_PREFIX."fiche_monstre
 			ORDER BY nom ASC;";
 		$res = mysql_query($query, $this->db);
 		while ($row = mysql_fetch_assoc($res)) {
@@ -351,7 +351,7 @@ EOF;
 			floor(AVG(armure_min)) as armure_min, floor(AVG(armure_max)) as armure_max,
 			floor(AVG(distance)) as distance,
 			count(id) as count
-			FROM fiche_monstre
+			FROM ".DB_PREFIX."fiche_monstre
 			WHERE nom='".mysql_real_escape_string(utf8_encode(urldecode($nom)))."'
 			AND $time_cond
 			GROUP BY nom";

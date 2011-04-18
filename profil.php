@@ -281,7 +281,7 @@ EOF;
 		}
 		$this->profils = array();
 		$query = "SELECT p.*, date_format(u.last_login, '%Y-%m-%d') as last_login
-			FROM profil p, user u
+			FROM ".DB_PREFIX."profil p, ".DB_PREFIX."user u
 			WHERE u.braldahim_id = p.idBraldun
 			ORDER BY idBraldun ASC;";
 		$res = mysql_query($query, $this->db);
@@ -296,7 +296,7 @@ EOF;
 	*/
 	private function getCompetences($id) {
 		$comp = array();
-		$query = sprintf("SELECT * FROM competence
+		$query = sprintf("SELECT * FROM ".DB_PREFIX."competence
 			WHERE idBraldun=%s ORDER BY idMetier,idCompetence",
 			mysql_real_escape_string($id));
 		$res = mysql_query($query, $this->db);

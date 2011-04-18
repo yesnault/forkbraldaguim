@@ -18,6 +18,7 @@ if (! defined('DB_HOST')) define('DB_HOST', 'localhost');
 if (! defined('DB_NAME')) define('DB_NAME', 'braldahim_db');
 if (! defined('DB_USER')) define('DB_USER', 'braldahim_user');
 if (! defined('DB_PASS')) define('DB_PASS', 'braldahim_pass');
+if (! defined('DB_PREFIX')) define('DB_PREFIX', '');
 
 // niveau de zoom par defaut
 if (! defined('DEF_ZOOM')) define('DEF_ZOOM', 3);
@@ -27,5 +28,4 @@ if (! defined('UPDATE_DELAY')) define('UPDATE_DELAY', 6200);
 
 // conserver les fichiers telechargés
 if (! defined('KEEP_SCRIPT_FILE')) define('KEEP_SCRIPT_FILE', 'no');
-
 ?>
