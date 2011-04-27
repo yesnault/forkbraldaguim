@@ -105,37 +105,6 @@ CREATE TABLE ville(
 	INDEX(id_ville)
 ) CHARACTER SET utf8;
 
-CREATE TABLE fiche_monstre(
-	id MEDIUMINT,
-	nom TEXT NOT NULL,
-	niveau_min MEDIUMINT,
-	niveau_max MEDIUMINT,
-	pv_max_min MEDIUMINT,
-	pv_max_max MEDIUMINT,
-	vue_min MEDIUMINT,
-	vue_max MEDIUMINT,
-	force_min MEDIUMINT,
-	force_max MEDIUMINT,
-	force_unite TEXT,
-	agilite_min MEDIUMINT,
-	agilite_max MEDIUMINT,
-	agilite_unite TEXT,
-	sagesse_min MEDIUMINT,
-	sagesse_max MEDIUMINT,
-	sagesse_unite TEXT,
-	vigueur_min MEDIUMINT,
-	vigueur_max MEDIUMINT,
-	vigueur_unite TEXT,
-	regeneration_min MEDIUMINT,
-	regeneration_max MEDIUMINT,
-	armure_min MEDIUMINT,
-	armure_max MEDIUMINT,
-	distance MEDIUMINT,
-	last_update DATE,
-	INDEX(nom(10)),
-	PRIMARY KEY (id)
-) CHARACTER SET utf8;
-
 CREATE TABLE bestiaire(
 	id MEDIUMINT,
 	nom TEXT NOT NULL,

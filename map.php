@@ -271,10 +271,10 @@ class Carte {
 			'profonde'	=> array(100, 170, 200),
 			'mer'	=> array(0, 0, 139),
 			'lac'	=> array(0, 0, 139),
-			'montagne'	=> array(200, 200, 200),
-			'mine'	=> array(200, 200, 200),
+			'montagne'	=> array(116, 46, 9),
+			'mine'	=> array(0, 0, 0),
 			'caverne'	=> array(200, 200, 200),
-			'marais'	=> array(65, 105, 225),
+			'marais'	=> array(130, 196, 108),
 			'gazon'	=> array(0, 101, 0),
 			// Couleur pour le type BOSQUET
 			'peupliers'	=> array(70, 220, 70),
@@ -711,8 +711,8 @@ class Carte {
 		$y = 100;
 		$h = imagefontheight($this->font_size);
 		
-		imagefilledrectangle($this->img, $x, $y, $x+150, $y+300, $this->colors['legendbg']);
-		imagerectangle($this->img, $x, $y, $x+150, $y+300, $this->colors['black']);
+		imagefilledrectangle($this->img, $x, $y, $x+150, $y+360, $this->colors['legendbg']);
+		imagerectangle($this->img, $x, $y, $x+150, $y+360, $this->colors['black']);
 		imagestring($this->img, $this->font_size, $x+10, $y+$h, 'Legende', $this->colors['black']);
 		$x += 30;
 		$y += 50;
@@ -722,14 +722,19 @@ class Carte {
 		imagestring($this->img, $this->font_size, $x+$h+10, $y, 'Plaine', $this->colors['black']);
 		$y += 2*$h;
 		
-		imagefilledrectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['eau']);
-		imagerectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['black']);
-		imagestring($this->img, $this->font_size, $x+$h+10, $y, 'Eau', $this->colors['black']);
-		$y += 2*$h;
-		
 		imagefilledrectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['peupliers']);
 		imagerectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['black']);
 		imagestring($this->img, $this->font_size, $x+$h+10, $y, 'Bosquet', $this->colors['black']);
+		$y += 2*$h;
+		
+		imagefilledrectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['marais']);
+		imagerectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['black']);
+		imagestring($this->img, $this->font_size, $x+$h+10, $y, 'Marais', $this->colors['black']);
+		$y += 2*$h;
+		
+		imagefilledrectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['eau']);
+		imagerectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['black']);
+		imagestring($this->img, $this->font_size, $x+$h+10, $y, 'Eau', $this->colors['black']);
 		$y += 2*$h;
 		
 		imagefilledrectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['route']);
@@ -752,6 +757,11 @@ class Carte {
 		imagestring($this->img, $this->font_size, $x+$h+10, $y, 'Champ', $this->colors['black']);
 		$y += 2*$h;
 		
+		imagefilledrectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['montagne']);
+		imagerectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['black']);
+		imagestring($this->img, $this->font_size, $x+$h+10, $y, 'Montagne', $this->colors['black']);
+		$y += 2*$h;
+		
 		imagefilledrectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['nid']);
 		imagerectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['black']);
 		imagestring($this->img, $this->font_size, $x+$h+10, $y, 'Nid', $this->colors['black']);
@@ -760,6 +770,11 @@ class Carte {
 		imagefilledrectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['ruine']);
 		imagerectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['black']);
 		imagestring($this->img, $this->font_size, $x+$h+10, $y, 'Ruine', $this->colors['black']);
+		$y += 2*$h;
+		
+		imagefilledrectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['mine']);
+		imagerectangle($this->img, $x, $y, $x+$h, $y+$h, $this->colors['black']);
+		imagestring($this->img, $this->font_size, $x+$h+10, $y, 'Mine', $this->colors['black']);
 	}
 	
 	/*
