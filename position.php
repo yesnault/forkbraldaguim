@@ -32,50 +32,61 @@ class Position extends Application {
 	On appelle la méthode 'qui_va_bien' en fonction de l'action.
 	*/
 	public function actionParse() {
-		$this->action = 'home';
+		$this->action = '';
 		if (isset($_REQUEST['action'])) {
 			$this->action = $_REQUEST['action'];
 		}
 		
 		switch($this->action) {
+			case 'home':
+				$this->home();
+				break;
 			case 'position':
+			default:
 				if (!$this->logged) break;
 				$this->position();
-				break;
-			case 'home':
-			default:
-				$this->home();
 				break;
 		}
 	}
 
 	public function getHtmlScript() {
+		$checkbox_states = (isset($_REQUEST['checkbox_states'])) ?  $_REQUEST['checkbox_states'] : '';
 		$str =<<<EOF
+// initialisation :
+// * charge l'etat des checkbox
+// * masque/affiche les calques en fontion des checkbox
 window.onload = function () {
+	checkbox_states = '{$checkbox_states}';
+	checkbox_list = ["chk_fond", "chk_brouillard", "chk_joueur", "chk_lieumythique", "chk_lieustandard", "chk_nid", "chk_legende"]
+	if (checkbox_states != '') {
+		for (var i=0; i<checkbox_list.length; i++) {
+			document.getElementById(checkbox_list[i]).checked = (checkbox_states.charAt(i) == "1");
+			checkbox_list[i].match(/[^_]+_(.*)/);
+			var id_layer = "map_"+RegExp.$1;
+			document.getElementById(id_layer).style.visibility = (checkbox_states.charAt(i) == "1") ? 'visible' : 'hidden';
+		}
+		update_map_ctrl_link();
+	}
 	initOnClick();
 }
+
+// Ajoute les listeners de click sur les checkbox
 function initOnClick() {
 	if (! window.ActiveXObject) {
 		// show/hide map layer
-		document.getElementById("chk_fond").addEventListener('click', show_hide_layer, false);
-		document.getElementById("chk_brouillard").addEventListener('click', show_hide_layer, false);
-		document.getElementById("chk_joueur").addEventListener('click', show_hide_layer, false);
-		document.getElementById("chk_lieumythique").addEventListener('click', show_hide_layer, false);
-		document.getElementById("chk_lieustandard").addEventListener('click', show_hide_layer, false);
-		document.getElementById("chk_nid").addEventListener('click', show_hide_layer, false);
-		document.getElementById("chk_legende").addEventListener('click', show_hide_layer, false);
+		for (var i=0; i<checkbox_list.length; i++) {
+			document.getElementById(checkbox_list[i]).addEventListener('click', show_hide_layer, false);
+		}
 	}
 	else {
-		document.getElementById("chk_fond").onclick = show_hide_layer;
-		document.getElementById("chk_brouillard").onclick = show_hide_layer;
-		document.getElementById("chk_joueur").onclick = show_hide_layer;
-		document.getElementById("chk_lieumythique").onclick = show_hide_layer;
-		document.getElementById("chk_lieustandard").onclick = show_hide_layer;
-		document.getElementById("chk_nid").onclick = show_hide_layer;
-		document.getElementById("chk_legende").onclick = show_hide_layer;
+		for (var i=0; i<checkbox_list.length; i++) {
+			document.getElementById(checkbox_list[i]).onclick = show_hide_layer;
+		}
 	}
-	
 }
+
+// Affiche/masque le calque correspondant à la checkbox emettant l'evenement
+// Met à jour la variable checkbox_states
 function show_hide_layer() {
 	this.id.match(/[^_]+_(.*)/);
 	var id_layer = "map_"+RegExp.$1;
@@ -85,7 +96,23 @@ function show_hide_layer() {
 	else {
 		document.getElementById(id_layer).style.visibility = 'hidden';
 	}
+	checkbox_states = '';
+	for (var i=0; i<checkbox_list.length; i++) {
+		checkbox_states += (document.getElementById(checkbox_list[i]).checked) ? "1" : "0";
+	}
+	update_map_ctrl_link();
 }
+
+// Met à jour tous les liens de navigation pour se souvenir de ce qui est affiché/masqué
+function update_map_ctrl_link() {
+	var lstA = document.getElementsByTagName("A");
+	for (var i=0; i<lstA.length; i++) {
+		if (lstA[i].className.indexOf("map_ctrl_link") != -1) {
+			lstA[i].href = lstA[i].href.replace(/checkbox_states=\d*/,"checkbox_states=" + checkbox_states);
+		}
+	}
+}
+
 function calcDistance() {
 	var dp1 = document.getElementById("dist_player1");
 	var dp2 = document.getElementById("dist_player2");
@@ -240,7 +267,7 @@ EOF;
 	*/
 	private function getMoveControl($zoom, $x, $y, $inner) {
 		$str =<<<EOF
-<a href="position.php?action=position&zoom={$zoom}&x={$x}&y={$y}">{$inner}</a>
+<a class="map_ctrl_link" href="position.php?action=position&zoom={$zoom}&x={$x}&y={$y}&checkbox_states=">{$inner}</a>
 EOF;
 		return $str;
 	}

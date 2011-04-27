@@ -224,7 +224,7 @@ td.map_zoom {
 		<li><?php echo $app->getLoginLink(); ?></li>
 		<?php if ($app->logged) {?>
 		<li><a href="account.php?action=account">Gestion du compte</a></li>
-		<li><a href="position.php?action=position">Position</a></li>
+		<li><a href="position.php">Position</a></li>
 		<li><a href="bestiaire.php?action=bestiaire">Bestiaire</a></li>
 		<li><a href="profil.php?action=allprofils">Profils</a></li>
 		<li><a href="simulateur.php?action=simulation">Simulateur</a></li>
