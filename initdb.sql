@@ -136,6 +136,27 @@ CREATE TABLE fiche_monstre(
 	PRIMARY KEY (id)
 ) CHARACTER SET utf8;
 
+CREATE TABLE bestiaire(
+	id MEDIUMINT,
+	nom TEXT NOT NULL,
+	niveau_min MEDIUMINT,
+	niveau_max MEDIUMINT,
+	pv_max_min MEDIUMINT,
+	pv_max_max MEDIUMINT,
+	vue MEDIUMINT,
+	regeneration MEDIUMINT,
+	degats MEDIUMINT,
+	attaque MEDIUMINT,
+	defense MEDIUMINT,
+	sagesse MEDIUMINT,
+	vigueur MEDIUMINT,
+	armure_min MEDIUMINT,
+	armure_max MEDIUMINT,
+	last_update DATE,
+	INDEX(nom(10)),
+	PRIMARY KEY (id)
+) CHARACTER SET utf8;
+
 CREATE TABLE champ(
 	x MEDIUMINT not null,
 	y MEDIUMINT not null,

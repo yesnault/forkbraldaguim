@@ -242,7 +242,7 @@ td.map_zoom {
 	<div class="clear_that"></div>
 </div>
 <div id="footer">
-v0.3 - Code source disponible sur : <a href="http://www.guim.info/dokuwiki/dev/braldaguim">Braldaguim</a>
+v0.4 - Code source disponible sur : <a href="http://www.guim.info/dokuwiki/dev/braldaguim">Braldaguim</a>
 </div>
 </body>
 </html>

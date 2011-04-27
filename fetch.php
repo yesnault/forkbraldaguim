@@ -650,7 +650,7 @@ class Fetch {
 
 		//TYPE:dynamique;NB_APPELS:6;MAX_AUTORISE:24
 		//idBraldun;idEvenement;type;date;details;detailsbot
-		//282;401406;Déplacement;2011-04-04 09:20:10;<!-- DEBUT_BRALDUN:282-- FIN_A -->Bulrog Polpeur (282)<!-- FIN --> a marché;Influence sur la balance de faim : -1 %<br><br>Cela vous a co&ucirct&eacute 1 PA<br>D&eacuteplacement r&eacuteussi jusqu'en: <br>x=-24, y=8 <br>Type de terrain de d&eacutepart : Plaine
+		//282;420907;Compétence;2011-04-19 08:52:52;<!-- DEBUT_BRALDUN:282-- FIN_A -->Bulrog Polpeur (282)<!-- FIN --> a réussi l'utilisation d'une compétence sur un <!-- DEBUT_MONSTRE:150623-- FIN_A -->Lièvre (150623)<!-- FIN -->;Vous avez r&eacuteussi votre jet d'action 35 % <br>Vous avez rat&eacute votre jet d'am&eacutelioration : 1 %<br>Vous avez gagn&eacute 1 PX<br>Influence sur la balance de faim : -1 %<br><br>Cela vous a co&ucirct&eacute 1 PA<br>Le monstre Lièvre Petit (150623) a les caract&eacuteristiques suivantes :<br>Niveau : entre 0 et 3<br>Point de vie max : entre 0 et 2<br>Point de vie actuels : entre 0 et 2<br>Vue : 1 case<br>D&eacuteg&acircts : pas plus de 18<br>Attaque : pas plus de 18<br>D&eacutefense : pas plus de 18<br>Sagesse : pas plus de 18<br>Vigueur : pas plus de 18<br>R&eacuteg&eacuten&eacuteration : pas plus de 10<br>Armure : entre 0 et 1<br>Dur&eacutee du tour : entre 11:53:00 et 12:51:00<br><br>Vous ne pouvez pas encore pister ce type de monstre !
 
 		if (preg_match("/^ERREUR-/", $content[0]) == 1) {
 			// erreur lors de l'appel du script (cf : http://sp.braldahim.com/)
@@ -699,7 +699,7 @@ class Fetch {
 
 		$date = (int)(str_replace('-', '', substr($date, 0, 10)));
 		// date de la dernière RAZ des monstres
-		if ($date < 20110214) {
+		if ($date < 20110419) {
 			return;
 		}
 		$lines = explode("<br>", $desc);
@@ -728,50 +728,46 @@ class Fetch {
 				$query_values[] = $match[1].", ".$match[2];
 				continue;
 			}
-			if (preg_match("/Vue : entre (\d+) et (\d+)/", $str, $match) == 1) {
-				$monstre['vue_min'] = trim($match[1]);
-				$monstre['vue_max'] = trim($match[2]);
-				$query_keys[] = 'vue_min, vue_max';
-				$query_values[] = $match[1].", ".$match[2];
+			if (preg_match("/Vue : (\d+) case/", $str, $match) == 1) {
+				$monstre['vue'] = trim($match[1]);
+				$query_keys[] = 'vue';
+				$query_values[] = $match[1];
 				continue;
 			}
-			if (preg_match("/Force : entre (\d+) et (\d+) (D\d+)/", $str, $match) == 1) {
-				$monstre['force_min'] = trim($match[1]);
-				$monstre['force_max'] = trim($match[2]);
-				$monstre['force_unite'] = trim($match[3]);
-				$query_keys[] = 'force_min, force_max, force_unite';
-				$query_values[] = $match[1].", ".$match[2].", '".mysql_real_escape_string($match[3])."'";
+			if (preg_match("/R.+g.+n.+ration : pas plus de (\d+)/", $str, $match) == 1) {
+				$monstre['regeneration'] = trim($match[1]);
+				$query_keys[] = 'regeneration';
+				$query_values[] = $match[1];
 				continue;
 			}
-			if (preg_match("/Agilit.+ : entre (\d+) et (\d+) (D\d+)/", $str, $match) == 1) {
-				$monstre['agilite_min'] = trim($match[1]);
-				$monstre['agilite_max'] = trim($match[2]);
-				$monstre['agilite_unite'] = trim($match[3]);
-				$query_keys[] = 'agilite_min, agilite_max, agilite_unite';
-				$query_values[] = $match[1].", ".$match[2].", '".mysql_real_escape_string($match[3])."'";
+			if (preg_match("/D&eacuteg&acircts : pas plus de (\d+)/", $str, $match) == 1) {
+				$monstre['degats'] = trim($match[1]);
+				$query_keys[] = 'degats';
+				$query_values[] = $match[1];
 				continue;
 			}
-			if (preg_match("/Sagesse : entre (\d+) et (\d+) (D\d+)/", $str, $match) == 1) {
-				$monstre['sagesse_min'] = trim($match[1]);
-				$monstre['sagesse_max'] = trim($match[2]);
-				$monstre['sagesse_unite'] = trim($match[3]);
-				$query_keys[] = 'sagesse_min, sagesse_max, sagesse_unite';
-				$query_values[] = $match[1].", ".$match[2].", '".mysql_real_escape_string($match[3])."'";
+			if (preg_match("/Attaque : pas plus de (\d+)/", $str, $match) == 1) {
+				$monstre['attaque'] = trim($match[1]);
+				$query_keys[] = 'attaque';
+				$query_values[] = $match[1];
 				continue;
 			}
-			if (preg_match("/Vigueur : entre (\d+) et (\d+) (D\d+)/", $str, $match) == 1) {
-				$monstre['vigueur_min'] = trim($match[1]);
-				$monstre['vigueur_max'] = trim($match[2]);
-				$monstre['vigueur_unite'] = trim($match[3]);
-				$query_keys[] = 'vigueur_min, vigueur_max, vigueur_unite';
-				$query_values[] = $match[1].", ".$match[2].", '".mysql_real_escape_string($match[3])."'";
+			if (preg_match("/D&eacutefense : pas plus de (\d+)/", $str, $match) == 1) {
+				$monstre['defense'] = trim($match[1]);
+				$query_keys[] = 'defense';
+				$query_values[] = $match[1];
 				continue;
 			}
-			if (preg_match("/R.+g.+n.+ration : entre (\d+) et (\d+)/", $str, $match) == 1) {
-				$monstre['regeneration_min'] = trim($match[1]);
-				$monstre['regeneration_max'] = trim($match[2]);
-				$query_keys[] = 'regeneration_min, regeneration_max';
-				$query_values[] = $match[1].", ".$match[2];
+			if (preg_match("/Sagesse : pas plus de (\d+)/", $str, $match) == 1) {
+				$monstre['sagesse'] = trim($match[1]);
+				$query_keys[] = 'sagesse';
+				$query_values[] = $match[1];
+				continue;
+			}
+			if (preg_match("/Vigueur : pas plus de (\d+)/", $str, $match) == 1) {
+				$monstre['vigueur'] = trim($match[1]);
+				$query_keys[] = 'vigueur';
+				$query_values[] = $match[1];
 				continue;
 			}
 			if (preg_match("/Armure : entre (\d+) et (\d+)/", $str, $match) == 1) {
@@ -781,20 +777,14 @@ class Fetch {
 				$query_values[] = $match[1].", ".$match[2];
 				continue;
 			}
-			if (preg_match("/Vous avez .* une distance de (\d+) de la cible/", $str, $match) == 1) {
-				$monstre['distance'] = trim($match[1]);
-				$query_keys[] = 'distance';
-				$query_values[] = $match[1];
-				continue;
-			}
 		}
 		// si on a un nom on insère
 		if (in_array('nom, id', $query_keys)) {
-			$query = "SELECT id FROM ".DB_PREFIX."fiche_monstre WHERE id={$monstre['id']};";
+			$query = "SELECT id FROM ".DB_PREFIX."bestiaire WHERE id={$monstre['id']};";
 			$res = mysql_query($query);
 			if (mysql_num_rows($res) == 0) {
 				mysql_free_result($res);
-				$query = "INSERT INTO ".DB_PREFIX."fiche_monstre(".
+				$query = "INSERT INTO ".DB_PREFIX."bestiaire(".
 					implode(',', $query_keys).
 					", last_update) VALUES(".
 					implode(',', $query_values).
