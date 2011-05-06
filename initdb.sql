@@ -6,6 +6,7 @@ CREATE TABLE user(
 	nom TEXT,
 	x MEDIUMINT,
 	y MEDIUMINT,
+	updated TINYINT(1),
 	last_login TIMESTAMP default 0,
 	last_event text default null
 ) CHARACTER SET utf8;
@@ -73,10 +74,10 @@ CREATE TABLE ressource(
 
 INSERT INTO ressource(type, dirty) VALUES('fond', false);
 INSERT INTO ressource(type, dirty) VALUES('joueur', false);
-INSERT INTO ressource(type, dirty) VALUES('lieu', false);
 INSERT INTO ressource(type, dirty) VALUES('lieumythique', false);
 INSERT INTO ressource(type, dirty) VALUES('lieustandard', false);
-INSERT INTO ressource(type, dirty) VALUES('legende', false);
+INSERT INTO ressource(type, dirty) VALUES('nid', false);
+INSERT INTO ressource(type, dirty) VALUES('buisson', false);
 
 CREATE TABLE zone(
 	id_zone MEDIUMINT not null,
@@ -215,4 +216,14 @@ CREATE TABLE nid (
 	last_update DATE
 );
 
+CREATE TABLE buisson (
+	x MEDIUMINT,
+	y MEDIUMINT,
+	z MEDIUMINT,
+	id_buisson TEXT,
+	nom_type_buisson TEXT,
+	last_update DATE,
+	INDEX(x),
+	INDEX(y)
+) CHARACTER SET utf8;
 

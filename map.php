@@ -121,7 +121,7 @@ class Carte {
 	private $p_min; // point min en coordonnées position
 	private $p_max; // point max en coordonnées position
 	
-	private $debug = true;
+	private $debug = false;
 	
 	/*
 	Construit une carte de la taille indiqué avec size (en pixel)
@@ -132,7 +132,7 @@ class Carte {
 	public function __construct($size, $type, $user_zoom, $user_x, $user_y) {
 		$this->size = $size;
 		$this->type = ($type == null) ? "fond" : $type;
-		$this->players_size = 10; // un rond de 5 pixel de diametre
+		$this->players_size = 10; // diametre
 		$this->font_size = 2;
 		$this->ttfont_size = 8;
 		$this->players = array();
@@ -269,13 +269,14 @@ class Carte {
 			'eau'		=> array(130, 200, 230),
 			'peuprofonde'	=> array(130, 200, 230),
 			'profonde'	=> array(100, 170, 200),
-			'mer'	=> array(0, 0, 139),
-			'lac'	=> array(0, 0, 139),
+			'mer'		=> array(0, 0, 139),
+			'lac'		=> array(0, 0, 139),
 			'montagne'	=> array(116, 46, 9),
-			'mine'	=> array(0, 0, 0),
+			'mine'		=> array(0, 0, 0),
 			'caverne'	=> array(200, 200, 200),
 			'marais'	=> array(130, 196, 108),
-			'gazon'	=> array(0, 101, 0),
+			'gazon'		=> array(0, 101, 0),
+			'buisson'	=> array(100, 200, 10),
 			// Couleur pour le type BOSQUET
 			'peupliers'	=> array(70, 220, 70),
 			'hetres'	=> array(70, 220, 70),
@@ -512,6 +513,9 @@ class Carte {
 			$p_physique = $this->positionToPixel(new Point($x, $y));
 			$color = '';
 			switch($tile['type']) {
+				case 'buisson':
+					$color = $this->colors['buisson'];
+					break;
 				case 'champ':
 					$color = $this->colors['champ'];
 					break;
@@ -550,7 +554,7 @@ class Carte {
 		$tiles = array();;
 		// on va essayer toutes les tables dans un ordre précis
 		// et on s'arrête dès qu'on a une info pertinente
-		$table_list = array('champ', 'palissade', 'route', 'bosquet', 'environnement');
+		$table_list = array('buisson', 'champ', 'palissade', 'route', 'bosquet', 'environnement');
 		foreach ($table_list as $table) {
 			$query = "SELECT * FROM ".DB_PREFIX."{$table} WHERE x BETWEEN {$x_min} AND {$x_max} AND y BETWEEN {$y_min} AND {$y_max}";
 			$res = mysql_query($query);
@@ -965,12 +969,6 @@ class Carte {
 						$this->updateUser($p->id);
 						$prev_pos = $p->position;
 					}
-					break;
-				case "lieu":
-					// mise en place du fond
-					imagefilledrectangle($this->img, 0, 0, $this->size, $this->size, $this->colors['transparent']);
-					// dessin des lieux importants
-					$this->drawLieu();
 					break;
 				case "lieumythique":
 					// mise en place du fond

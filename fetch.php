@@ -222,7 +222,7 @@ class Fetch {
 	MONSTRE;x;y;z;id_monstre;nom_type_monstre;m_taille;niveau_monstre
 	--NID;x;y;z;id_nid;nom_nid_type_monstre
 	--PALISSADE;x;y;z;id_palissade;est_destructible_palissade
-	BUISSON;x;y;z;id_buisson;nom_type_buisson
+	--BUISSON;x;y;z;id_buisson;nom_type_buisson
 	--BOSQUET;x;y;z;id_bosquet;nom_systeme_type_bosquet
 	--ROUTE;x;y;z;id_route;type_route
 	BALLON_SOULE;x;y;z;present
@@ -272,6 +272,10 @@ class Fetch {
 				$this->update_nid($part);
 				continue;
 			}
+			if ($part[0] == 'BUISSON') {
+				$this->update_buisson($part);
+				continue;
+			}
 		}
 		if (KEEP_SCRIPT_FILE == "yes") {
 			file_put_contents('cache/'.date("YmdHi").'-'.uniqid(), $content);
@@ -286,7 +290,7 @@ class Fetch {
 	n'apparaissent plus dans la vue.
 	*/
 	protected function clean_case($x, $y, $z, $table) {
-		$liste_table = array('environnement', 'route', 'palissade', 'bosquet', 'lieu', 'champ', 'nid');
+		$liste_table = array('environnement', 'route', 'palissade', 'bosquet', 'lieu', 'champ', 'nid', 'buisson');
 		foreach ($liste_table as $t) {
 			if ($t == $table) {
 				continue;
@@ -533,7 +537,6 @@ class Fetch {
 
 	/*
 	Insère ou met à jour un element de type NID
-	LIEU;x;y;z;id_lieu;nom_lieu;nom_type_lieu;nom_systeme_type_lieu
 	NID;x;y;z;id_nid;nom_nid_type_monstre
 	*/
 	protected function update_nid($line) {
@@ -566,6 +569,42 @@ class Fetch {
 			mysql_query($query);
 		}
 		$this->clean_case($line[1], $line[2], $line[3], 'nid');
+	}
+
+	/*
+	Insère ou met à jour un element de type BUISSON
+	BUISSON;x;y;z;id_buisson;nom_type_buisson
+	*/
+	protected function update_buisson($line) {
+		$query = "SELECT x FROM ".DB_PREFIX."buisson WHERE x=%s AND y=%s AND id_buisson='%s';";
+		$query = sprintf($query,
+			mysql_real_escape_string($line[1]),
+			mysql_real_escape_string($line[2]),
+			mysql_real_escape_string($line[4]));
+		$res = mysql_query($query);
+		if (mysql_num_rows($res) == 0) {
+			// insert
+			$query = "INSERT INTO ".DB_PREFIX."buisson(x, y, z, id_buisson, nom_type_buisson, last_update) VALUES(%s, %s, %s, '%s', '%s', current_date);";
+			$query = sprintf($query,
+				mysql_real_escape_string($line[1]),
+				mysql_real_escape_string($line[2]),
+				mysql_real_escape_string($line[3]),
+				mysql_real_escape_string($line[4]),
+				mysql_real_escape_string($line[5]));
+			mysql_query($query);
+		}
+		else {
+			// update
+			$query = "UPDATE ".DB_PREFIX."buisson SET nom_type_buisson='%s', last_update=current_date ";
+			$query .= "WHERE x=%s AND y=%s AND id_buisson='%s';";
+			$query = sprintf($query,
+				mysql_real_escape_string($line[5]),
+				mysql_real_escape_string($line[1]),
+				mysql_real_escape_string($line[2]),
+				mysql_real_escape_string($line[4]));
+			mysql_query($query);
+		}
+		$this->clean_case($line[1], $line[2], $line[3], 'buisson');
 	}
 
 	/*
