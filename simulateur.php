@@ -85,7 +85,7 @@ class Simulateur extends Application {
 		$str =<<<EOF
 window.onload = function () {
 	if (! window.ActiveXObject) {
-		var lst = ["niveau", "for_niv", "agi_niv", "vig_niv", "sag_niv", "connaissancebralduns", "connaissancemonstres", "identifierrune", "pister", "provoquer", "rechercher", "recycler", "tirerencourant"];
+		var lst = ["niveau", "for_niv", "agi_niv", "vig_niv", "sag_niv", "connaissancebralduns", "connaissancemonstres", "identifierrune", "pister", "filer", "provoquer", "rechercher", "recycler", "tirerencourant"];
 		for (elt in lst) {
 			document.getElementById(lst[elt]).addEventListener('change', update_all, false);
 		}
@@ -107,7 +107,7 @@ window.onload = function () {
 		document.getElementById("sag_niv_plus").addEventListener('click', plus_moins, false);
 	}
 	else {
-		var lst = ["niveau", "for_niv", "agi_niv", "vig_niv", "sag_niv", "connaissancebralduns", "connaissancemonstres", "identifierrune", "pister", "provoquer", "rechercher", "recycler", "tirerencourant"];
+		var lst = ["niveau", "for_niv", "agi_niv", "vig_niv", "sag_niv", "connaissancebralduns", "connaissancemonstres", "identifierrune", "pister", "filer", "provoquer", "rechercher", "recycler", "tirerencourant"];
 		for (elt in lst) {
 			document.getElementById(elt).onchange = update_all;
 		}
@@ -162,6 +162,7 @@ function update_all() {
 		"connaissancemonstres" :  10,
 		"identifierrune" :  4,
 		"pister" :  10,
+		"filer" :  30,
 		"provoquer" :  10,
 		"rechercher" :  50,
 		"recycler" :  10,
@@ -274,7 +275,7 @@ EOF;
 	 private function simulation() {
 	 	$p = $this->getCurrentProfil();
 		$lst_cur_cpt = $this->getCurrentCompetences();
-		$nom_cpt = array("connaissancebralduns", "connaissancemonstres", "identifierrune", "pister", "provoquer", "rechercher", "recycler", "tirerencourant");
+		$nom_cpt = array("connaissancebralduns", "connaissancemonstres", "identifierrune", "pister", "filer", "provoquer", "rechercher", "recycler", "tirerencourant");
 		$lst_cpt = array();
 		foreach ($nom_cpt as $k) {
 			$lst_cpt[$k] = (in_array($k, $lst_cur_cpt)) ? 'checked="checked"' : '';
@@ -365,6 +366,7 @@ EOF;
 <tr><td><input id="connaissancemonstres" type="checkbox" {$lst_cpt['connaissancemonstres']}></td><td><label for="connaissancemonstres">Connaissance des Monstres</label></td><td>10</td></tr>
 <tr><td><input id="identifierrune" type="checkbox" {$lst_cpt['identifierrune']} ></td><td><label for="identifierrune">Identification des runes</label></td><td>4</td></tr>
 <tr><td><input id="pister" type="checkbox" {$lst_cpt['pister']} ></td><td><label for="pister">Pister</label></td><td>10</td></tr>
+<tr><td><input id="filer" type="checkbox" {$lst_cpt['filer']} ></td><td><label for="filer">Filer</label></td><td>30</td></tr>
 <tr><td><input id="provoquer" type="checkbox" {$lst_cpt['provoquer']} ></td><td><label for="provoquer">Provoquer</label></td><td>10</td></tr>
 <tr><td><input id="rechercher" type="checkbox" {$lst_cpt['rechercher']} ></td><td><label for="rechercher">Recherche de mots runiques</label></td><td>50</td></tr>
 <tr><td><input id="recycler" type="checkbox" {$lst_cpt['recycler']} ></td><td><label for="recycler">Recyclage</label></td><td>10</td></tr>
@@ -376,7 +378,14 @@ EOF;
 </table>
 
 <table>
-<tr><td>Niveau</td><td>Force</td><td>Agilit&eacute;</td><td>Vigueur</td><td>Sagesse</td><td>Aucun</td></tr>
+<tr>
+	<td>Niveau</td>
+	<td>Force<br/>(vigoureux/puissante)</td>
+	<td>Agilit&eacute;<br/>(vif/leg&egrave;re)</td>
+	<td>Vigueur<br/>(gaillard/robuste)</td>
+	<td>Sagesse<br/>(calme/honn&ecirc;te)</td>
+	<td>Aucun</td>
+</tr>
 <form id="titre">
 <tr>
 	<td>10</td>

@@ -57,7 +57,7 @@ class Position extends Application {
 // * masque/affiche les calques en fontion des checkbox
 window.onload = function () {
 	checkbox_states = '{$checkbox_states}';
-	checkbox_list = ["chk_fond", "chk_brouillard", "chk_joueur", "chk_lieumythique", "chk_lieustandard", "chk_nid", "chk_legende"]
+	checkbox_list = ["chk_fond", "chk_brouillard", "chk_joueur", "chk_lieumythique", "chk_lieustandard", "chk_nid", "chk_buisson", "chk_legende"];
 	if (checkbox_states != '') {
 		for (var i=0; i<checkbox_list.length; i++) {
 			document.getElementById(checkbox_list[i]).checked = (checkbox_states.charAt(i) == "1");
@@ -209,6 +209,7 @@ EOF;
 	<div class="map_item" id="map_lieumythique"><img src="map.php?type=lieumythique&$url_append" /></div>
 	<div class="map_item" id="map_lieustandard"><img src="map.php?type=lieustandard&$url_append" /></div>
 	<div class="map_item" id="map_nid"><img src="map.php?type=nid&$url_append" /></div>
+	<div class="map_item" id="map_buisson"><img src="map.php?type=buisson&$url_append" /></div>
 	<div class="map_item" id="map_joueur"><img src="map.php?type=joueur&$url_append" /></div>
 	<div class="map_item" id="map_legende"><img src="map.php?type=legende&$url_append" /></div>
 	
@@ -232,6 +233,9 @@ EOF;
 		
 		<br/><input type="checkbox" id="chk_nid" checked="checked" />
 		<label for="chk_nid">Nids</label>
+
+		<br/><input type="checkbox" id="chk_buisson" />
+		<label for="chk_buisson">Buissons</label>
 
 		<br/><input type="checkbox" id="chk_legende" />
 		<label for="chk_legende">Legende</label>

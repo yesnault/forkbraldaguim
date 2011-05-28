@@ -76,7 +76,7 @@ a:hover {color: #F0AE21;}
 	border: 1px solid black;
 	margin: 10px 10px;
 }
-#map_legende, #map_lieustandard {
+#map_legende, #map_lieustandard, #map_buisson, #map_nid {
 	visibility: hidden;
 }
 #map_info {

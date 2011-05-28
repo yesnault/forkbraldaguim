@@ -513,9 +513,6 @@ class Carte {
 			$p_physique = $this->positionToPixel(new Point($x, $y));
 			$color = '';
 			switch($tile['type']) {
-				case 'buisson':
-					$color = $this->colors['buisson'];
-					break;
 				case 'champ':
 					$color = $this->colors['champ'];
 					break;
@@ -554,7 +551,7 @@ class Carte {
 		$tiles = array();;
 		// on va essayer toutes les tables dans un ordre précis
 		// et on s'arrête dès qu'on a une info pertinente
-		$table_list = array('buisson', 'champ', 'palissade', 'route', 'bosquet', 'environnement');
+		$table_list = array('champ', 'palissade', 'route', 'bosquet', 'environnement');
 		foreach ($table_list as $table) {
 			$query = "SELECT * FROM ".DB_PREFIX."{$table} WHERE x BETWEEN {$x_min} AND {$x_max} AND y BETWEEN {$y_min} AND {$y_max}";
 			$res = mysql_query($query);
@@ -857,6 +854,32 @@ class Carte {
 	}
 
 	/*
+	Dessine les buissons
+	*/
+	private function drawBuisson() {
+		// Pour obtenir un fond transparent et des polices antialiasées
+		// il faut supprimer l'alphablending et activer la transparence du png
+		// avec imagesavealpha
+		imagesavealpha($this->img, true);
+		imagealphablending($this->img, false);
+		imagefill($this->img, 0, 0, $this->colors['transparent_alpha']);
+		
+		// On va chercher tous les objets qui se trouvent
+		// entre les bornes maximales de la carte
+		$p_min = $this->pixelToPosition(new Point(0, $this->size)); // coin bas gauche (min X et min Y)
+		$p_max = $this->pixelToPosition(new Point($this->size, 0)); // coin haut droite (max X et max Y)
+		$query = "SELECT x, y, nom_type_buisson
+			FROM ".DB_PREFIX."buisson
+			WHERE x BETWEEN {$p_min->x} AND {$p_max->x}
+			AND y BETWEEN {$p_min->y} AND {$p_max->y};";
+		$res = mysql_query($query);
+		while ($row = mysql_fetch_assoc($res)) {
+			$this->drawPointText(new Point($row['x'], $row['y']), $row['nom_type_buisson'], $this->colors['buisson'], false);
+		}
+		mysql_free_result($res);
+	}
+
+	/*
 	Dessine un point et un texte
 	*/
 	private function drawPointText($position, $text, $color, $useBg=false) {
@@ -950,6 +973,9 @@ class Carte {
 					break;
 				case "nid":
 					$this->drawNid();
+					break;
+				case "buisson":
+					$this->drawBuisson();
 					break;
 				case "joueur":
 					// dessin des joueurs
