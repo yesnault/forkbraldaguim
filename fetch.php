@@ -741,7 +741,7 @@ class Fetch {
 		if ($date < 20110419) {
 			return;
 		}
-		$lines = explode("<br>", $desc);
+		$lines = explode("<br />", $desc);
 		$monstre = array();
 		$query_keys = array();
 		$query_values = array();

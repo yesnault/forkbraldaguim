@@ -295,7 +295,7 @@ EOF;
 	<p>Votre dernière mise à jour a eu lieu le : {$p['last_update']}</p>
 EOF;
 		// si on a le droit de mettre a jour
-		if ($p == null || $p['diff'] > UPDATE_DELAY) {
+		if ($p == null || $p['diff'] == NULL || $p['diff'] > UPDATE_DELAY) {
 			$content .=<<<EOF
 	<form action="account.php" method="POST">
 	<input type="hidden" name="action" value="fetch_me" />
