@@ -57,11 +57,15 @@ class Fetch {
 			$url = "http://sp.braldahim.com/scripts/evenements/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=2";
 			#$url =  "http://www.guim.info/braldahim/toto";
 			$this->fetch_evenements($url, $row['braldahim_id'], $row['last_event']);
+
+			$url = "http://sp.braldahim.com/scripts/equipements/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=1";
+			#$url =  "http://www.guim.info/braldahim/toto";
+			$this->fetch_equipement($url, $row['braldahim_id']);
 		}
 	}
 	
 	public function fetchOnePlayer($id) {
-		$query = sprintf("SELECT braldahim_id, restricted_password FROM ".DB_PREFIX."user WHERE braldahim_id=%s;",
+		$query = sprintf("SELECT braldahim_id, restricted_password, last_event FROM ".DB_PREFIX."user WHERE braldahim_id=%s;",
 			mysql_real_escape_string($id));
 		$res = mysql_query($query);
 		
@@ -71,6 +75,7 @@ class Fetch {
 			if (is_null($row['restricted_password']) || $row['restricted_password'] == 'NULL') {
 				continue;
 			}
+			
 			$url = "http://sp.braldahim.com/scripts/profil/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=2";
 			$this->fetch_position($url);
 			
@@ -82,6 +87,10 @@ class Fetch {
 
 			$url = "http://sp.braldahim.com/scripts/evenements/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=2";
 			$this->fetch_evenements($url, $row['braldahim_id'], $row['last_event']);
+
+			$url = "http://sp.braldahim.com/scripts/equipements/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=1";
+			#$url =  "http://www.guim.info/braldahim/toto";
+			$this->fetch_equipement($url, $row['braldahim_id']);
 		}
 	}
 	
@@ -832,5 +841,90 @@ class Fetch {
 			}
 		}
 	}
+
+	/*
+	MAJ des equipement du joueur
+	Va chercher le contenu de l'url, le traite et le stock en db
+	*/
+	protected function fetch_equipement($url, $braldun) {
+		$content = file($url);
+		if (count($content) == 0) {
+			echo "Erreur : le fichier est vide\n";
+			return;
+		}
+		// content[0] = info sur le script
+		// content[1] = entete
+		// content[X] = valeur
+
+		/* Détails d'une ligne :
+		EQUIPEMENT;
+		id_equipement;nom;qualite;emplacement;niveau;
+		id_type_equipement;id_type_emplacement;
+		nom_type_emplacement;nom_systeme_type_emplacement;
+		nb_runes;
+		armure;force;agilite;vigueur;sagesse;vue;attaque;degat;defense;
+		suffixe;
+		poids;etat_courant;etat_initial;
+		ingredient;nom_systeme_type_ingredient;
+		armure_equipement_bonus;
+		vernis_bm_armure_equipement_bonus;
+		agilite_equipement_bonus;
+		vernis_bm_agilite_equipement_bonus;
+		force_equipement_bonus;
+		vernis_bm_force_equipement_bonus;
+		sagesse_equipement_bonus;
+		vernis_bm_sagesse_equipement_bonus;
+		vigueur_equipement_bonus;
+		vernis_bm_vigueur_equipement_bonus;
+		vernis_bm_vue_equipement_bonus;
+		vernis_bm_attaque_equipement_bonus;
+		vernis_bm_degat_equipement_bonus;
+		vernis_bm_defense_equipement_bonus;
+		id_rune_equipement_rune1;nom_type_rune1;
+		id_rune_equipement_rune2;nom_type_rune2;
+		id_rune_equipement_rune3;nom_type_rune3;
+		id_rune_equipement_rune4;nom_type_rune4;
+		id_rune_equipement_rune5;nom_type_rune5;
+		id_rune_equipement_rune6;nom_type_rune6;
+		ou :
+		AUCUN_EQUIPEMENT 
+		*/
+		if (preg_match("/^ERREUR-/", $content[0]) == 1) {
+			// erreur lors de l'appel du script (cf : http://sp.braldahim.com/)
+			echo "[".date("YmdHi")."] ".$content[0];
+			return;
+		}
+
+		$keys = explode(";", $content[1]);
+		array_shift($keys); //suppr de EQUIPEMNT
+		array_pop($keys); // suppr du ; en trop
+		$values = array();
+		for ($i=2; $i<count($content); $i++) {
+			$line = trim($content[$i]);
+			if (strlen($line) == 0) {
+				continue;
+			}
+			if (preg_match("/AUCUN_EQUIPEMENT/", $line, $m) !== 1) {
+				$tmp = explode(";", $line);
+				array_shift($tmp);
+				array_pop($tmp);
+				array_pop($tmp); // suppr des 2 ; en trop
+				array_pop($tmp);
+				array_walk($tmp, function (&$str) {$str = mysql_real_escape_string($str);});
+				$values[] = $tmp;
+			}
+		}
+		$query = "DELETE FROM ".DB_PREFIX."equipement WHERE braldun=$braldun";
+		mysql_query($query);
+		foreach ($values as $v) {
+			$query = "INSERT INTO ".DB_PREFIX."equipement (braldun,`"
+				.join("`,`", $keys)
+				."`) VALUES ($braldun,'"
+				.join("', '", $v)
+				."');";
+			mysql_query($query);
+		}
+	}
+
 }
 ?>

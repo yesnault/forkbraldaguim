@@ -26,6 +26,7 @@
 		<li><a href="position.php">Position</a></li>
 		<li><a href="bestiaire.php?action=bestiaire">Bestiaire</a></li>
 		<li><a href="profil.php?action=allprofils">Profils</a></li>
+		<li><a href="equipement.php?action=equipement">Equipement</a></li>
 		<li><a href="simulateur.php?action=simulation">Simulateur</a></li>
 		<?php } ?>
 </ul>
@@ -41,7 +42,7 @@
 	<div class="clear_that"></div>
 </div>
 <div id="footer">
-v0.5 - Code source disponible sur : <a href="http://www.guim.info/dokuwiki/dev/braldaguim">Braldaguim</a>
+v0.6 - Code source disponible sur : <a href="http://www.guim.info/dokuwiki/dev/braldaguim">Braldaguim</a>
 </div>
 </body>
 </html>

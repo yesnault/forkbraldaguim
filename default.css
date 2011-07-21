@@ -177,7 +177,7 @@ td.map_zoom {
 .profil table.bar td.titre {
 	text-align: right;
 }
-.profil span.bar {
+span.bar {
 	display: block;
 	width: 100px;
 	height: 5px;
