@@ -7,6 +7,7 @@
 <link href="default.css" type="text/css" rel="stylesheet">
 
 <title><?php  echo $app->getHtmlTitle(); ?></title>
+<?php  echo $app->getHtmlHead(); ?>
 <script type="text/javascript"><?php echo $app->getHtmlScript(); ?></script>
 </head>
 <body>
@@ -28,6 +29,7 @@
 		<li><a href="profil.php?action=allprofils">Profils</a></li>
 		<li><a href="equipement.php?action=equipement">Equipement</a></li>
 		<li><a href="simulateur.php?action=simulation">Simulateur</a></li>
+		<li><a href="svgmap2.php?action=position">SVGMAP (beta)</a></li>
 		<?php } ?>
 </ul>
 </div>

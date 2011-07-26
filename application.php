@@ -27,6 +27,7 @@ class Application {
 	protected $html_content;
 	protected $html_message;
 	protected $html_script;
+	protected $html_head;
 	protected $db;
 	protected $action;
 	
@@ -80,6 +81,10 @@ class Application {
 	
 	public function getHtmlScript() {
 		return $this->html_script;
+	}
+	
+	public function getHtmlHead() {
+		return $this->html_head;
 	}
 	
 	/*
