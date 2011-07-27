@@ -17,12 +17,15 @@
     along with braldaguim.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/*
 if (! isset($_SESSION)) session_start();
 if (! isset($_SESSION['bra_num'])) return;
+*/
 
 require_once("conf.php");
 error_reporting(E_ALL ^ E_NOTICE);
 
+$echelle = 50; # largeur d'une tuile en pixel
 $carte = null;
 
 $colors = array(
@@ -34,16 +37,15 @@ $colors = array(
 	'fog_clear'	=> "array(255, 255, 255, 127)",
 	);
 
-if (isset($_REQUEST['standalone'])) {
-	$carte = new Carte(700, 500);
+//if (isset($_REQUEST['standalone'])) {
+	$carte = new Carte(800, 600);
 	// utilisation de "ob_gzhandler" pour gzipper le fichier svg,
 	// la taille est divisé par 10
 	ob_start("ob_gzhandler");
 	$carte->display();
 	ob_end_flush();
-}
+//}
 
-$echelle = 50; # largeur d'une tuile en pixel
 
 /*
 Classe utilitaire représentant un point (comme dans les cours de 1ere année...)
@@ -75,14 +77,17 @@ class Joueur {
 	public $nom;
 	public $prenom;
 	public $position;
+	public $rayon;
 	
 	public function __construct($id, $prenom, $nom, Point $position) {
+		global $echelle;
 		$this->id = $id;
 		$this->prenom = $prenom;
 		$this->nom = $nom;
 		$this->position = $position;
-		$this->position->x += 0.5;
-		$this->position->y += 0.5;
+		$this->position->x += 0.5 * $echelle;
+		$this->position->y += 0.5 * $echelle;
+		$this->rayon = $echelle / 2;
 	}
 	
 	public function __toString() {
@@ -90,11 +95,11 @@ class Joueur {
 	}
 
 	public function toSVG() {
+#	<circle cx="{$this->position->x}" cy="{$this->position->y}" r="{$this->rayon}" />
 		$svg =<<<EOF
 <g id="joueur{$this->id}">
-	<circle cx="{$this->position->x}" cy="{$this->position->y}" r="0.5" />
 	<text x="{$this->position->x}" y="{$this->position->y}">{$this->prenom}</text>
-	<use xlink:href="#png_joueur" x="{$this->position->x}" y="{$this->position->y}" width="19" height="22" />
+	<use xlink:href="#png_joueur" x="{$this->position->x}" y="{$this->position->y}" />
 </g>
 EOF;
 		return $svg;
@@ -104,27 +109,53 @@ EOF;
 class Tuile {
 	public $type;
 	public $position;
+	public $w;
+	public $h;
 
 	public function __construct($type, Point $position) {
+		global $echelle;
 		$this->type = $type;
 		$this->position = $position;
+		$this->w = $echelle;
+		$this->h = $echelle;
 	}
 
 	public function toSVG() {
 		$svg =<<<EOF
-	<rect x="{$this->position->x}" y="{$this->position->y}" height="1" width="1" class="{$this->type}"/>
+	<rect x="{$this->position->x}" y="{$this->position->y}" height="{$this->h}" width="{$this->w}" class="{$this->type}"/>
+EOF;
+		return $svg;
+	}
+}
+
+class Champ extends Tuile {
+	public function toSVG() {
+		$svg =<<<EOF
+	<use xlink:href="#png_champ" x="{$this->position->x}" y="{$this->position->y}" />
 EOF;
 		return $svg;
 	}
 }
 
 class Lieu extends Tuile {
+	public $nom;
+	public function __construct($nom, $type, Point $position) {
+		global $echelle;
+		$this->type = $type;
+		$this->nom = $nom;
+		$this->position = $position;
+		$this->w = $echelle;
+		$this->h = $echelle;
+	}
+
 	public function toSVG() {
-		$x = $this->position->x + 0.5;
-		$y = $this->position->y + 0.5;
+		global $echelle;
+		$x = $this->position->x + 0.5 * $echelle;
+		$y = $this->position->y + 0.5 * $echelle;
 		$svg =<<<EOF
-	<rect x="{$this->position->x}" y="{$this->position->y}" height="1" width="1" />
-	<text x="{$x}" y="{$y}" transform="rotate(45 {$x} {$y})">{$this->type}</text>
+	<rect x="{$this->position->x}" y="{$this->position->y}" height="{$this->h}" width="{$this->w}" />
+	<text x="{$x}" y="{$y}" transform="rotate(45 {$x} {$y})">{$this->nom}</text>
+	<use xlink:href="#png_{$this->type}" x="{$this->position->x}" y="{$this->position->y}"  />
 EOF;
 		return $svg;
 	}
@@ -132,9 +163,10 @@ EOF;
 
 class Buisson extends Tuile {
 	public function toSVG() {
+	#<rect x="{$this->position->x}" y="{$this->position->y}" height="{$this->h}" width="{$this->w}" class="{$this->type}"/>
 		$svg =<<<EOF
-	<rect x="{$this->position->x}" y="{$this->position->y}" height="1" width="1" class="{$this->type}"/>
 	<text x="{$this->position->x}" y="{$this->position->y}">{$this->type}</text>
+	<use xlink:href="#png_buisson" x="{$this->position->x}" y="{$this->position->y}"  />
 EOF;
 		return $svg;
 	}
@@ -246,12 +278,35 @@ class Carte {
 <script xlink:href="js/SVGPan.js"/>
 <defs>
 {$this->getStyle()}
-<g id="png_joueur">
-<image xlink:href="img/b/braldun.png" width="19" height="22" />
-</g>
+<g id="png_joueur"><image xlink:href="img/b/braldun.png" width="19" height="22" /></g>
+<g id="png_champ"><image xlink:href="img/b/champ.png" width="32" height="29" /></g>
+<g id="png_buisson"><image xlink:href="img/b/buisson.png" width="30" height="30" /></g>
+<g id="png_nid"><image xlink:href="img/b/nid.png" width="30" height="30" /></g>
+
+<g id="png_apothicaire"><image xlink:href="img/b/apothicaire.png" width="32" height="32" /></g>
+<g id="png_cuisinier"><image xlink:href="img/b/cuisinier.png" width="32" height="32" /></g>
+<g id="png_forgeron"><image xlink:href="img/b/forgeron.png" width="32" height="32" /></g>
+<g id="png_menuisier"><image xlink:href="img/b/menuisier.png" width="32" height="32" /></g>
+<g id="png_tanneur"><image xlink:href="img/b/tanneur.png" width="32" height="32" /></g>
+
+<g id="png_academie"><image xlink:href="img/b/academie.png" width="32" height="32" /></g>
+<g id="png_assembleur"><image xlink:href="img/b/assembleur.png" width="32" height="32" /></g>
+<g id="png_auberge"><image xlink:href="img/b/auberge.png" width="32" height="32" /></g>
+<g id="png_banque"><image xlink:href="img/b/banque.png" width="32" height="32" /></g>
+<g id="png_centreformation"><image xlink:href="img/b/centreformation.png" width="32" height="32" /></g>
+<g id="png_gare"><image xlink:href="img/b/gare.png" width="32" height="32" /></g>
+<g id="png_hall"><image xlink:href="img/b/hall.png" width="32" height="32" /></g>
+<g id="png_hopital"><image xlink:href="img/b/hopital.png" width="32" height="32" /></g>
+<g id="png_mairie"><image xlink:href="img/b/mairie.png" width="32" height="32" /></g>
+<g id="png_marche"><image xlink:href="img/b/marche.png" width="32" height="32" /></g>
+<g id="png_notaire"><image xlink:href="img/b/notaire.png" width="32" height="32" /></g>
+<g id="png_tabatiere"><image xlink:href="img/b/tabatiere.png" width="32" height="32" /></g>
+<g id="png_tribunal"><image xlink:href="img/b/tribunal.png" width="32" height="32" /></g>
+<g id="png_tribune"><image xlink:href="img/b/tribune.png" width="32" height="32" /></g>
 </defs>
 <g id="viewport" transform="translate(350, 250)">
 EOF;
+// https://github.com/braldahim/braldahim/tree/master/braldahim-static/public/images/vue/batiments
 		foreach ($this->zones as $i) {
 			$svg .= $i->toSVG();
 		}
@@ -381,10 +436,8 @@ text {
 }
 .champ rect {
 	fill: #966496;
-	/*stroke: none;
-	stroke-width: 0;*/
-	stroke: #000000;
-	stroke-width: 0.1px;
+	stroke: none;
+	stroke-width: 0;
 }
 .buisson rect {
 	fill: #64C80A;
@@ -397,12 +450,12 @@ text {
 	stroke-width: 0; 
 }
 .lieu text {
-	font-size: 0.1px;
-	display: inline;
+	font-size: 10px;
+	display: none;
 	text-anchor: middle;
 }
 .nid rect {
-	fill: #960A0A;
+	fill: transparent;
 	stroke: #000000;
 	stroke-width: 0.1px;
 }
@@ -424,7 +477,7 @@ text {
 	stroke-width: 0.1px;
 }
 .joueur text {
-	font-size: 1px;
+	font-size: 10px;
 	display: inline;
 	text-anchor: middle;
 }
@@ -433,7 +486,7 @@ text {
 	/*fill: #B4B4B4;*/
 	fill: none;
 	stroke: #FF0000;
-	stroke-width: 0.1px;
+	stroke-width: 1px;
 }
 .ville text {
 	font-size: 3px;
@@ -492,6 +545,7 @@ EOF;
 	Recupere les joueurs de la communauté
 	*/
 	private function getJoueurs() {
+		global $echelle;
 		$query = "SELECT braldahim_id, prenom, nom, x, y
 		FROM ".DB_PREFIX."user
 		WHERE x IS NOT NULL
@@ -504,7 +558,7 @@ EOF;
 				$row['braldahim_id'],
 				$row['prenom'],
 				$row['nom'],
-				new Point($row['x'], $row['y']*-1));
+				new Point($row['x']*$echelle, $row['y']*-1*$echelle));
 		}
 		mysql_free_result($res);
 	}
@@ -513,6 +567,7 @@ EOF;
 	Recupere les villes
 	*/
 	private function getVilles() {
+		global $echelle;
 		$query = "SELECT nom_ville,
 			x_min_ville, y_min_ville,
 			x_max_ville, y_max_ville
@@ -522,8 +577,8 @@ EOF;
 		while ($row = mysql_fetch_assoc($res)) {
 			$this->villes[] = new Ville(
 				$row['nom_ville'],
-				new Point($row['x_min_ville'], $row['y_max_ville']*-1),
-				new Point($row['x_max_ville'], $row['y_min_ville']*-1)
+				new Point($row['x_min_ville']*$echelle, $row['y_max_ville']*-1*$echelle),
+				new Point($row['x_max_ville']*$echelle, $row['y_min_ville']*-1*$echelle)
 				);
 		}
 		mysql_free_result($res);
@@ -533,6 +588,7 @@ EOF;
 	Retourne un tableau de toutes les zones
 	*/
 	private function getZones() {
+		global $echelle;
 		$query = "SELECT nom_systeme_environnement,
 			x_min_zone, y_min_zone,
 			x_max_zone, y_max_zone
@@ -541,8 +597,8 @@ EOF;
 		while ($row = mysql_fetch_assoc($res)) {
 			$this->zones[] = new Zone(
 				$row['nom_systeme_environnement'],
-				new Point($row['x_min_zone'], $row['y_max_zone']*-1),
-				new Point($row['x_max_zone']+2, $row['y_min_zone']*-1+2)
+				new Point($row['x_min_zone']*$echelle, ($row['y_max_zone']+2)*-1*$echelle),
+				new Point(($row['x_max_zone']+2)*$echelle, $row['y_min_zone']*-1*$echelle)
 				);
 		}
 		mysql_free_result($res);
@@ -552,6 +608,7 @@ EOF;
 	Recupere les routes
 	*/
 	private function getRoutes() {
+		global $echelle;
 		$query = "SELECT x, y, type_route
 		FROM ".DB_PREFIX."route
 		ORDER BY x, y, type_route DESC;";
@@ -559,7 +616,7 @@ EOF;
 		while ($row = mysql_fetch_assoc($res)) {
 			$this->routes[] = new Tuile(
 				$row['type_route'],
-				new Point($row['x'], $row['y']*-1));
+				new Point($row['x']*$echelle, $row['y']*-1*$echelle));
 		}
 		mysql_free_result($res);
 	}
@@ -568,6 +625,7 @@ EOF;
 	Recupere les palissade
 	*/
 	private function getPalissades() {
+		global $echelle;
 		$query = "SELECT x, y
 		FROM ".DB_PREFIX."palissade
 		ORDER BY x, y;";
@@ -575,7 +633,7 @@ EOF;
 		while ($row = mysql_fetch_assoc($res)) {
 			$this->palissades[] = new Tuile(
 				'palissade',
-				new Point($row['x'], $row['y']*-1));
+				new Point($row['x']*$echelle, $row['y']*-1*$echelle));
 		}
 		mysql_free_result($res);
 	}
@@ -584,14 +642,15 @@ EOF;
 	Recupere les champs
 	*/
 	private function getChamps() {
+		global $echelle;
 		$query = "SELECT x, y
 		FROM ".DB_PREFIX."champ
 		ORDER BY x, y;";
 		$res = mysql_query($query);
 		while ($row = mysql_fetch_assoc($res)) {
-			$this->champs[] = new Tuile(
+			$this->champs[] = new Champ(
 				'champ',
-				new Point($row['x'], $row['y']*-1));
+				new Point($row['x']*$echelle, $row['y']*-1*$echelle));
 		}
 		mysql_free_result($res);
 	}
@@ -600,6 +659,7 @@ EOF;
 	Recupere les bosquets
 	*/
 	private function getBosquets() {
+		global $echelle;
 		$query = "SELECT x, y, nom_systeme_type_bosquet
 		FROM ".DB_PREFIX."bosquet
 		ORDER BY x, y;";
@@ -607,7 +667,7 @@ EOF;
 		while ($row = mysql_fetch_assoc($res)) {
 			$this->bosquets[] = new Tuile(
 				$row['nom_systeme_type_bosquet'],
-				new Point($row['x'], $row['y']*-1));
+				new Point($row['x']*$echelle, $row['y']*-1*$echelle));
 		}
 		mysql_free_result($res);
 	}
@@ -616,8 +676,9 @@ EOF;
 	Recupere les lieux standards
 	*/
 	private function getLieuStandards() {
+		global $echelle;
 		#$query = "SELECT x, y, nom_systeme_type_lieu
-		$query = "SELECT x, y, nom_lieu
+		$query = "SELECT x, y, nom_lieu, nom_systeme_type_lieu
 		FROM ".DB_PREFIX."lieu
 		WHERE nom_systeme_type_lieu NOT IN ('lieumythique', 'quete', 'ruine')
 		ORDER BY x, y;";
@@ -625,7 +686,8 @@ EOF;
 		while ($row = mysql_fetch_assoc($res)) {
 			$this->lieuStandards[] = new Lieu(
 				$row['nom_lieu'],
-				new Point($row['x'], $row['y']*-1));
+				$row['nom_systeme_type_lieu'],
+				new Point($row['x']*$echelle, $row['y']*-1*$echelle));
 		}
 		mysql_free_result($res);
 	}
@@ -634,16 +696,18 @@ EOF;
 	Recupere les lieux standards
 	*/
 	private function getLieuMythiques() {
+		global $echelle;
 		#$query = "SELECT x, y, nom_systeme_type_lieu
-		$query = "SELECT x, y, nom_lieu
+		$query = "SELECT x, y, nom_lieu, nom_systeme_type_lieu
 		FROM ".DB_PREFIX."lieu
 		WHERE nom_systeme_type_lieu IN ('lieumythique', 'quete', 'ruine')
 		ORDER BY x, y;";
 		$res = mysql_query($query);
 		while ($row = mysql_fetch_assoc($res)) {
 			$this->lieuMythiques[] = new Lieu(
-				$row['nom__lieu'],
-				new Point($row['x'], $row['y']*-1));
+				$row['nom_lieu'],
+				$row['nom_systeme_type_lieu'],
+				new Point($row['x']*$echelle, $row['y']*-1*$echelle));
 		}
 		mysql_free_result($res);
 	}
@@ -652,6 +716,7 @@ EOF;
 	Recupere les environnements
 	*/
 	private function getEnvironnements() {
+		global $echelle;
 		$query = "SELECT x, y, nom_systeme_environnement
 		FROM ".DB_PREFIX."environnement
 		WHERE nom_systeme_environnement != 'plaine'
@@ -660,7 +725,7 @@ EOF;
 		while ($row = mysql_fetch_assoc($res)) {
 			$this->environnements[] = new Tuile(
 				strtolower($row['nom_systeme_environnement']),
-				new Point($row['x'], $row['y']*-1));
+				new Point($row['x']*$echelle, $row['y']*-1*$echelle));
 		}
 		mysql_free_result($res);
 	}
@@ -669,6 +734,7 @@ EOF;
 	Recupere les nids standards
 	*/
 	private function getNids() {
+		global $echelle;
 		$query = "SELECT x, y, nom_nid
 		FROM ".DB_PREFIX."nid
 		ORDER BY x, y;";
@@ -676,7 +742,8 @@ EOF;
 		while ($row = mysql_fetch_assoc($res)) {
 			$this->nids[] = new Lieu(
 				$row['nom_nid'],
-				new Point($row['x'], $row['y']*-1));
+				'nid',
+				new Point($row['x']*$echelle, $row['y']*-1*$echelle));
 		}
 		mysql_free_result($res);
 	}
@@ -685,6 +752,7 @@ EOF;
 	Recupere les buissons
 	*/
 	private function getBuissons() {
+		global $echelle;
 		$query = "SELECT x, y, nom_type_buisson
 		FROM ".DB_PREFIX."buisson
 		ORDER BY x, y;";
@@ -692,7 +760,7 @@ EOF;
 		while ($row = mysql_fetch_assoc($res)) {
 			$this->buissons[] = new Buisson(
 				$row['buisson'],
-				new Point($row['x'], $row['y']*-1));
+				new Point($row['x']*$echelle, $row['y']*-1*$echelle));
 		}
 		mysql_free_result($res);
 	}
