@@ -17,10 +17,8 @@
     along with braldaguim.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*
 if (! isset($_SESSION)) session_start();
 if (! isset($_SESSION['bra_num'])) return;
-*/
 
 require_once("conf.php");
 error_reporting(E_ALL ^ E_NOTICE);
@@ -37,14 +35,12 @@ $colors = array(
 	'fog_clear'	=> "array(255, 255, 255, 127)",
 	);
 
-//if (isset($_REQUEST['standalone'])) {
-	$carte = new Carte(800, 600);
-	// utilisation de "ob_gzhandler" pour gzipper le fichier svg,
-	// la taille est divisé par 10
-	ob_start("ob_gzhandler");
-	$carte->display();
-	ob_end_flush();
-//}
+$carte = new Carte(800, 600);
+// utilisation de "ob_gzhandler" pour gzipper le fichier svg,
+// la taille est divisé par 10
+ob_start("ob_gzhandler");
+$carte->display();
+ob_end_flush();
 
 
 /*
