@@ -217,20 +217,18 @@ class Carte {
 	private $zoom;
 	private $user_x;
 	private $user_y;
-	private $img;
 	private $colors;
-	
-	private $debug = false;
+	private $my_position;
+	private $w;
+	private $h;
 	
 	/*
-	Construit une carte de la taille indiqué avec size (en pixel)
-	et representant le sujet indiqué par type (fond, joueur, lieu)
-	$user_zoom : valeur du zoom utilisateur
-	$user_x, $user_y : décalage demandé par l'utilisateur par rapport à l'origine
+	Construit une carte de la taille indiqué avec i$w/$h (en pixel)
 	*/
 	public function __construct($w, $h) {
 		$this->w = $w;
 		$this->h = $h;
+		$this->my_position = null;
 		$this->joueurs = array();
 		$this->villes = array();
 		$this->zones = array();
@@ -264,6 +262,13 @@ class Carte {
 	}
 
 	public function toSVG() {
+		$tr_x = $this->w / 2;
+		$tr_y = $this->h / 2;
+		if ($this->my_position != null) {
+			$tr_x = $this->my_position->x * -1 + $this->w / 2;
+			$tr_y = $this->my_position->y * -1 + $this->h / 2;
+		}
+			
 		$svg =<<<EOF
 <svg version="1.1" baseProfile="full"
 	xmlns="http://www.w3.org/2000/svg"
@@ -300,7 +305,7 @@ class Carte {
 <g id="png_tribunal"><image xlink:href="img/b/tribunal.png" width="32" height="32" /></g>
 <g id="png_tribune"><image xlink:href="img/b/tribune.png" width="32" height="32" /></g>
 </defs>
-<g id="viewport" transform="translate(350, 250)">
+<g id="viewport" transform="translate({$tr_x}, {$tr_y})">
 EOF;
 // https://github.com/braldahim/braldahim/tree/master/braldahim-static/public/images/vue/batiments
 		foreach ($this->zones as $i) {
@@ -555,6 +560,9 @@ EOF;
 				$row['prenom'],
 				$row['nom'],
 				new Point($row['x']*$echelle, $row['y']*-1*$echelle));
+			if ($row['braldahim_id'] == $_SESSION['bra_num']) {
+				$this->my_position = new Point($row['x']*$echelle, $row['y']*-1*$echelle);
+			}
 		}
 		mysql_free_result($res);
 	}
