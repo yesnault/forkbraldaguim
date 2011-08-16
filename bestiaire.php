@@ -74,7 +74,7 @@ class Bestiaire extends Application {
 			$nb_fiche = $monstre['count'];
 			$nom = $monstre['nom'];
 			$str_monstre =<<<EOF
-Le monstre <b>{$nom}</b> ({$nb_fiche} fiches) a les caractéristiques suivantes :
+<p>Le monstre <b>{$nom}</b> ({$nb_fiche} fiches) a les caractéristiques suivantes :</p>
 <table class="monstre_tab_detail" border="1">
 <tr>
 	<th>&nbsp;</th>

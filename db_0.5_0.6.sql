@@ -56,3 +56,9 @@ CREATE TABLE equipement (
 ) CHARACTER SET utf8;
 
 
+CREATE TABLE charrette (
+	idBraldun MEDIUMINT,
+	objet TEXT,
+	contenu TEXT,
+	INDEX(idBraldun)
+) CHARACTER SET utf8;

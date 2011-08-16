@@ -4,17 +4,20 @@ body {
 }
 a:link, a:visited {color: #BBBBFF;}
 a:hover {color: #F0AE21;}
+#menu {
+	font-size: .8em;
+}
 #menu ul {
 	list-style-type: none;
 	padding: 0;
 	text-align: center;
-	margin: .5em 0 .5em;
+	margin: .3em 0 .3em;
 }
 #menu ul li {display: inline;}
 #menu ul li a {
 	font-weight: bold;
 	text-decoration: none;
-	padding: .2em 1em;
+	padding: .2em .5em;
 	background-color: #5D8231;
 }
 #menu ul li a:hover {
@@ -102,7 +105,7 @@ td.map_zoom {
 #monstre_detail {
 	float: left;
 	padding: 0 2em 0 0;
-	max-width: 600px;
+	/*max-width: 600px;*/
 }
 .monstre_tab_detail {
 	float: left;

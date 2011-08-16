@@ -61,6 +61,10 @@ class Fetch {
 			$url = "http://sp.braldahim.com/scripts/equipements/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=1";
 			#$url =  "http://www.guim.info/braldahim/toto";
 			$this->fetch_equipement($url, $row['braldahim_id']);
+			
+			$url = "http://sp.braldahim.com/scripts/charrette/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=1";
+			#$url =  "http://www.guim.info/braldahim/toto";
+			$this->fetch_charrette($url, $row['braldahim_id']);
 		}
 	}
 	
@@ -91,6 +95,10 @@ class Fetch {
 			$url = "http://sp.braldahim.com/scripts/equipements/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=1";
 			#$url =  "http://www.guim.info/braldahim/toto";
 			$this->fetch_equipement($url, $row['braldahim_id']);
+			
+			$url = "http://sp.braldahim.com/scripts/charrette/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=1";
+			#$url =  "http://www.guim.info/braldahim/toto";
+			$this->fetch_charrette($url, $row['braldahim_id']);
 		}
 	}
 	
@@ -924,7 +932,59 @@ class Fetch {
 				."');";
 			mysql_query($query);
 		}
+		
+		if ($content[1] == "AUCUNE_CHARRETTE") {
+			return;
+		}
 	}
+	
+	/*
+	MAJ du contenu de la charrette du joueur
+	Va chercher le contenu de l'url, le traite et le stock en db
+	*/
+	protected function fetch_charrette($url, $braldun) {
+		$content = file($url);
+		if (count($content) == 0) {
+			echo "Erreur : le fichier est vide\n";
+			return;
+		}
+		// content[0] = info sur le script
+		// content[X] = valeur
 
+		/*
+		CHARRETTE;idCharrette;durabiliteMax;durabiliteActuelle;poidsTransportable;poidsTransporte
+		ou : 
+		AUCUNE_CHARRETTE
+		
+		TYPE:statique;NB_APPELS:11;MAX_AUTORISE:14
+		CHARRETTE;5;2000;1403;40;4.659
+		ELEMENT;Castar;1609
+		ALIMENT;14883;Gigot braisé;Standard;21
+		ALIMENT;14884;Gigot braisé;Standard;21
+		*/
+		if (preg_match("/^ERREUR-/", $content[0]) == 1) {
+			// erreur lors de l'appel du script (cf : http://sp.braldahim.com/)
+			echo "[".date("YmdHi")."] ".$content[0];
+			return;
+		}
+		
+		$query = "DELETE FROM ".DB_PREFIX."charrette WHERE braldun=$braldun";
+		mysql_query($query);
+		
+		if ($content[1] == "AUCUNE_CHARRETTE") {
+			return;
+		}
+		
+		for ($l=2; $l<count($content); $l++) {
+			$match = null;
+			if (preg_match("/([^;]+);(.*)/", $content[$l], $match)) {
+				$query = "INSERT INTO ".DB_PREFIX."charrette (idBraldun, objet, contenu)
+					VALUES ($braldun, '"
+					.$match[1]."', '"
+					.mysql_real_escape_string($match[2])."');";
+				mysql_query($query);
+			}
+		}
+	}
 }
 ?>

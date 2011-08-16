@@ -44,6 +44,32 @@ ob_end_flush();
 
 
 /*
+Classe contenant les propriétés de la carte.
+C'est un singleton pour le partager entre tous les objets.
+*/
+class Props {
+	private static $instance;
+	
+	private function __construct(){}
+	
+	public static function getProps() {
+		if (!isset(self::$instance)) {
+			$className = __CLASS__;
+			self::$instance = new $className;
+		}
+		return self::$instance;
+	}
+
+	public function __clone() {
+		trigger_error('Clone is not allowed.', E_USER_ERROR);
+	}
+
+	public function __wakeup() {
+		trigger_error('Unserializing is not allowed.', E_USER_ERROR);
+	}
+}
+
+/*
 Classe utilitaire représentant un point (comme dans les cours de 1ere année...)
 */
 class Point {
@@ -85,10 +111,6 @@ class Joueur {
 		$this->position->y += 0.5 * $echelle;
 		$this->rayon = $echelle / 2;
 	}
-	
-	public function __toString() {
-		return "[{$this->id}] {$this->prenom} {$this->nom} {$this->position}";
-	}
 
 	public function toSVG() {
 #	<circle cx="{$this->position->x}" cy="{$this->position->y}" r="{$this->rayon}" />
@@ -96,6 +118,22 @@ class Joueur {
 <g id="joueur{$this->id}">
 	<text x="{$this->position->x}" y="{$this->position->y}">{$this->prenom}</text>
 	<use xlink:href="#png_joueur" x="{$this->position->x}" y="{$this->position->y}" />
+</g>
+EOF;
+		return $svg;
+	}
+	
+	public function getInfo() {
+		$p = Props::getProps();
+		$txt_y = $p->info_y + 25;
+		$svg=<<<EOF
+<g id="info_joueur{$this->id}" class="info_joueur">
+	<rect x="{$p->info_x}" y="{$p->info_y}" height="{$p->info_h}" width="{$p->info_w}" class="info_bg" />
+	<text x="{$p->info_x}" y="{$txt_y}" style="display:inline; color:#000">{$this->prenom} {$this->nom}</text>
+	<text x="{$p->info_x}" y="{($txt_y+20)}" style="display:inline; color:#000">{$this->prenom} {$this->nom}</text>
+	<g id="close_info_joueur{$this->id}">
+		<path d="M0,0 L10,10 M10,0 L0,10" style="fill:none;stroke:#000000;stroke-width:2;" transform="translate({$p->info_x} {$p->info_y})" />
+	</g>
 </g>
 EOF;
 		return $svg;
@@ -128,6 +166,27 @@ class Champ extends Tuile {
 	public function toSVG() {
 		$svg =<<<EOF
 	<use xlink:href="#png_champ" x="{$this->position->x}" y="{$this->position->y}" />
+EOF;
+		return $svg;
+	}
+}
+
+class Balise extends Tuile {
+	public function toSVG() {
+		global $echelle;
+		$xa = $this->position->x + 0.1 * $echelle;
+		$ya = $this->position->y + 0.1 * $echelle;
+		$xb = $xa;
+		$yb = $ya + 3;
+		$xc = $xa;
+		$yc = $ya + 6;
+//<use xlink:href="#png_balise" x="{$this->position->x}" y="{$this->position->y}" />
+$svg =<<<EOF
+<g class="balise">
+	<rect class="a" x="{$xa}" y="{$ya}" height="32" width="7" rx="1.3" ry="1.3" />
+	<rect class="b" x="{$xb}" y="{$yb}" height="3" width="7" />
+	<rect class="c" x="{$xc}" y="{$yc}" height="3" width="7" />
+</g>
 EOF;
 		return $svg;
 	}
@@ -221,9 +280,10 @@ class Carte {
 	private $my_position;
 	private $w;
 	private $h;
+	private $p;
 	
 	/*
-	Construit une carte de la taille indiqué avec i$w/$h (en pixel)
+	Construit une carte de la taille indiquée avec $w/$h (en pixel)
 	*/
 	public function __construct($w, $h) {
 		$this->w = $w;
@@ -259,16 +319,33 @@ class Carte {
 		$this->getEnvironnements();
 		$this->getNids();
 		$this->getBuissons();
+		
+		$this->p = Props::getProps();
+		$this->p->w = $w;
+		$this->p->h = $h;
+		$this->p->info_w = 300;
+		$this->p->info_h = 150;
+		$this->p->info_x = 50;
+		$this->p->info_y = 20;
 	}
 
+	/*
+	Génère le svg en parcourant les tableaux remplis dans le constructeurs
+	*/
 	public function toSVG() {
+		// translation pour être soit en 0,0 soit centré sur le joueur
 		$tr_x = $this->w / 2;
 		$tr_y = $this->h / 2;
 		if ($this->my_position != null) {
 			$tr_x = $this->my_position->x * -1 + $this->w / 2;
 			$tr_y = $this->my_position->y * -1 + $this->h / 2;
 		}
-			
+		// position du panneau d'info
+		$info_w = 150;
+		$info_x = $this->w - $info_w;
+		
+		$info_str = "";
+		
 		$svg =<<<EOF
 <svg version="1.1" baseProfile="full"
 	xmlns="http://www.w3.org/2000/svg"
@@ -277,12 +354,15 @@ class Carte {
 	width="{$this->w}px" height="{$this->h}px"
 	>
 <script xlink:href="js/SVGPan.js"/>
+<script xlink:href="js/svgmap.js"/>
 <defs>
 {$this->getStyle()}
 <g id="png_joueur"><image xlink:href="img/b/braldun.png" width="19" height="22" /></g>
 <g id="png_champ"><image xlink:href="img/b/champ.png" width="32" height="29" /></g>
 <g id="png_buisson"><image xlink:href="img/b/buisson.png" width="30" height="30" /></g>
 <g id="png_nid"><image xlink:href="img/b/nid.png" width="30" height="30" /></g>
+
+<g id="png_balise"><image xlink:href="img/b/balise.png" width="30" height="30" /></g>
 
 <g id="png_apothicaire"><image xlink:href="img/b/apothicaire.png" width="32" height="32" /></g>
 <g id="png_cuisinier"><image xlink:href="img/b/cuisinier.png" width="32" height="32" /></g>
@@ -369,15 +449,22 @@ EOF;
 		foreach ($this->villes as $i) {
 			$svg .= $i->toSVG();
 		}
-
+		
 		$svg .= '<g class="joueur">';
+		
 		foreach ($this->joueurs as $i) {
 			$svg .= $i->toSVG();
+			$info_str .= $i->getInfo();
 		}
 		$svg .= "</g>";
 
-		$svg .= "</g></svg>";
-
+		// on ajoute le panneau d'info en dehors de id="viewport"
+		// pour qu'il ne soit pas pris en compte par svgpan
+		$svg .=<<<EOF
+</g>
+{$info_str}
+</svg>
+EOF;
 		return $svg;
 	}
 
@@ -396,6 +483,13 @@ EOF;
 
 text {
 	display: none;
+}
+
+/* info */
+.info_joueur rect {
+	fill: #FFFFFF;
+	stroke: #000000;
+	stroke-width: 1;
 }
 
 /* zone */
@@ -427,6 +521,21 @@ text {
 	fill: #B4B4B4;
 	stroke: none;
 	stroke-width: 0; 
+}
+.balise .a {
+	fill: #cfb779;
+	stroke:#000000;
+	stroke-width:1;
+}
+.balise .b {
+	fill: #ff0000;
+	stroke:#000000;
+	stroke-width:0.5;
+}
+.balise .c {
+	fill: #ffffff;
+	stroke:#000000;
+	stroke-width:0.5;
 }
 .palissade {
 }
@@ -546,20 +655,26 @@ EOF;
 	Recupere les joueurs de la communauté
 	*/
 	private function getJoueurs() {
+	
 		global $echelle;
-		$query = "SELECT braldahim_id, prenom, nom, x, y
-		FROM ".DB_PREFIX."user
-		WHERE x IS NOT NULL
-		AND y IS NOT NULL
+		$query = "SELECT braldahim_id, u.prenom, u.nom, u.x, u.y,
+		p.PvRestant, p.bmPVmax
+		FROM ".DB_PREFIX."user u, ".DB_PREFIX."profil p
+		WHERE p.idBraldun = u.braldahim_id
+ 		AND u.x IS NOT NULL
+		AND u.y IS NOT NULL
 		AND restricted_password IS NOT NULL
 		ORDER BY braldahim_id ASC;";
 		$res = mysql_query($query);
 		while ($row = mysql_fetch_assoc($res)) {
-			$this->joueurs[] = new Joueur(
+			$j = new Joueur(
 				$row['braldahim_id'],
 				$row['prenom'],
 				$row['nom'],
 				new Point($row['x']*$echelle, $row['y']*-1*$echelle));
+			$j->pvrestant = $row['PvRestant'];
+			$j->bmpvmax = $row['bmPVmax'];
+			$this->joueurs[] = $j;
 			if ($row['braldahim_id'] == $_SESSION['bra_num']) {
 				$this->my_position = new Point($row['x']*$echelle, $row['y']*-1*$echelle);
 			}
@@ -618,9 +733,16 @@ EOF;
 		ORDER BY x, y, type_route DESC;";
 		$res = mysql_query($query);
 		while ($row = mysql_fetch_assoc($res)) {
-			$this->routes[] = new Tuile(
-				$row['type_route'],
-				new Point($row['x']*$echelle, $row['y']*-1*$echelle));
+			if ($row['type_route'] == 'balise') {
+				$this->routes[] = new Balise(
+					$row['type_route'],
+					new Point($row['x']*$echelle, $row['y']*-1*$echelle));
+			}
+			else {
+				$this->routes[] = new Tuile(
+					$row['type_route'],
+					new Point($row['x']*$echelle, $row['y']*-1*$echelle));
+			}
 		}
 		mysql_free_result($res);
 	}
