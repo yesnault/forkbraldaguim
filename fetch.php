@@ -968,7 +968,7 @@ class Fetch {
 			return;
 		}
 		
-		$query = "DELETE FROM ".DB_PREFIX."charrette WHERE braldun=$braldun";
+		$query = "DELETE FROM ".DB_PREFIX."charrette WHERE idBraldun=$braldun";
 		mysql_query($query);
 		
 		if ($content[1] == "AUCUNE_CHARRETTE") {

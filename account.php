@@ -304,7 +304,7 @@ EOF;
 EOF;
 		}
 		else {
-			$content .= "<p>Votre derni&egrave;re mise &agrave; jour est r&eacute;cente, pas besoin de mettre &agrave; jour.</p>";
+			$content .= "<p>Votre derni&egrave;re mise &agrave; jour est r&eacute;cente, pas besoin de mettre &agrave; jour (délai ".UPDATE_DELAY."s).</p>";
 		}
 		$content .= "</div>";
 		$this->html_content = $content;

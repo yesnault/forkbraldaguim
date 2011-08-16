@@ -27,6 +27,7 @@
 		<li><a href="position.php">Position</a></li>
 		<li><a href="bestiaire.php?action=bestiaire">Bestiaire</a></li>
 		<li><a href="profil.php?action=allprofils">Profils</a></li>
+		<li><a href="charrette.php?action=charrette">Charrette</a></li>
 		<li><a href="equipement.php?action=equipement">Equipement</a></li>
 		<li><a href="simulateur.php?action=simulation">Simulateur</a></li>
 		<li><a href="svgmap2.php?action=position">SVGMAP (beta)</a></li>
