@@ -125,14 +125,23 @@ EOF;
 	
 	public function getInfo() {
 		$p = Props::getProps();
-		$txt_y = $p->info_y + 25;
-		$svg=<<<EOF
+		
+		$nom_x = $p->info_x + 5;
+		$nom_y = $p->info_y + 20;
+		$pv_x = $p->info_x + 5;
+		$pv_y = $p->info_y + 35;
+		
+		$close_w = 14;
+		$close_cx = $p->info_x + $p->info_w;
+		$close_cy = $p->info_y;
+		
+		$svg =<<<EOF
 <g id="info_joueur{$this->id}" class="info_joueur">
 	<rect x="{$p->info_x}" y="{$p->info_y}" height="{$p->info_h}" width="{$p->info_w}" class="info_bg" />
-	<text x="{$p->info_x}" y="{$txt_y}" style="display:inline; color:#000">{$this->prenom} {$this->nom}</text>
-	<text x="{$p->info_x}" y="{($txt_y+20)}" style="display:inline; color:#000">{$this->prenom} {$this->nom}</text>
-	<g id="close_info_joueur{$this->id}">
-		<path d="M0,0 L10,10 M10,0 L0,10" style="fill:none;stroke:#000000;stroke-width:2;" transform="translate({$p->info_x} {$p->info_y})" />
+	<text x="{$nom_x}" y="{$nom_y}" style="display:inline; color:#000">{$this->prenom} {$this->nom}</text>
+	<text x="{$pv_x}" y="{$pv_y}" style="display:inline; color:#000">{$this->pvrestant} / {$this->pvmax}</text>
+	<g id="close_info_joueur{$this->id}" class="close_info_joueur">
+		<circle r="14" cx="{$close_cx}" cy="{$close_cy}" />
 	</g>
 </g>
 EOF;
@@ -320,13 +329,13 @@ class Carte {
 		$this->getNids();
 		$this->getBuissons();
 		
-		$this->p = Props::getProps();
-		$this->p->w = $w;
-		$this->p->h = $h;
-		$this->p->info_w = 300;
-		$this->p->info_h = 150;
-		$this->p->info_x = 50;
-		$this->p->info_y = 20;
+		$p = Props::getProps();
+		$p->w = $w;
+		$p->h = $h;
+		$p->info_w = 400;
+		$p->info_h = 100;
+		$p->info_x = 100;
+		$p->info_y = 150;
 	}
 
 	/*
@@ -478,171 +487,7 @@ EOF;
 	Inline style
 	*/
 	private function getStyle() {
-		$style =<<<EOF
-<style type="text/css"><![CDATA[
-
-text {
-	display: none;
-}
-
-/* info */
-.info_joueur rect {
-	fill: #FFFFFF;
-	stroke: #000000;
-	stroke-width: 1;
-}
-
-/* zone */
-.montagne rect {
-	fill: #742E09;
-	stroke: none;
-	stroke-width: 0; 
-}
-.plaine rect {
-	fill: #009900;
-	stroke: none;
-	stroke-width: 0; 
-}
-.gazon rect {
-	fill: #006500;
-	stroke: none;
-	stroke-width: 0; 
-}
-.marais rect {
-	fill: #82C46C;
-	stroke: none;
-	stroke-width: 0; 
-}
-
-/* environnement */
-.bosquet {
-}
-.route rect {
-	fill: #B4B4B4;
-	stroke: none;
-	stroke-width: 0; 
-}
-.balise .a {
-	fill: #cfb779;
-	stroke:#000000;
-	stroke-width:1;
-}
-.balise .b {
-	fill: #ff0000;
-	stroke:#000000;
-	stroke-width:0.5;
-}
-.balise .c {
-	fill: #ffffff;
-	stroke:#000000;
-	stroke-width:0.5;
-}
-.palissade {
-}
-.lac rect, .mer rect {
-	fill: #00008B;
-	stroke: none;
-	stroke-width: 0;
-}
-.champ rect {
-	fill: #966496;
-	stroke: none;
-	stroke-width: 0;
-}
-.buisson rect {
-	fill: #64C80A;
-	stroke: none;
-	stroke-width: 0; 
-}
-.lieu rect {
-	fill: #646464;
-	stroke: none;
-	stroke-width: 0; 
-}
-.lieu text {
-	font-size: 10px;
-	display: none;
-	text-anchor: middle;
-}
-.nid rect {
-	fill: transparent;
-	stroke: #000000;
-	stroke-width: 0.1px;
-}
-.caverne rect {
-	fill: #C8C8C8;
-	stroke: none;
-	stroke-width: 0;
-}
-.mine rect {
-	fill: #000000;
-	stroke: none;
-	stroke-width: 0;
-}
-
-/* joueur */
-.joueur circle {
-	fill: #46DCF0;
-	stroke: #FF0000;
-	stroke-width: 0.1px;
-}
-.joueur text {
-	font-size: 10px;
-	display: inline;
-	text-anchor: middle;
-}
-
-.ville rect {
-	/*fill: #B4B4B4;*/
-	fill: none;
-	stroke: #FF0000;
-	stroke-width: 1px;
-}
-.ville text {
-	font-size: 3px;
-	display: inline;
-	text-anchor: middle;
-}
-
-/* tuile */
-rect.montagne {
-	fill: #742E09;
-	stroke: none;
-	stroke-width: 0; 
-}
-rect.palissade {
-	fill: #FFB93F;
-	stroke: none;
-	stroke-width: 0; 
-}
-rect.balise {
-	fill: #968278;
-	stroke: none;
-	stroke-width: 0; 
-}
-rect.ville {
-}
-rect.echoppe {
-}
-rect.eau, rect.peuprofonde {
-	fill: #82C8E6;
-	stroke: none;
-	stroke-width: 0; 
-}
-rect.profonde {
-	fill: #64AAC8;
-	stroke: none;
-	stroke-width: 0; 
-}
-rect.peupliers, rect.hetres, rect.chenes, rect.erables {
-	fill: #46DC46;
-	stroke: none;
-	stroke-width: 0;
-}
-
-
-]]></style>
-EOF;
+		$style = '<style type="text/css"><![CDATA['.file_get_contents("svgmap.css").']]></style>';
 /*
 // Couleur pour le type ROUTE
 'echoppe'	=> "B4B4B4",
@@ -658,7 +503,7 @@ EOF;
 	
 		global $echelle;
 		$query = "SELECT braldahim_id, u.prenom, u.nom, u.x, u.y,
-		p.PvRestant, p.bmPVmax
+		p.PvRestant, p.nivVigueur*10+40 as pvmax
 		FROM ".DB_PREFIX."user u, ".DB_PREFIX."profil p
 		WHERE p.idBraldun = u.braldahim_id
  		AND u.x IS NOT NULL
@@ -673,7 +518,7 @@ EOF;
 				$row['nom'],
 				new Point($row['x']*$echelle, $row['y']*-1*$echelle));
 			$j->pvrestant = $row['PvRestant'];
-			$j->bmpvmax = $row['bmPVmax'];
+			$j->pvmax = $row['pvmax'];
 			$this->joueurs[] = $j;
 			if ($row['braldahim_id'] == $_SESSION['bra_num']) {
 				$this->my_position = new Point($row['x']*$echelle, $row['y']*-1*$echelle);

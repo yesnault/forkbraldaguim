@@ -1,0 +1,164 @@
+
+text {
+	display: none;
+}
+
+/* info */
+.info_joueur rect {
+	fill: #FFFFFF;
+	stroke: #000000;
+	stroke-width: 1;
+}
+.close_info_joueur circle {
+	fill: #FFFFFF;	
+	stroke: #000000;
+	stroke-width: 1;
+}
+
+/* zone */
+.montagne rect {
+	fill: #742E09;
+	stroke: none;
+	stroke-width: 0; 
+}
+.plaine rect {
+	fill: #009900;
+	stroke: none;
+	stroke-width: 0; 
+}
+.gazon rect {
+	fill: #006500;
+	stroke: none;
+	stroke-width: 0; 
+}
+.marais rect {
+	fill: #82C46C;
+	stroke: none;
+	stroke-width: 0; 
+}
+
+/* environnement */
+.bosquet {
+}
+.route rect {
+	fill: #B4B4B4;
+	stroke: none;
+	stroke-width: 0; 
+}
+.balise .a {
+	fill: #cfb779;
+	stroke:#000000;
+	stroke-width:1;
+}
+.balise .b {
+	fill: #ff0000;
+	stroke:#000000;
+	stroke-width:0.5;
+}
+.balise .c {
+	fill: #ffffff;
+	stroke:#000000;
+	stroke-width:0.5;
+}
+.palissade {
+}
+.lac rect, .mer rect {
+	fill: #00008B;
+	stroke: none;
+	stroke-width: 0;
+}
+.champ rect {
+	fill: #966496;
+	stroke: none;
+	stroke-width: 0;
+}
+.buisson rect {
+	fill: #64C80A;
+	stroke: none;
+	stroke-width: 0; 
+}
+.lieu rect {
+	fill: #646464;
+	stroke: none;
+	stroke-width: 0; 
+}
+.lieu text {
+	font-size: 10px;
+	display: none;
+	text-anchor: middle;
+}
+.nid rect {
+	fill: transparent;
+	stroke: #000000;
+	stroke-width: 0.1px;
+}
+.caverne rect {
+	fill: #C8C8C8;
+	stroke: none;
+	stroke-width: 0;
+}
+.mine rect {
+	fill: #000000;
+	stroke: none;
+	stroke-width: 0;
+}
+
+/* joueur */
+.joueur circle {
+	fill: #46DCF0;
+	stroke: #FF0000;
+	stroke-width: 0.1px;
+}
+.joueur text {
+	font-size: 10px;
+	display: inline;
+	text-anchor: middle;
+}
+
+.ville rect {
+	/*fill: #B4B4B4;*/
+	fill: none;
+	stroke: #FF0000;
+	stroke-width: 1px;
+}
+.ville text {
+	font-size: 3px;
+	display: inline;
+	text-anchor: middle;
+}
+
+/* tuile */
+rect.montagne {
+	fill: #742E09;
+	stroke: none;
+	stroke-width: 0; 
+}
+rect.palissade {
+	fill: #FFB93F;
+	stroke: none;
+	stroke-width: 0; 
+}
+rect.balise {
+	fill: #968278;
+	stroke: none;
+	stroke-width: 0; 
+}
+rect.ville {
+}
+rect.echoppe {
+}
+rect.eau, rect.peuprofonde {
+	fill: #82C8E6;
+	stroke: none;
+	stroke-width: 0; 
+}
+rect.profonde {
+	fill: #64AAC8;
+	stroke: none;
+	stroke-width: 0; 
+}
+rect.peupliers, rect.hetres, rect.chenes, rect.erables {
+	fill: #46DC46;
+	stroke: none;
+	stroke-width: 0;
+}

@@ -62,3 +62,10 @@ CREATE TABLE charrette (
 	contenu TEXT,
 	INDEX(idBraldun)
 ) CHARACTER SET utf8;
+
+CREATE TABLE laban (
+	idBraldun MEDIUMINT,
+	objet TEXT,
+	contenu TEXT,
+	INDEX(idBraldun)
+) CHARACTER SET utf8;

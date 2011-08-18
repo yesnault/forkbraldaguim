@@ -19,27 +19,22 @@ window.addEventListener('load', function() {
 	}
 }, false);
 
+window.addEventListener('load', function() {
+	elt=document.getElementsByTagName('a');
+	rxcentre = /^centre_joueur\d+/;
+	for (i in elt) {
+		if (rxcentre.test(elt[i].id)) {
+			elt[i].addEventListener('click', centreBraldun, false);
+		}
+	}
+}, false);
+
 function showBraldunInfo(evt) {
 	if (!evt) var evt = window.event;
 
 	if(evt.preventDefault)
 		evt.preventDefault();
-	/*
-	elt = document.getElementById('info');
-	jid = evt.target.parentNode.id.substr(6);
-	if (elt.style.display == 'none') {
-		for (i in joueurs) {
-			if (joueurs[i].id == jid) {
-				alert(joueurs[i].nom);
-			}
-		}
-		elt.style.display = 'block';
-	}
-	else {
-		elt.style.display = 'none';
-		return;
-	}
-	*/
+	
 	evt_id = evt.target.parentNode.id;
 	info_elt = document.getElementById('info_'+evt_id);
 	if (info_elt != null) {
@@ -61,4 +56,13 @@ function closeBraldunInfo(evt) {
 	rx = /^close_info_joueur(\d+)/;
 	rx.test(evt.target.parentNode.id);
 	document.getElementById('info_joueur'+RegExp.$1).style.display = 'none';
+}
+
+function centreBraldun(evt) {
+	if (!evt) var evt = window.event;
+
+	if(evt.preventDefault)
+		evt.preventDefault();
+	
+	alert('toto');
 }

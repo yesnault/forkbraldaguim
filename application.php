@@ -103,7 +103,7 @@ class Application {
 	public function home() {
 		$com = COMMUNAUTE_NOM;
 		$this->html_content = <<<EOF
-<p>Bienvenue sur la page de positionnement de la communaut&eacute; <b>{$com}</b>.</p>
+<p>Bienvenue sur l'interface externe de la communaut&eacute; <b>{$com}</b>.</p>
 <p>Pour vous inscrire, utilisez le lien <a href="index.php?action=inscription">Inscription</a>.</p>
 <p>Vous pourrez ensuite conna&icirc;tre la position des brald&ucirc;ns de la communaut&eacute;.</p>
 <p>La mise à jour des positions &agrave; lieu <u>toutes les 6 heures</u>.</p>

@@ -43,28 +43,25 @@ class Fetch {
 				continue;
 			}
 			$url = "http://sp.braldahim.com/scripts/profil/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=2";
-			#$url = "http://www.guim.info/braldahim/cache/282-201103091200";
 			$this->fetch_position($url);
 			
 			$url = "http://sp.braldahim.com/scripts/vue/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=2";
-			#$url = "http://www.guim.info/braldahim/toto.php?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['crypted_password']}&version=1";
 			$this->fetch_vue($url);
 
 			$url = "http://sp.braldahim.com/scripts/competences/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=1";
-			#$url =  "http://www.guim.info/braldahim/toto";
 			$this->fetch_competence($url);
 
 			$url = "http://sp.braldahim.com/scripts/evenements/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=2";
-			#$url =  "http://www.guim.info/braldahim/toto";
 			$this->fetch_evenements($url, $row['braldahim_id'], $row['last_event']);
 
 			$url = "http://sp.braldahim.com/scripts/equipements/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=1";
-			#$url =  "http://www.guim.info/braldahim/toto";
 			$this->fetch_equipement($url, $row['braldahim_id']);
 			
 			$url = "http://sp.braldahim.com/scripts/charrette/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=1";
-			#$url =  "http://www.guim.info/braldahim/toto";
 			$this->fetch_charrette($url, $row['braldahim_id']);
+			
+			$url = "http://sp.braldahim.com/scripts/laban/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=1";
+			$this->fetch_laban($url, $row['braldahim_id']);
 		}
 	}
 	
@@ -93,12 +90,14 @@ class Fetch {
 			$this->fetch_evenements($url, $row['braldahim_id'], $row['last_event']);
 
 			$url = "http://sp.braldahim.com/scripts/equipements/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=1";
-			#$url =  "http://www.guim.info/braldahim/toto";
 			$this->fetch_equipement($url, $row['braldahim_id']);
 			
 			$url = "http://sp.braldahim.com/scripts/charrette/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=1";
 			#$url =  "http://www.guim.info/braldahim/toto";
 			$this->fetch_charrette($url, $row['braldahim_id']);
+			
+			$url = "http://sp.braldahim.com/scripts/laban/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=1";
+			$this->fetch_laban($url, $row['braldahim_id']);
 		}
 	}
 	
@@ -111,7 +110,7 @@ class Fetch {
 		$profil = array();
 		$content = file($url);
 		if (count($content) == 0) {
-			echo "Erreur : le fichier est vide\n";
+			echo "[ ".__FUNCTION__." ] Erreur : le fichier est vide\n";
 			return;
 		}
 
@@ -126,7 +125,7 @@ class Fetch {
 
 		if (preg_match("/^ERREUR-/", $content[0]) == 1) {
 			// erreur lors de l'appel du script (cf : http://sp.braldahim.com/)
-			echo "[".date("YmdHi")."] ".$content[0];
+			echo "[".date("YmdHi")."] [ ".__FUNCTION__." ] ".$content[0];
 			return;
 		}
 		$keys = explode(';', trim($content[1]));
@@ -250,14 +249,14 @@ class Fetch {
 		$content = file($url);
 		// pour le format voir : http://sp.braldahim.com/
 		if (count($content) == 0) {
-			echo "Erreur : le fichier est vide\n";
+			echo "[ ".__FUNCTION__." ] Erreur : le fichier est vide\n";
 			return;
 		}
 		
 		foreach ($content as $line) {
 			if (preg_match("/^ERREUR-/", $line) == 1) {
 				// erreur lors de l'appel du script (cf : http://sp.braldahim.com/)
-				echo "ERREUR:\n$line\n";
+				echo "[ ".__FUNCTION__." ] ERREUR:\n$line\n";
 				return;
 			}
 			$part = explode(';', trim($line));
@@ -631,7 +630,7 @@ class Fetch {
 	protected function fetch_competence($url) {
 		$content = file($url);
 		if (count($content) == 0) {
-			echo "Erreur : le fichier est vide\n";
+			echo "[ ".__FUNCTION__." ] Erreur : le fichier est vide\n";
 			return;
 		}
 		// content[0] = info sur le script
@@ -647,7 +646,7 @@ class Fetch {
 
 		if (preg_match("/^ERREUR-/", $content[0]) == 1) {
 			// erreur lors de l'appel du script (cf : http://sp.braldahim.com/)
-			echo "[".date("YmdHi")."] ".$content[0];
+			echo "[".date("YmdHi")."] [ ".__FUNCTION__." ] ".$content[0]." (".$url.")";
 			return;
 		}
 		for ($i=2; $i<count($content); $i++) {
@@ -697,7 +696,7 @@ class Fetch {
 	protected function fetch_evenements($url, $braldun, $last_event) {
 		$content = file($url);
 		if (count($content) == 0) {
-			echo "Erreur : le fichier est vide\n";
+			echo "[ ".__FUNCTION__." ] Erreur : le fichier est vide\n";
 			return;
 		}
 		// content[0] = info sur le script
@@ -710,7 +709,7 @@ class Fetch {
 
 		if (preg_match("/^ERREUR-/", $content[0]) == 1) {
 			// erreur lors de l'appel du script (cf : http://sp.braldahim.com/)
-			echo "[".date("YmdHi")."] ".$content[0];
+			echo "[".date("YmdHi")."] [ ".__FUNCTION__." ] ".$content[0]." ($braldun)";
 			return;
 		}
 
@@ -857,7 +856,7 @@ class Fetch {
 	protected function fetch_equipement($url, $braldun) {
 		$content = file($url);
 		if (count($content) == 0) {
-			echo "Erreur : le fichier est vide\n";
+			echo "[ ".__FUNCTION__." ] Erreur : le fichier est vide\n";
 			return;
 		}
 		// content[0] = info sur le script
@@ -899,7 +898,7 @@ class Fetch {
 		*/
 		if (preg_match("/^ERREUR-/", $content[0]) == 1) {
 			// erreur lors de l'appel du script (cf : http://sp.braldahim.com/)
-			echo "[".date("YmdHi")."] ".$content[0];
+			echo "[".date("YmdHi")."] [ ".__FUNCTION__." ] ".$content[0]." ($braldun)";
 			return;
 		}
 
@@ -945,7 +944,7 @@ class Fetch {
 	protected function fetch_charrette($url, $braldun) {
 		$content = file($url);
 		if (count($content) == 0) {
-			echo "Erreur : le fichier est vide\n";
+			echo "[ ".__FUNCTION__." ] Erreur : le fichier est vide\n";
 			return;
 		}
 		// content[0] = info sur le script
@@ -964,7 +963,7 @@ class Fetch {
 		*/
 		if (preg_match("/^ERREUR-/", $content[0]) == 1) {
 			// erreur lors de l'appel du script (cf : http://sp.braldahim.com/)
-			echo "[".date("YmdHi")."] ".$content[0];
+			echo "[".date("YmdHi")."] [ ".__FUNCTION__." ] ".$content[0]." ($braldun)";
 			return;
 		}
 		
@@ -979,6 +978,46 @@ class Fetch {
 			$match = null;
 			if (preg_match("/([^;]+);(.*)/", $content[$l], $match)) {
 				$query = "INSERT INTO ".DB_PREFIX."charrette (idBraldun, objet, contenu)
+					VALUES ($braldun, '"
+					.$match[1]."', '"
+					.mysql_real_escape_string($match[2])."');";
+				mysql_query($query);
+			}
+		}
+	}
+	
+	/*
+	MAJ du contenu du laban du joueur
+	Va chercher le contenu de l'url, le traite et le stock en db
+	*/
+	protected function fetch_laban($url, $braldun) {
+		$content = file($url);
+		if (count($content) == 0) {
+			echo "[ ".__FUNCTION__." ] Erreur : le fichier est vide\n";
+			return;
+		}
+		// content[0] = info sur le script
+		// content[X] = valeur
+
+		/*
+		TYPE:statique;NB_APPELS:11;MAX_AUTORISE:14
+		ELEMENT;Castar;1609
+		ALIMENT;14883;Gigot braisé;Standard;21
+		ALIMENT;14884;Gigot braisé;Standard;21
+		*/
+		if (preg_match("/^ERREUR-/", $content[0]) == 1) {
+			// erreur lors de l'appel du script (cf : http://sp.braldahim.com/)
+			echo "[".date("YmdHi")."] [ ".__FUNCTION__." ] ".$content[0]." ($braldun)";
+			return;
+		}
+		
+		$query = "DELETE FROM ".DB_PREFIX."laban WHERE idBraldun=$braldun";
+		mysql_query($query);
+		
+		for ($l=1; $l<count($content); $l++) {
+			$match = null;
+			if (preg_match("/([^;]+);(.*)/", $content[$l], $match)) {
+				$query = "INSERT INTO ".DB_PREFIX."laban (idBraldun, objet, contenu)
 					VALUES ($braldun, '"
 					.$match[1]."', '"
 					.mysql_real_escape_string($match[2])."');";
