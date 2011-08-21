@@ -20,10 +20,11 @@ window.addEventListener('load', function() {
 }, false);
 
 window.addEventListener('load', function() {
-	elt=document.getElementsByTagName('a');
-	rxcentre = /^centre_joueur\d+/;
+	elt=document.getElementsByTagName('text');
+	rxcentre = /^centre_joueur\d+_-?\d+_-?\d+/;
 	for (i in elt) {
 		if (rxcentre.test(elt[i].id)) {
+			//elt[i].addEventListener('click', centreBraldun(elt[i], RegExp.$1, RegExp.$2), false);
 			elt[i].addEventListener('click', centreBraldun, false);
 		}
 	}
@@ -61,8 +62,15 @@ function closeBraldunInfo(evt) {
 function centreBraldun(evt) {
 	if (!evt) var evt = window.event;
 
-	if(evt.preventDefault)
+	if(evt.preventDefault) {
 		evt.preventDefault();
+	}
 	
-	alert('toto');
+	rxcentre = /^centre_joueur\d+_(-?\d+)_(-?\d+)/;
+	rxcentre.test(evt.target.id);
+	x = parseInt(RegExp.$1);
+	y = parseInt(RegExp.$2);
+	e = x * -1 + 425;
+	f = y * -1 + 325;
+	svgRoot.setAttribute("transform", "translate(" + e + " " + f + ")");
 }

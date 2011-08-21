@@ -15,6 +15,22 @@ text {
 	stroke-width: 1;
 }
 
+/* panneau */
+#panneau rect {
+	fill: #D0D0D0;
+	stroke: #000000;
+	stroke-width: 1;
+}
+#panneau text {
+	display: inline;
+	fill: #000000;
+	font-size: .8em;
+}
+#panneau text:hover {
+	stroke: #F0AE21;
+	stroke-width: 1;
+}
+
 /* zone */
 .montagne rect {
 	fill: #742E09;

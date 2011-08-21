@@ -35,14 +35,6 @@ $colors = array(
 	'fog_clear'	=> "array(255, 255, 255, 127)",
 	);
 
-$carte = new Carte(800, 600);
-// utilisation de "ob_gzhandler" pour gzipper le fichier svg,
-// la taille est divisé par 10
-ob_start("ob_gzhandler");
-$carte->display();
-ob_end_flush();
-
-
 /*
 Classe contenant les propriétés de la carte.
 C'est un singleton pour le partager entre tous les objets.
@@ -69,210 +61,8 @@ class Props {
 	}
 }
 
-/*
-Classe utilitaire représentant un point (comme dans les cours de 1ere année...)
-*/
-class Point {
-	public $x;
-	public $y;
-	public function __construct($x, $y) {
-		$this->x = $x;
-		$this->y = $y;
-	}
-	public function __toString() {
-		return "({$this->x}, {$this->y})";
-	}
-	
-	public function distanceMax(Point $p) {
-		return max(abs($p->y - $this->y), abs($p->x - $this->x));
-	}
-	public function equals(Point $p) {
-		return ($this->x == $p->x && $this->y == $p->y);
-	}
-}
+include("svgmap_element.php");
 
-/*
-Classe représantant un joueur et sa postion
-*/
-class Joueur {
-	public $id;
-	public $nom;
-	public $prenom;
-	public $position;
-	public $rayon;
-	
-	public function __construct($id, $prenom, $nom, Point $position) {
-		global $echelle;
-		$this->id = $id;
-		$this->prenom = $prenom;
-		$this->nom = $nom;
-		$this->position = $position;
-		$this->position->x += 0.5 * $echelle;
-		$this->position->y += 0.5 * $echelle;
-		$this->rayon = $echelle / 2;
-	}
-
-	public function toSVG() {
-#	<circle cx="{$this->position->x}" cy="{$this->position->y}" r="{$this->rayon}" />
-		$svg =<<<EOF
-<g id="joueur{$this->id}">
-	<text x="{$this->position->x}" y="{$this->position->y}">{$this->prenom}</text>
-	<use xlink:href="#png_joueur" x="{$this->position->x}" y="{$this->position->y}" />
-</g>
-EOF;
-		return $svg;
-	}
-	
-	public function getInfo() {
-		$p = Props::getProps();
-		
-		$nom_x = $p->info_x + 5;
-		$nom_y = $p->info_y + 20;
-		$pv_x = $p->info_x + 5;
-		$pv_y = $p->info_y + 35;
-		
-		$close_w = 14;
-		$close_cx = $p->info_x + $p->info_w;
-		$close_cy = $p->info_y;
-		
-		$svg =<<<EOF
-<g id="info_joueur{$this->id}" class="info_joueur">
-	<rect x="{$p->info_x}" y="{$p->info_y}" height="{$p->info_h}" width="{$p->info_w}" class="info_bg" />
-	<text x="{$nom_x}" y="{$nom_y}" style="display:inline; color:#000">{$this->prenom} {$this->nom}</text>
-	<text x="{$pv_x}" y="{$pv_y}" style="display:inline; color:#000">{$this->pvrestant} / {$this->pvmax}</text>
-	<g id="close_info_joueur{$this->id}" class="close_info_joueur">
-		<circle r="14" cx="{$close_cx}" cy="{$close_cy}" />
-	</g>
-</g>
-EOF;
-		return $svg;
-	}
-}
-
-class Tuile {
-	public $type;
-	public $position;
-	public $w;
-	public $h;
-
-	public function __construct($type, Point $position) {
-		global $echelle;
-		$this->type = $type;
-		$this->position = $position;
-		$this->w = $echelle;
-		$this->h = $echelle;
-	}
-
-	public function toSVG() {
-		$svg =<<<EOF
-	<rect x="{$this->position->x}" y="{$this->position->y}" height="{$this->h}" width="{$this->w}" class="{$this->type}"/>
-EOF;
-		return $svg;
-	}
-}
-
-class Champ extends Tuile {
-	public function toSVG() {
-		$svg =<<<EOF
-	<use xlink:href="#png_champ" x="{$this->position->x}" y="{$this->position->y}" />
-EOF;
-		return $svg;
-	}
-}
-
-class Balise extends Tuile {
-	public function toSVG() {
-		global $echelle;
-		$xa = $this->position->x + 0.1 * $echelle;
-		$ya = $this->position->y + 0.1 * $echelle;
-		$xb = $xa;
-		$yb = $ya + 3;
-		$xc = $xa;
-		$yc = $ya + 6;
-//<use xlink:href="#png_balise" x="{$this->position->x}" y="{$this->position->y}" />
-$svg =<<<EOF
-<g class="balise">
-	<rect class="a" x="{$xa}" y="{$ya}" height="32" width="7" rx="1.3" ry="1.3" />
-	<rect class="b" x="{$xb}" y="{$yb}" height="3" width="7" />
-	<rect class="c" x="{$xc}" y="{$yc}" height="3" width="7" />
-</g>
-EOF;
-		return $svg;
-	}
-}
-
-class Lieu extends Tuile {
-	public $nom;
-	public function __construct($nom, $type, Point $position) {
-		global $echelle;
-		$this->type = $type;
-		$this->nom = $nom;
-		$this->position = $position;
-		$this->w = $echelle;
-		$this->h = $echelle;
-	}
-
-	public function toSVG() {
-		global $echelle;
-		$x = $this->position->x + 0.5 * $echelle;
-		$y = $this->position->y + 0.5 * $echelle;
-		$svg =<<<EOF
-	<rect x="{$this->position->x}" y="{$this->position->y}" height="{$this->h}" width="{$this->w}" />
-	<text x="{$x}" y="{$y}" transform="rotate(45 {$x} {$y})">{$this->nom}</text>
-	<use xlink:href="#png_{$this->type}" x="{$this->position->x}" y="{$this->position->y}"  />
-EOF;
-		return $svg;
-	}
-}
-
-class Buisson extends Tuile {
-	public function toSVG() {
-	#<rect x="{$this->position->x}" y="{$this->position->y}" height="{$this->h}" width="{$this->w}" class="{$this->type}"/>
-		$svg =<<<EOF
-	<text x="{$this->position->x}" y="{$this->position->y}">{$this->type}</text>
-	<use xlink:href="#png_buisson" x="{$this->position->x}" y="{$this->position->y}"  />
-EOF;
-		return $svg;
-	}
-}
-
-class Ville {
-	public $nom;
-	public $start;
-	public $w;
-	public $h;
-	public $text_position;
-
-	public function __construct($nom, Point $start, Point $end) {
-		$this->nom = $nom;
-		$this->start = $start;
-		$this->w = $end->x - $start->x;
-		$this->h = $end->y - $start->y;
-		$this->text_position = new Point($end->x-$this->w/2, $start->y);
-	}
-	
-	public function toSVG() {
-		$svg =<<<EOF
-<g class="ville">
-	<rect x="{$this->start->x}" y="{$this->start->y}" height="{$this->h}" width="{$this->w}" />
-	<text x="{$this->text_position->x}" y="{$this->text_position->y}">{$this->nom}</text>
-</g>
-EOF;
-		return $svg;
-	}
-}
-
-class Zone extends Ville {
-	public function toSVG() {
-		global $colors;
-		$svg =<<<EOF
-<g class="zone {$this->nom}">
-	<rect x="{$this->start->x}" y="{$this->start->y}" height="{$this->h}" width="{$this->w}" />
-</g>
-EOF;
-		return $svg;
-	}
-}
 /*
 Genere une carte du monde centrée sur les joueurs
 */
@@ -350,8 +140,8 @@ class Carte {
 			$tr_y = $this->my_position->y * -1 + $this->h / 2;
 		}
 		// position du panneau d'info
-		$info_w = 150;
-		$info_x = $this->w - $info_w;
+		$this->panneau_w = 150;
+		$this->panneau_x = $this->w - $this->panneau_w;
 		
 		$info_str = "";
 		
@@ -393,6 +183,9 @@ class Carte {
 <g id="png_tabatiere"><image xlink:href="img/b/tabatiere.png" width="32" height="32" /></g>
 <g id="png_tribunal"><image xlink:href="img/b/tribunal.png" width="32" height="32" /></g>
 <g id="png_tribune"><image xlink:href="img/b/tribune.png" width="32" height="32" /></g>
+
+
+
 </defs>
 <g id="viewport" transform="translate({$tr_x}, {$tr_y})">
 EOF;
@@ -472,6 +265,8 @@ EOF;
 		$svg .=<<<EOF
 </g>
 {$info_str}
+
+{$this->getPanneauJoueur()}
 </svg>
 EOF;
 		return $svg;
@@ -497,10 +292,43 @@ EOF;
 	}
 
 	/*
+	Construit le panneau lateral avec le nom des membres
+	*/
+	private function getPanneauJoueur() {
+		$this->getJoueurs();
+		$str =<<<EOF
+<g id="panneau">
+	<animateTransform id="panneau_in"
+		attributeName="transform" type="translate"
+		dur="0.5" begin="indefinite"
+		from="{$this->panneau_w}" to="0"
+		fill="freeze" />
+	<animateTransform id="panneau_out"
+		attributeName="transform" type="translate"
+		dur="0.5" begin="indefinite"
+		from="0" to="{$this->panneau_w}"
+		fill="freeze" />
+	<rect x="{$this->panneau_x}" y="0" width="{$this->panneau_w}" height="{$this->h}"/>
+EOF;
+		$x = $this->panneau_x + 5;
+		$y = 20;
+		foreach ($this->joueurs as $e) {
+			$str .=<<<EOF
+<text id="centre_joueur{$e->id}_{$e->position->x}_{$e->position->y}" x="{$x}" y="{$y}">{$e->prenom} {$e->nom}</text>
+EOF;
+			$y += 20;
+		}
+		$str .= "</g>";
+		return $str;
+	}
+	
+	/*
 	Recupere les joueurs de la communauté
 	*/
 	private function getJoueurs() {
-	
+		if (! empty($this->joueurs)) {
+			return $this->joueurs;
+		}
 		global $echelle;
 		$query = "SELECT braldahim_id, u.prenom, u.nom, u.x, u.y,
 		p.PvRestant, p.nivVigueur*10+40 as pvmax
@@ -785,5 +613,12 @@ EOF;
 		}
 	}
 }
+
+$carte = new Carte(800, 600);
+// utilisation de "ob_gzhandler" pour gzipper le fichier svg,
+// la taille est divisé par 10
+ob_start("ob_gzhandler");
+$carte->display();
+ob_end_flush();
 
 ?>
