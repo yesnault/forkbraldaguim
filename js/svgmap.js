@@ -1,3 +1,5 @@
+panneau_in_out = 'out';
+
 window.addEventListener('load', function() {
 	elt=document.getElementsByTagName('g');
 	rx = /^joueur\d+/;
@@ -17,6 +19,8 @@ window.addEventListener('load', function() {
 			elt[i].addEventListener('click', closeBraldunInfo, false);
 		}
 	}
+	// affiche masque le panneau d'information
+	document.getElementById('panneau_open_close').addEventListener('click', panneauOpenClose, false);
 }, false);
 
 window.addEventListener('load', function() {
@@ -73,4 +77,20 @@ function centreBraldun(evt) {
 	e = x * -1 + 425;
 	f = y * -1 + 325;
 	svgRoot.setAttribute("transform", "translate(" + e + " " + f + ")");
+}
+
+function panneauOpenClose(evt) {
+	if (!evt) var evt = window.event;
+
+	if(evt.preventDefault) {
+		evt.preventDefault();
+	}
+	if (panneau_in_out == 'in') {
+		document.getElementById('panneau_out').beginElement();
+		panneau_in_out = 'out';
+	}
+	else {
+		document.getElementById('panneau_in').beginElement();
+		panneau_in_out = 'in';
+	}
 }

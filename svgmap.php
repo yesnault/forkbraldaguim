@@ -141,7 +141,7 @@ class Carte {
 		}
 		// position du panneau d'info
 		$this->panneau_w = 150;
-		$this->panneau_x = $this->w - $this->panneau_w;
+		$this->panneau_x = $this->w;
 		
 		$info_str = "";
 		
@@ -296,19 +296,21 @@ EOF;
 	*/
 	private function getPanneauJoueur() {
 		$this->getJoueurs();
+		$open_close_x = $this->panneau_x - 30;
 		$str =<<<EOF
 <g id="panneau">
 	<animateTransform id="panneau_in"
 		attributeName="transform" type="translate"
 		dur="0.5" begin="indefinite"
-		from="{$this->panneau_w}" to="0"
+		from="0" to="-{$this->panneau_w}"
 		fill="freeze" />
 	<animateTransform id="panneau_out"
 		attributeName="transform" type="translate"
 		dur="0.5" begin="indefinite"
-		from="0" to="{$this->panneau_w}"
+		from="-{$this->panneau_w}" to="0"
 		fill="freeze" />
 	<rect x="{$this->panneau_x}" y="0" width="{$this->panneau_w}" height="{$this->h}"/>
+	<rect id="panneau_open_close" x="{$open_close_x}" y="0" width="30" height="30"/>
 EOF;
 		$x = $this->panneau_x + 5;
 		$y = 20;
