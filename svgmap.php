@@ -126,6 +126,7 @@ class Carte {
 		$p->info_h = 100;
 		$p->info_x = 100;
 		$p->info_y = 150;
+		$p->panneau_speed = "0.3";
 	}
 
 	/*
@@ -142,6 +143,11 @@ class Carte {
 		// position du panneau d'info
 		$this->panneau_w = 150;
 		$this->panneau_x = $this->w;
+		
+		$open_close_buisson_x = $this->w - $this->panneau_w - 40;
+		$open_close_ville_x = $open_close_buisson_x - 40;
+		$open_close_joueur_x = $open_close_ville_x - 40;
+		
 		
 		$info_str = "";
 		
@@ -253,7 +259,6 @@ EOF;
 		}
 		
 		$svg .= '<g class="joueur">';
-		
 		foreach ($this->joueurs as $i) {
 			$svg .= $i->toSVG();
 			$info_str .= $i->getInfo();
@@ -267,6 +272,13 @@ EOF;
 {$info_str}
 
 {$this->getPanneauJoueur()}
+{$this->getPanneauVille()}
+{$this->getPanneauBuisson()}
+<g class="panneau_bouton">
+	<rect id="panneau_open_close_joueur" x="{$open_close_joueur_x}" y="0" width="30" height="30"/>
+	<rect id="panneau_open_close_ville" x="{$open_close_ville_x}" y="0" width="30" height="30"/>
+	<rect id="panneau_open_close_buisson" x="{$open_close_buisson_x}" y="0" width="30" height="30"/>
+</g>
 </svg>
 EOF;
 		return $svg;
@@ -295,30 +307,101 @@ EOF;
 	Construit le panneau lateral avec le nom des membres
 	*/
 	private function getPanneauJoueur() {
+		$p = Props::getProps();
 		$this->getJoueurs();
-		$open_close_x = $this->panneau_x - 30;
+		$x = $this->panneau_x + 5;
+		$y = 20;
+
 		$str =<<<EOF
-<g id="panneau">
-	<animateTransform id="panneau_in"
+<g id="panneau_joueur" class="panneau">
+	<animateTransform id="panneau_joueur_in"
 		attributeName="transform" type="translate"
-		dur="0.5" begin="indefinite"
+		dur="{$p->panneau_speed}" begin="indefinite"
 		from="0" to="-{$this->panneau_w}"
 		fill="freeze" />
-	<animateTransform id="panneau_out"
+	<animateTransform id="panneau_joueur_out"
 		attributeName="transform" type="translate"
-		dur="0.5" begin="indefinite"
+		dur="{$p->panneau_speed}" begin="indefinite"
 		from="-{$this->panneau_w}" to="0"
 		fill="freeze" />
 	<rect x="{$this->panneau_x}" y="0" width="{$this->panneau_w}" height="{$this->h}"/>
-	<rect id="panneau_open_close" x="{$open_close_x}" y="0" width="30" height="30"/>
+	<text x="{$x}" y="{$y}" class="panneau_titre">Joueurs</text>
 EOF;
-		$x = $this->panneau_x + 5;
-		$y = 20;
 		foreach ($this->joueurs as $e) {
+			$y += 20;
 			$str .=<<<EOF
 <text id="centre_joueur{$e->id}_{$e->position->x}_{$e->position->y}" x="{$x}" y="{$y}">{$e->prenom} {$e->nom}</text>
 EOF;
+		}
+		$str .= "</g>";
+		return $str;
+	}
+	
+	/*
+	Construit le panneau lateral avec le nom des villes
+	*/
+	private function getPanneauVille() {
+		$p = Props::getProps();
+		$this->getVilles();
+		$x = $this->panneau_x + 5;
+		$y = 20;
+
+		$str =<<<EOF
+<g id="panneau_ville" class="panneau">
+	<animateTransform id="panneau_ville_in"
+		attributeName="transform" type="translate"
+		dur="{$p->panneau_speed}" begin="indefinite"
+		from="0" to="-{$this->panneau_w}"
+		fill="freeze" />
+	<animateTransform id="panneau_ville_out"
+		attributeName="transform" type="translate"
+		dur="{$p->panneau_speed}" begin="indefinite"
+		from="-{$this->panneau_w}" to="0"
+		fill="freeze" />
+	<rect x="{$this->panneau_x}" y="0" width="{$this->panneau_w}" height="{$this->h}"/>
+	<text x="{$x}" y="{$y}" class="panneau_titre">Villes</text>
+EOF;
+		foreach ($this->villes as $e) {
+			$vx = $e->start->x + $e->w / 2;
+			$vy = $e->start->y + $e->h / 2;
 			$y += 20;
+			$str .=<<<EOF
+<text id="centre_ville_{$vx}_{$vy}" x="{$x}" y="{$y}">{$e->nom}</text>
+EOF;
+		}
+		$str .= "</g>";
+		return $str;
+	}
+	
+	/*
+	Construit le panneau lateral avec le nom des buissons
+	*/
+	private function getPanneauBuisson() {
+		$p = Props::getProps();
+		$this->getTypeBuissons();
+		$x = $this->panneau_x + 5;
+		$y = 20;
+
+		$str =<<<EOF
+<g id="panneau_buisson" class="panneau">
+	<animateTransform id="panneau_buisson_in"
+		attributeName="transform" type="translate"
+		dur="{$p->panneau_speed}" begin="indefinite"
+		from="0" to="-{$this->panneau_w}"
+		fill="freeze" />
+	<animateTransform id="panneau_buisson_out"
+		attributeName="transform" type="translate"
+		dur="{$p->panneau_speed}" begin="indefinite"
+		from="-{$this->panneau_w}" to="0"
+		fill="freeze" />
+	<rect x="{$this->panneau_x}" y="0" width="{$this->panneau_w}" height="{$this->h}"/>
+	<text x="{$x}" y="{$y}" class="panneau_titre">Buisson</text>
+EOF;
+		foreach ($this->type_buissons as $e) {
+			$y += 20;
+			$str .=<<<EOF
+<text id="buisson_type_{$e}" x="{$x}" y="{$y}">{$e}</text>
+EOF;
 		}
 		$str .= "</g>";
 		return $str;
@@ -333,7 +416,8 @@ EOF;
 		}
 		global $echelle;
 		$query = "SELECT braldahim_id, u.prenom, u.nom, u.x, u.y,
-		p.PvRestant, p.nivVigueur*10+40 as pvmax
+		p.PvRestant, p.nivVigueur*10+40 as pvmax, p.pxPerso, p.niveau,
+		p.bbdf
 		FROM ".DB_PREFIX."user u, ".DB_PREFIX."profil p
 		WHERE p.idBraldun = u.braldahim_id
  		AND u.x IS NOT NULL
@@ -349,6 +433,10 @@ EOF;
 				new Point($row['x']*$echelle, $row['y']*-1*$echelle));
 			$j->pvrestant = $row['PvRestant'];
 			$j->pvmax = $row['pvmax'];
+			$j->niveau = $row['niveau'];
+			$j->pxperso = $row['pxPerso'];
+			$j->bbdf = $row['bbdf'];
+			
 			$this->joueurs[] = $j;
 			if ($row['braldahim_id'] == $_SESSION['bra_num']) {
 				$this->my_position = new Point($row['x']*$echelle, $row['y']*-1*$echelle);
@@ -361,6 +449,9 @@ EOF;
 	Recupere les villes
 	*/
 	private function getVilles() {
+		if (! empty($this->villes)) {
+			return $this->villes;
+		}
 		global $echelle;
 		$query = "SELECT nom_ville,
 			x_min_ville, y_min_ville,
@@ -565,7 +656,22 @@ EOF;
 		}
 		mysql_free_result($res);
 	}
-
+	
+	/*
+	Recupere les type de buissons
+	*/
+	private function getTypeBuissons() {
+		global $echelle;
+		$query = "SELECT distinct(nom_type_buisson) as nom
+		FROM ".DB_PREFIX."buisson
+		ORDER BY nom_type_buisson;";
+		$res = mysql_query($query);
+		while ($row = mysql_fetch_assoc($res)) {
+			$this->type_buissons[] = $row['nom'];
+		}
+		mysql_free_result($res);
+	}
+	
 	/*
 	Assombrit les zones qui n'ont jamais été visitées ou bien qui n'ont pas
 	été visitées depsui longtemps

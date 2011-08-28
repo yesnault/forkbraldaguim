@@ -342,7 +342,8 @@ EOF;
 
 	private function fetch_me() {
 		$fetch = new Fetch();
-		$fetch->fetchOnePlayer($_SESSION['bra_num']);
+		$fetch->fetchOnePlayer_dynamique($_SESSION['bra_num']);
+		$fetch->fetchOnePlayer_statique($_SESSION['bra_num']);
 		$this->html_message = "Les informations de votre brald&ucirc;n ont &eacute;t&eacute; mise &agrave; jour.";
 		$this->account();
 	}

@@ -77,7 +77,13 @@ EOF;
 		$nom_x = $p->info_x + 5;
 		$nom_y = $p->info_y + 20;
 		$pv_x = $p->info_x + 5;
-		$pv_y = $p->info_y + 35;
+		$pv_y = $p->info_y + 40;
+		$px_x = $p->info_x + 5;
+		$px_y = $p->info_y + 60;
+		$bbdf_x = $p->info_x + 5;
+		$bbdf_y = $p->info_y + 80;
+
+		$px_max = ($this->niveau + 2) * 5 - 5;
 		
 		$close_w = 14;
 		$close_cx = $p->info_x + $p->info_w;
@@ -88,6 +94,8 @@ EOF;
 	<rect x="{$p->info_x}" y="{$p->info_y}" height="{$p->info_h}" width="{$p->info_w}" class="info_bg" />
 	<text x="{$nom_x}" y="{$nom_y}" style="display:inline; color:#000">{$this->prenom} {$this->nom}</text>
 	<text x="{$pv_x}" y="{$pv_y}" style="display:inline; color:#000">PV : {$this->pvrestant} / {$this->pvmax}</text>
+	<text x="{$px_x}" y="{$px_y}" style="display:inline; color:#000">PX : {$this->pxperso} / {$px_max}</text>
+	<text x="{$bbdf_x}" y="{$bbdf_y}" style="display:inline; color:#000">Bbdf : {$this->bbdf}</text>
 	<g id="close_info_joueur{$this->id}" class="close_info_joueur">
 		<circle r="14" cx="{$close_cx}" cy="{$close_cy}" />
 	</g>

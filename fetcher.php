@@ -4,8 +4,13 @@ require("fetch.php");
 
 // si on est en mode CLI, alors on met à jour tous les joueurs
 if ( isset($_SERVER['argc']) && $_SERVER['argc'] >= 1 ) {
-	$fetch = new Fetch();
-	$fetch->fetchAllPlayers();
+	if ($_SERVER['argv'][1] == "statique" || $_SERVER['argv'][1] == "dynamique") {
+		$fetch = new Fetch();
+		$fetch->fetchAllPlayers($_SERVER['argv'][1]);
+	}
+	else {
+		echo "Argument inconnu : ".$argv[1]."\n";
+	}
 }
 // si on est en mode WEB, on ne met à jour que le joueur demandé
 else {

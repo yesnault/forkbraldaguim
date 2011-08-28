@@ -32,40 +32,23 @@ class Fetch {
 		//mysql_free_result($res);
 	}
 	
-	public function fetchAllPlayers() {
+	public function fetchAllPlayers($methode) {
 		$query = "SELECT braldahim_id, restricted_password, last_event FROM ".DB_PREFIX."user;";
 		$res = mysql_query($query);
 		
 		if (! $res) die('Impossible de lancer une requete');
 		
 		while ($row = mysql_fetch_assoc($res)) {
-			if (is_null($row['restricted_password']) || $row['restricted_password'] == 'NULL') {
-				continue;
+			if ($methode == "dynamique") {
+				$this->fetchOnePlayer_dynamique($row['braldahim_id']);
 			}
-			$url = "http://sp.braldahim.com/scripts/profil/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=2";
-			$this->fetch_position($url);
-			
-			$url = "http://sp.braldahim.com/scripts/vue/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=2";
-			$this->fetch_vue($url);
-
-			$url = "http://sp.braldahim.com/scripts/competences/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=1";
-			$this->fetch_competence($url);
-
-			$url = "http://sp.braldahim.com/scripts/evenements/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=2";
-			$this->fetch_evenements($url, $row['braldahim_id'], $row['last_event']);
-
-			$url = "http://sp.braldahim.com/scripts/equipements/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=1";
-			$this->fetch_equipement($url, $row['braldahim_id']);
-			
-			$url = "http://sp.braldahim.com/scripts/charrette/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=1";
-			$this->fetch_charrette($url, $row['braldahim_id']);
-			
-			$url = "http://sp.braldahim.com/scripts/laban/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=1";
-			$this->fetch_laban($url, $row['braldahim_id']);
+			else if ($methode == "statique" ) {
+				$this->fetchOnePlayer_statique($row['braldahim_id']);
+			}
 		}
 	}
 	
-	public function fetchOnePlayer($id) {
+	public function fetchOnePlayer_dynamique($id) {
 		$query = sprintf("SELECT braldahim_id, restricted_password, last_event FROM ".DB_PREFIX."user WHERE braldahim_id=%s;",
 			mysql_real_escape_string($id));
 		$res = mysql_query($query);
@@ -83,11 +66,25 @@ class Fetch {
 			$url = "http://sp.braldahim.com/scripts/vue/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=2";
 			$this->fetch_vue($url);
 
-			$url = "http://sp.braldahim.com/scripts/competences/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=1";
-			$this->fetch_competence($url);
-
 			$url = "http://sp.braldahim.com/scripts/evenements/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=2";
 			$this->fetch_evenements($url, $row['braldahim_id'], $row['last_event']);
+		}
+	}
+
+	public function fetchOnePlayer_statique($id) {
+		$query = sprintf("SELECT braldahim_id, restricted_password, last_event FROM ".DB_PREFIX."user WHERE braldahim_id=%s;",
+			mysql_real_escape_string($id));
+		$res = mysql_query($query);
+		
+		if (! $res) die('Impossible de lancer une requete');
+		
+		while ($row = mysql_fetch_assoc($res)) {
+			if (is_null($row['restricted_password']) || $row['restricted_password'] == 'NULL') {
+				continue;
+			}
+			
+			$url = "http://sp.braldahim.com/scripts/competences/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=1";
+			$this->fetch_competence($url);
 
 			$url = "http://sp.braldahim.com/scripts/equipements/?idBraldun={$row['braldahim_id']}&mdpRestreint={$row['restricted_password']}&version=1";
 			$this->fetch_equipement($url, $row['braldahim_id']);

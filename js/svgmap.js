@@ -1,4 +1,11 @@
-panneau_in_out = 'out';
+// contient l'etat des panneaux d'information
+var panneau_in_out = new Object();
+panneau_in_out.joueur = false;
+panneau_in_out.ville = false;
+panneau_in_out.buisson = false;
+
+// contient l'état des info des joueurs
+var info_joueur = new Object();
 
 window.addEventListener('load', function() {
 	elt=document.getElementsByTagName('g');
@@ -13,23 +20,28 @@ window.addEventListener('load', function() {
 		// masque les popups par defaut
 		if (rxinfo.test(elt[i].id)) {
 			elt[i].style.display = 'none';
+			info_joueur[elt[i].id] = false;
 		}
 		// masque les popups dynamiquement
 		if (rxcloseinfo.test(elt[i].id)) {
 			elt[i].addEventListener('click', closeBraldunInfo, false);
 		}
 	}
-	// affiche masque le panneau d'information
-	document.getElementById('panneau_open_close').addEventListener('click', panneauOpenClose, false);
-}, false);
-
-window.addEventListener('load', function() {
+	// affiche masque les panneaux d'information
+	document.getElementById('panneau_open_close_joueur').addEventListener('click', panneauOpenClose, false);
+	document.getElementById('panneau_open_close_ville').addEventListener('click', panneauOpenClose, false);
+	document.getElementById('panneau_open_close_buisson').addEventListener('click', panneauOpenClose, false);
+	
+	// centre sur les joueurs/villes
 	elt=document.getElementsByTagName('text');
-	rxcentre = /^centre_joueur\d+_-?\d+_-?\d+/;
+	rxcentreJ = /^centre_joueur\d+_-?\d+_-?\d+/;
+	rxcentreV = /^centre_ville_-?\d+_-?\d+/;
 	for (i in elt) {
-		if (rxcentre.test(elt[i].id)) {
-			//elt[i].addEventListener('click', centreBraldun(elt[i], RegExp.$1, RegExp.$2), false);
-			elt[i].addEventListener('click', centreBraldun, false);
+		if (rxcentreJ.test(elt[i].id)) {
+			elt[i].addEventListener('click', centreElement, false);
+		}
+		else if (rxcentreV.test(elt[i].id)) {
+			elt[i].addEventListener('click', centreElement, false);
 		}
 	}
 }, false);
@@ -40,14 +52,19 @@ function showBraldunInfo(evt) {
 	if(evt.preventDefault)
 		evt.preventDefault();
 	
-	evt_id = evt.target.parentNode.id;
-	info_elt = document.getElementById('info_'+evt_id);
-	if (info_elt != null) {
-		if (info_elt.style.display == 'none') {
-			info_elt.style.display = 'block';
+	s = 'info_'+evt.target.parentNode.id;
+	
+	// on parcours la liste des info_joueur
+	for (e in info_joueur) {
+		// si c'est fermé on l'ouvre
+		if (s == e && !info_joueur[e]) {
+			document.getElementById(e).style.display = 'block';
+			info_joueur[e] = true;
 		}
-		else {
-			info_elt.style.display = 'none';
+		// on ferme les autres panneaux ouverts
+		else if (info_joueur[e]) {
+			document.getElementById(e).style.display = 'none';
+			info_joueur[e] = false;
 		}
 	}
 }
@@ -61,36 +78,56 @@ function closeBraldunInfo(evt) {
 	rx = /^close_info_joueur(\d+)/;
 	rx.test(evt.target.parentNode.id);
 	document.getElementById('info_joueur'+RegExp.$1).style.display = 'none';
+	info_joueur['info_joueur'+RegExp.$1] = false;
 }
 
-function centreBraldun(evt) {
+/*
+ * Centre la vue sur un element (joueur, ville, ...)
+ * L'action est déclenchée par les listes des panneaux d'informations
+ */
+function centreElement(evt) {
 	if (!evt) var evt = window.event;
 
 	if(evt.preventDefault) {
 		evt.preventDefault();
 	}
 	
-	rxcentre = /^centre_joueur\d+_(-?\d+)_(-?\d+)/;
+	rxcentre = /^centre_.+_(-?\d+)_(-?\d+)/;
 	rxcentre.test(evt.target.id);
 	x = parseInt(RegExp.$1);
 	y = parseInt(RegExp.$2);
 	e = x * -1 + 425;
 	f = y * -1 + 325;
-	svgRoot.setAttribute("transform", "translate(" + e + " " + f + ")");
+	svgRoot.setAttribute("transform", "translate(" + e + " " + f + ")");	
 }
 
+/*
+ * Ouvre le panneau séléctionné et ferme les autres.
+ * Ferme le panneau séléctionné s'il est ouvert
+ */
 function panneauOpenClose(evt) {
 	if (!evt) var evt = window.event;
 
 	if(evt.preventDefault) {
 		evt.preventDefault();
 	}
-	if (panneau_in_out == 'in') {
-		document.getElementById('panneau_out').beginElement();
-		panneau_in_out = 'out';
-	}
-	else {
-		document.getElementById('panneau_in').beginElement();
-		panneau_in_out = 'in';
+	// les identifiants des declencheur contiennent le nom
+	rxid = /^panneau_open_close_(.+)/;
+	rxid.test(evt.target.id);
+	s = RegExp.$1;
+	
+	// on parcours la liste des panneaux
+	for (e in panneau_in_out) {
+		// si le panneau est fermé on l'ouvre
+		if (s == e && !panneau_in_out[e]) {
+			document.getElementById('panneau_'+e+'_in').beginElement();
+			panneau_in_out[e] = true;
+		}
+		// on ferme les autres panneaux ouverts
+		else if (panneau_in_out[e]) {
+			document.getElementById('panneau_'+e+'_out').beginElement();
+			panneau_in_out[e] = false;
+		}
 	}
 }
+
