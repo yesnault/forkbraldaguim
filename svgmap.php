@@ -224,18 +224,18 @@ EOF;
 		}
 		$svg .= "</g>";
 
-		$svg .= '<g class="buisson">';
-		foreach ($this->buissons as $i) {
-			$svg .= $i->toSVG();
-		}
-		$svg .= "</g>";
-
 		$svg .= '<g class="palissade">';
 		foreach ($this->palissades as $i) {
 			$svg .= $i->toSVG();
 		}
 		$svg .= "</g>";
 
+		$svg .= '<g class="buisson">';
+		foreach ($this->buissons as $i) {
+			$svg .= $i->toSVG();
+		}
+		$svg .= "</g>";
+		
 		$svg .= '<g class="lieu mythique">';
 		foreach ($this->lieuMythiques as $i) {
 			$svg .= $i->toSVG();
@@ -399,8 +399,9 @@ EOF;
 EOF;
 		foreach ($this->type_buissons as $e) {
 			$y += 20;
+			$type = Buisson::sanitize($e);
 			$str .=<<<EOF
-<text id="buisson_type_{$e}" x="{$x}" y="{$y}">{$e}</text>
+<text id="buisson_type_{$type}" x="{$x}" y="{$y}">{$e}</text>
 EOF;
 		}
 		$str .= "</g>";
@@ -651,7 +652,7 @@ EOF;
 		$res = mysql_query($query);
 		while ($row = mysql_fetch_assoc($res)) {
 			$this->buissons[] = new Buisson(
-				$row['buisson'],
+				preg_replace("/Buisson d['|e]/", '', $row['nom_type_buisson']),
 				new Point($row['x']*$echelle, $row['y']*-1*$echelle));
 		}
 		mysql_free_result($res);
@@ -667,7 +668,7 @@ EOF;
 		ORDER BY nom_type_buisson;";
 		$res = mysql_query($query);
 		while ($row = mysql_fetch_assoc($res)) {
-			$this->type_buissons[] = $row['nom'];
+			$this->type_buissons[] = preg_replace("/Buisson d['|e]/", '', $row['nom']);
 		}
 		mysql_free_result($res);
 	}

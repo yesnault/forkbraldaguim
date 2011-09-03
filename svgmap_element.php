@@ -173,9 +173,9 @@ class Lieu extends Tuile {
 		$x = $this->position->x + 0.5 * $echelle;
 		$y = $this->position->y + 0.5 * $echelle;
 		$svg =<<<EOF
-	<rect x="{$this->position->x}" y="{$this->position->y}" height="{$this->h}" width="{$this->w}" />
-	<text x="{$x}" y="{$y}" transform="rotate(45 {$x} {$y})">{$this->nom}</text>
-	<use xlink:href="#png_{$this->type}" x="{$this->position->x}" y="{$this->position->y}"  />
+<rect x="{$this->position->x}" y="{$this->position->y}" height="{$this->h}" width="{$this->w}" />
+<text x="{$x}" y="{$y}" transform="rotate(45 {$x} {$y})">{$this->nom}</text>
+<use xlink:href="#png_{$this->type}" x="{$this->position->x}" y="{$this->position->y}"  />
 EOF;
 		return $svg;
 	}
@@ -183,12 +183,22 @@ EOF;
 
 class Buisson extends Tuile {
 	public function toSVG() {
+		$this->clean_type = self::sanitize($this->type);
+		$cw = 30;
+		$cx = $this->position->x + $cw / 2;
+		$cy = $this->position->y + $cw / 2;
 	#<rect x="{$this->position->x}" y="{$this->position->y}" height="{$this->h}" width="{$this->w}" class="{$this->type}"/>
 		$svg =<<<EOF
-	<text x="{$this->position->x}" y="{$this->position->y}">{$this->type}</text>
-	<use xlink:href="#png_buisson" x="{$this->position->x}" y="{$this->position->y}"  />
+<text x="{$this->position->x}" y="{$this->position->y}">{$this->type}</text>
+<circle r="{$cw}" cx="{$cx}" cy="{$cy}" class="{$this->clean_type}" />
+<use xlink:href="#png_buisson" x="{$this->position->x}" y="{$this->position->y}" />
 EOF;
 		return $svg;
+	}
+
+	public static function sanitize($str) {
+		return str_replace(
+			array(' ', '\''), '', $str);
 	}
 }
 

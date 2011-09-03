@@ -32,16 +32,23 @@ window.addEventListener('load', function() {
 	document.getElementById('panneau_open_close_ville').addEventListener('click', panneauOpenClose, false);
 	document.getElementById('panneau_open_close_buisson').addEventListener('click', panneauOpenClose, false);
 	
-	// centre sur les joueurs/villes
+	// active les liens dans les panneaux lateraux
 	elt=document.getElementsByTagName('text');
 	rxcentreJ = /^centre_joueur\d+_-?\d+_-?\d+/;
 	rxcentreV = /^centre_ville_-?\d+_-?\d+/;
+	rxbuisson = /^buisson_type_.+/;
 	for (i in elt) {
+		// centre sur les joueurs
 		if (rxcentreJ.test(elt[i].id)) {
 			elt[i].addEventListener('click', centreElement, false);
 		}
+		// centre sur les villes
 		else if (rxcentreV.test(elt[i].id)) {
 			elt[i].addEventListener('click', centreElement, false);
+		}
+		// affiche les types de buissons
+		else if (rxbuisson.test(elt[i].id)) {
+			elt[i].addEventListener('click', activeBuisson, false);
 		}
 	}
 }, false);
@@ -98,7 +105,7 @@ function centreElement(evt) {
 	y = parseInt(RegExp.$2);
 	e = x * -1 + 425;
 	f = y * -1 + 325;
-	svgRoot.setAttribute("transform", "translate(" + e + " " + f + ")");	
+	svgRoot.setAttribute("transform", "translate(" + e + " " + f + ")");
 }
 
 /*
@@ -131,3 +138,29 @@ function panneauOpenClose(evt) {
 	}
 }
 
+/*
+ * Affiche le cercle autour des buissons du type voulu
+ */
+function activeBuisson(evt) {
+	if (!evt) var evt = window.event;
+
+	if(evt.preventDefault) {
+		evt.preventDefault();
+	}
+	
+	rxcentre = /^buisson_type_(.+)/;
+	rxcentre.test(evt.target.id);
+	type = RegExp.$1;
+	
+	elt=document.getElementsByTagName('circle');
+	for (i in elt) {
+		// on test si la classe du cercle est celle séléctionnée
+		// attention : on utilise baseVal car c'est du SVG
+		if (elt[i].className.baseVal == type) {
+			elt[i].style.display = 'block';
+		}
+		else {
+			elt[i].style.display = 'none';
+		}
+	}
+}

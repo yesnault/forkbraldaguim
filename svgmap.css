@@ -98,7 +98,13 @@ text.panneau_titre:hover {
 .buisson rect {
 	fill: #64C80A;
 	stroke: none;
-	stroke-width: 0; 
+	stroke-width: 0;
+}
+.buisson circle {
+	display: none;
+	fill: #00FFFF;
+	stroke: none;
+	stroke-width: 0;
 }
 .lieu rect {
 	fill: #646464;
