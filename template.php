@@ -25,12 +25,12 @@
 		<?php if ($app->logged) {?>
 		<li><a href="account.php?action=account">Gestion du compte</a></li>
 		<li><a href="position.php">Position</a></li>
+		<li><a href="position_svg.php?action=position">Position 2 (beta)</a></li>
 		<li><a href="bestiaire.php?action=bestiaire">Bestiaire</a></li>
 		<li><a href="profil.php?action=allprofils">Profils</a></li>
 		<li><a href="charrette.php?action=charrette">Charrette</a></li>
 		<li><a href="equipement.php?action=equipement">Equipement</a></li>
 		<li><a href="simulateur.php?action=simulation">Simulateur</a></li>
-		<li><a href="svgmap2.php?action=position">SVGMAP (beta)</a></li>
 		<?php } ?>
 </ul>
 </div>
