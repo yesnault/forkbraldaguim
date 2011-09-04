@@ -147,7 +147,8 @@ class Carte {
 		$open_close_buisson_x = $this->w - $this->panneau_w - 40;
 		$open_close_ville_x = $open_close_buisson_x - 40;
 		$open_close_joueur_x = $open_close_ville_x - 40;
-		
+		$open_close_bandeau_x = $open_close_joueur_x - 10;
+		$open_close_bandeau_w = $open_close_buisson_x + 40 - $open_close_bandeau_x;
 		
 		$info_str = "";
 		
@@ -179,6 +180,7 @@ class Carte {
 <g id="png_assembleur"><image xlink:href="img/b/assembleur.png" width="32" height="32" /></g>
 <g id="png_auberge"><image xlink:href="img/b/auberge.png" width="32" height="32" /></g>
 <g id="png_banque"><image xlink:href="img/b/banque.png" width="32" height="32" /></g>
+<g id="png_bibliotheque"><image xlink:href="img/b/bibliotheque.png" width="32" height="32" /></g>
 <g id="png_centreformation"><image xlink:href="img/b/centreformation.png" width="32" height="32" /></g>
 <g id="png_gare"><image xlink:href="img/b/gare.png" width="32" height="32" /></g>
 <g id="png_hall"><image xlink:href="img/b/hall.png" width="32" height="32" /></g>
@@ -189,8 +191,6 @@ class Carte {
 <g id="png_tabatiere"><image xlink:href="img/b/tabatiere.png" width="32" height="32" /></g>
 <g id="png_tribunal"><image xlink:href="img/b/tribunal.png" width="32" height="32" /></g>
 <g id="png_tribune"><image xlink:href="img/b/tribune.png" width="32" height="32" /></g>
-
-
 
 </defs>
 <g id="viewport" transform="translate({$tr_x}, {$tr_y})">
@@ -275,9 +275,19 @@ EOF;
 {$this->getPanneauVille()}
 {$this->getPanneauBuisson()}
 <g class="panneau_bouton">
-	<rect id="panneau_open_close_joueur" x="{$open_close_joueur_x}" y="0" width="30" height="30"/>
-	<rect id="panneau_open_close_ville" x="{$open_close_ville_x}" y="0" width="30" height="30"/>
-	<rect id="panneau_open_close_buisson" x="{$open_close_buisson_x}" y="0" width="30" height="30"/>
+	<rect class="panneau_bandeau" x="{$open_close_bandeau_x}" y="0" width="{$open_close_bandeau_w}" height="40" rx="5" ry="5" />
+	<g>
+		<use xlink:href="#png_joueur" x="{$open_close_joueur_x}" y="0" width="15" height="15" />
+		<rect id="panneau_open_close_joueur" class="transparent" x="{$open_close_joueur_x}" y="0" width="30" height="30" />
+	</g>
+	<g>
+		<use xlink:href="#png_mairie" x="{$open_close_ville_x}" y="0" width="15" height="15" />
+		<rect id="panneau_open_close_ville" class="transparent" x="{$open_close_ville_x}" y="0" width="30" height="30" />
+	</g>
+	<g>
+		<use xlink:href="#png_buisson" x="{$open_close_buisson_x}" y="0" width="15" height="15" />
+		<rect id="panneau_open_close_buisson" class="transparent" x="{$open_close_buisson_x}" y="0" width="30" height="30" />
+	</g>
 </g>
 </svg>
 EOF;

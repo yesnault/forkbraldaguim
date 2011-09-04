@@ -16,10 +16,20 @@ text {
 }
 
 /* panneau */
-.panneau rect, .panneau_bouton rect {
+.panneau rect {
 	fill: #D0D0D0;
 	stroke: #000000;
 	stroke-width: 1;
+}
+.panneau_bouton rect {
+	fill: #D0D0D0;
+	stroke: #000000;
+	stroke-width: 1;
+}
+rect.transparent {
+	fill-opacity: 0;
+	fill: #FFFFFF;
+	stroke: none;
 }
 .panneau text {
 	display: inline;

@@ -139,7 +139,7 @@ function panneauOpenClose(evt) {
 }
 
 /*
- * Affiche le cercle autour des buissons du type voulu
+ * Affiche/masque le cercle autour des buissons du type voulu
  */
 function activeBuisson(evt) {
 	if (!evt) var evt = window.event;
@@ -156,7 +156,7 @@ function activeBuisson(evt) {
 	for (i in elt) {
 		// on test si la classe du cercle est celle séléctionnée
 		// attention : on utilise baseVal car c'est du SVG
-		if (elt[i].className.baseVal == type) {
+		if (elt[i].className.baseVal == type && elt[i].style.display == 'none') {
 			elt[i].style.display = 'block';
 		}
 		else {
